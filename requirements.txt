@@ -1,0 +1,17 @@
+# Python dependencies for the v10–v16 notebooks and the modular code/ pipeline.
+# Tested on Kaggle T4 (Python 3.10) and Google Colab T4 (Python 3.12).
+# Minimum versions chosen for AMP correctness (torch >= 2.0) and modern
+# torchvision transforms (>= 0.15). Use a recent CUDA-enabled PyTorch wheel.
+
+torch>=2.0
+torchvision>=0.15
+numpy>=1.24
+pandas>=1.5
+scikit-learn>=1.2
+scipy>=1.10
+Pillow>=9.0
+matplotlib>=3.6
+
+# Used only by the Colab port (improvedv16_colab_source.ipynb) for downloading
+# the dataset zip from a public Drive share link. Safe to skip on Kaggle.
+gdown>=5.0

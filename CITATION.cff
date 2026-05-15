@@ -1,0 +1,60 @@
+cff-version: 1.2.0
+message: "If you reference this coursework, please cite it as below."
+title: "A3-ADL: Multimodal Cancer Classification Challenge 2026 — v10 through v16"
+authors:
+  - family-names: "Proença"
+    given-names: "Rafael"
+    affiliation: "Uppsala University"
+    email: "rafaeltproenca@gmail.com"
+repository-code: "https://github.com/rafallex/A3-ADL"
+abstract: >-
+  Coursework for the Advanced Deep Learning for Image Processing course
+  (1MD042) at Uppsala University, spring 2026. Implements a series of
+  iteratively-improved binary classifiers (v10 through v16) for paired
+  brightfield + fluorescence microscopy cell images, with a focus on
+  out-of-distribution generalization across patients. v16 introduces
+  CoMIR-style contrastive self-supervised pretraining, leave-one-patient-out
+  cross-validation, EMA-smoothed multi-snapshot ensembling, and an auxiliary
+  NT-Xent alignment loss during supervised fine-tuning.
+keywords:
+  - "deep learning"
+  - "multimodal learning"
+  - "contrastive learning"
+  - "self-supervised learning"
+  - "medical imaging"
+  - "out-of-distribution generalization"
+  - "cancer classification"
+  - "microscopy"
+license: MIT
+date-released: 2026-05-15
+references:
+  - type: conference-paper
+    title: "CoMIR: Contrastive Multimodal Image Representation for Registration"
+    authors:
+      - family-names: "Pielawski"
+        given-names: "Nicolas"
+      - family-names: "Wetzer"
+        given-names: "Elisabeth"
+      - family-names: "Öfverstedt"
+        given-names: "Johan"
+      - family-names: "Lu"
+        given-names: "Jiahao"
+      - family-names: "Wählby"
+        given-names: "Carolina"
+      - family-names: "Lindblad"
+        given-names: "Joakim"
+      - family-names: "Sladoje"
+        given-names: "Nataša"
+    conference:
+      name: "Advances in Neural Information Processing Systems (NeurIPS)"
+    year: 2020
+    notes: "The SSL pretext task underlying v15 and v16."
+  - type: conference-paper
+    title: "Super-Convergence: Very Fast Training of Neural Networks Using Large Learning Rates"
+    authors:
+      - family-names: "Smith"
+        given-names: "Leslie N."
+      - family-names: "Topin"
+        given-names: "Nicholay"
+    year: 2019
+    notes: "OneCycleLR schedule used throughout v10–v16."

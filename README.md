@@ -109,6 +109,8 @@ Patients **9** and **17** are the OOD failures. v16's LOPO scheme will expose pa
 
 Data (the 770 MB competition zip) and trained checkpoints (~90 MB each) are gitignored — fetch them from the Kaggle competition page or from Google Drive (`gdown` flow described in `improvedv16_colab_source.ipynb`).
 
+For the full reasoning behind the v15 → v16 design changes (in ADR format), see [`docs/design-decisions.md`](docs/design-decisions.md). For the deeper rationale on a specific change, that document collects three formal ADRs plus supporting numerical audits.
+
 ---
 
 ## Running v16
