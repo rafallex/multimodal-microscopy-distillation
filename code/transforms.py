@@ -30,11 +30,17 @@ FL_MEAN, FL_STD = 0.100, 0.144
 
 
 def to_tensor_bf(img):
+    """PIL grayscale image -> normalized 1xHxW tensor (BF statistics)."""
     t = TF.to_tensor(img)  # [1, H, W] in [0, 1]
     return TF.normalize(t, [BF_MEAN], [BF_STD])
 
 
 def to_tensor_fl(img):
+    """PIL grayscale image -> normalized 1xHxW tensor (FL statistics).
+
+    FL has a much darker mean than BF because most pixels are unlit
+    background with sparse bright fluorescent spots.
+    """
     t = TF.to_tensor(img)
     return TF.normalize(t, [FL_MEAN], [FL_STD])
 
@@ -72,9 +78,14 @@ class PairedGeoAug:
         return bf, fl
 
 
-# Train: per-modality photometric jitter, then normalize to tensor, then
-# random erasing. Geometric paired aug is applied separately (in CellDataset).
 def train_modality_transform(modality: str):
+    """Photometric jitter + normalization + RandomErasing for training.
+
+    Per-modality (BF or FL) because their grayscale statistics differ.
+    Geometric augs (rotation, flips) are NOT included here -- those must be
+    applied identically to BF and FL via PairedGeoAug to preserve cross-
+    modal alignment.
+    """
     norm = to_tensor_bf if modality == "bf" else to_tensor_fl
     return T.Compose([
         T.ColorJitter(brightness=0.3, contrast=0.3),
@@ -84,4 +95,5 @@ def train_modality_transform(modality: str):
 
 
 def eval_modality_transform(modality: str):
+    """Inference-time transform: normalize only, no augmentation."""
     return to_tensor_bf if modality == "bf" else to_tensor_fl

@@ -44,6 +44,13 @@ from transforms import (
 
 
 def make_loaders(df, train_idx, val_idx, data_root: Path, batch_size: int, num_workers: int):
+    """Build train and val DataLoaders for one CV fold.
+
+    Train loader uses photometric + geometric augmentation, shuffle=True,
+    and drop_last=True so BatchNorm always sees a full batch. Val loader
+    uses the deterministic eval transform, no shuffle, and drop_last=False
+    so every val sample is scored exactly once.
+    """
     bf_dir = data_root / "BF" / "train"
     fl_dir = data_root / "FL" / "train"
 
@@ -83,12 +90,23 @@ def mixup(bf, fl, y, alpha: float = 0.2):
 
 
 def smooth(y, eps: float = 0.05):
+    """Label-smoothing for binary targets: 0/1 -> eps/2 / (1 - eps/2).
+
+    Reduces over-confident predictions and tends to help calibration. With
+    eps=0.05, target 1 becomes 0.975 and target 0 becomes 0.025.
+    """
     return y * (1.0 - eps) + eps * 0.5
 
 
 def run_epoch(model, loader, optimizer, scaler, criterion, device, train: bool,
               mixup_alpha: float = 0.0, label_smooth: float = 0.0,
               grad_clip: float = 0.0, sched=None):
+    """One pass over `loader`. Returns (mean_loss, AUC, hard_labels, sigmoids).
+
+    train=True does backward + optimizer step; train=False is eval-mode
+    inference. AUC is always computed against the un-mixed, un-smoothed
+    hard labels so it stays comparable across augmentation settings.
+    """
     model.train(train)
     losses, hard_ys, ps = [], [], []
     for batch in loader:
@@ -134,6 +152,13 @@ def run_epoch(model, loader, optimizer, scaler, criterion, device, train: bool,
 
 
 def main():
+    """Train one fold to completion.
+
+    Reads train.csv, builds the CV splits, trains one fold with mixup +
+    label smoothing + OneCycleLR, tracks val AUC, saves the best-AUC
+    checkpoint plus an OOF predictions CSV, writes the training history to
+    JSON. Early-stops if val AUC fails to improve for `patience` epochs.
+    """
     ap = argparse.ArgumentParser()
     ap.add_argument("--data-root", type=Path, required=True)
     ap.add_argument("--out-dir", type=Path, required=True)

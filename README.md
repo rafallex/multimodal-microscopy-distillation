@@ -109,7 +109,13 @@ Patients **9** and **17** are the OOD failures. v16's LOPO scheme will expose pa
 
 Data (the 770 MB competition zip) and trained checkpoints (~90 MB each) are gitignored — fetch them from the Kaggle competition page or from Google Drive (`gdown` flow described in `improvedv16_colab_source.ipynb`).
 
-For the full reasoning behind the v15 → v16 design changes (in ADR format), see [`docs/design-decisions.md`](docs/design-decisions.md). For the deeper rationale on a specific change, that document collects three formal ADRs plus supporting numerical audits.
+Documentation:
+
+- [`docs/methods-diagram.md`](docs/methods-diagram.md) — visual pipeline diagram, architecture diagram, problem → fix mapping, and a Gantt chart of the compute timeline. **Start here** for the 60-second overview.
+- [`docs/notebook-walkthrough.md`](docs/notebook-walkthrough.md) — how to read the 14 notebooks: which version contributed what, which cells in v16 are worth focusing on, what the `_source` / `_run` / `_colab` suffix conventions mean.
+- [`docs/design-decisions.md`](docs/design-decisions.md) — three formal ADRs covering the v15 → v16 design choices, plus supporting numerical audits (lecture-tip mining, AMP correctness, EMA decay math).
+- [`code/README.md`](code/README.md) — the modular Python pipeline from the early baseline (parallel implementation, not used by v16 itself).
+- [`v15_baseline/README.md`](v15_baseline/README.md) — what's in the v15 evidence folder and how to reproduce the OOF numbers.
 
 ---
 
