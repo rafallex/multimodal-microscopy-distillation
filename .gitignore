@@ -244,3 +244,5 @@ zizlJQk2
 # Exception: v15 baseline artifacts are committed evidence
 !v15_baseline/
 !v15_baseline/**
+!v16_results/
+!v16_results/**

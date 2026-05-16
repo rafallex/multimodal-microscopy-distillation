@@ -13,8 +13,10 @@ Binary cell-level classification (cancer vs healthy) from paired **brightfield (
 | `oral_cancer_baseline` | Course starter (ResNet-18 multimodal) | — | — | — | — |
 | `improvedv10` – `v13` | Iterative tweaks: AdamW, OneCycleLR, paired aug, patient-balanced sampler | rising | — | — | — |
 | `improvedv14` | First mixup attempt | — | — | — | — |
-| `improvedv15` | **CoMIR-style contrastive SSL** + discriminative LR (1:10) | **0.866 ± 0.046** | 0.846 | 0.914 | **0.572** |
-| `improvedv16` | 9 changes addressing v15's OOD collapse (see below) | TBD | TBD | TBD | TBD |
+| `improvedv15` | **CoMIR-style contrastive SSL** + discriminative LR (1:10) | **0.866 ± 0.046** | 0.846 | 0.914 | 0.572 |
+| `improvedv16` | 9 changes addressing v15's OOD collapse (see below) | LOPO 0.802 | 0.802 | **0.943** | 0.503 |
+
+**v16 result (2026-05-16):** the patient-level OOF rose to 0.943 (from v15's 0.914) — the aux NT-Xent + heavier SSL stain aug + EMA design worked **at the patient level**. But the public LB stayed near random (0.503). The remaining gap is **site-level / protocol-level OOD** that LOPO cannot detect: every train patient shares some property that no test patient has. See [`v16_results/README.md`](v16_results/README.md) for the full post-mortem and v17 roadmap.
 
 **The v15 CV ↔ LB gap (0.866 → 0.572) is the entire problem v16 was designed to solve.** Two of the three v15 CV folds had val AUC > 0.88; the third had 0.78–0.82 and peaked at epoch 0–1 (overfitting to train-distribution stains immediately). v15 saved the *best-AUC* epoch per fold, which on the hard folds was epoch 0 — essentially the pre-trained initialization plus one gradient step. See `v15_baseline/learning_curves.png` for the visual evidence.
 
