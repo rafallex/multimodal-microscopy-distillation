@@ -60,22 +60,6 @@ def _make_effnet_b0_branch(pretrained: bool = True):
 
 
 def _make_branch(backbone: str = "resnet18", pretrained: bool = True):
-    """Factory dispatching to the per-backbone constructor.
-
-    Parameters
-    ----------
-    backbone : {"resnet18", "efficientnet_b0"}
-        Which CNN family to use for the branch.
-    pretrained : bool
-        If True, load ImageNet weights and average the 3-channel input conv
-        across channels (since our inputs are 1-channel grayscale microscopy).
-
-    Returns
-    -------
-    (nn.Module, int)
-        The branch network (final classifier head replaced with Identity)
-        and the resulting feature dimensionality.
-    """
     if backbone == "efficientnet_b0":
         return _make_effnet_b0_branch(pretrained)
     return _make_resnet18_branch(pretrained)
@@ -86,22 +70,7 @@ def _make_branch(backbone: str = "resnet18", pretrained: bool = True):
 # ---------------------------------------------------------------------------
 
 class MultimodalClassifier(nn.Module):
-    """Two-branch multimodal classifier with late fusion.
-
-    Separate CNN branches encode BF and FL inputs (each 1-channel HxW), the
-    resulting feature vectors are concatenated and passed through a small MLP
-    head (Linear → BN → ReLU → Dropout → Linear) that outputs a single logit
-    per cell. Train with `BCEWithLogitsLoss`.
-
-    Parameters
-    ----------
-    pretrained : bool
-        Whether to initialise the branches from ImageNet weights.
-    dropout : float
-        Dropout rate in the fusion head (applied after ReLU).
-    backbone : str
-        Branch architecture; see `_make_branch`.
-    """
+    """Two-branch multimodal classifier with late fusion."""
 
     def __init__(self, pretrained: bool = True, dropout: float = 0.3,
                  backbone: str = "resnet18"):
@@ -118,17 +87,12 @@ class MultimodalClassifier(nn.Module):
         )
 
     def forward(self, bf: torch.Tensor, fl: torch.Tensor) -> torch.Tensor:
-        """Return a logit (not probability) of shape ``[B]`` for the batch."""
         feat = torch.cat([self.bf_branch(bf), self.fl_branch(fl)], dim=1)
         return self.head(feat).squeeze(-1)  # [B]
 
 
 class SingleModalClassifier(nn.Module):
-    """Single-branch classifier — for ablations isolating BF or FL alone.
-
-    Useful for answering "how much does the second modality help?". Same
-    backbone family as `MultimodalClassifier` but with one branch.
-    """
+    """For ablations: train on BF only or FL only."""
 
     def __init__(self, pretrained: bool = True, dropout: float = 0.3,
                  backbone: str = "resnet18"):
@@ -140,5 +104,4 @@ class SingleModalClassifier(nn.Module):
         )
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        """Return a logit of shape ``[B]`` for a single-modality batch."""
         return self.head(self.branch(x)).squeeze(-1)

@@ -67,6 +67,9 @@
 | Early stopping (patience=6) | `train.py` | Saves compute, avoids overfitting |
 | DataParallel (auto) | `train.py` | Uses both T4 GPUs |
 | 8-way D4 TTA (4 rotations × 2 reflections) | `predict.py` | Better test-time prediction |
+| Class-balanced sampler (`--balance-sampler`) | `train.py` | Handles heavy class imbalance |
+| Focal loss (`--focal-gamma 2.0`) | `train.py` | Focuses on hard positives |
+| EMA weights (`--ema-decay 0.999`) | `train.py` | Smoother validation, stronger checkpoints |
 
 ## Phased plan
 

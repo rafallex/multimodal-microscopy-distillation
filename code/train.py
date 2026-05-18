@@ -21,6 +21,7 @@ Run from Kaggle:
 from __future__ import annotations
 
 import argparse
+import copy
 import json
 import time
 from pathlib import Path
@@ -30,7 +31,7 @@ import pandas as pd
 import torch
 import torch.nn as nn
 from sklearn.metrics import roc_auc_score
-from torch.utils.data import DataLoader
+from torch.utils.data import DataLoader, WeightedRandomSampler
 
 from dataset import CellDataset, load_train_df
 from model import MultimodalClassifier
@@ -43,14 +44,8 @@ from transforms import (
 )
 
 
-def make_loaders(df, train_idx, val_idx, data_root: Path, batch_size: int, num_workers: int):
-    """Build train and val DataLoaders for one CV fold.
-
-    Train loader uses photometric + geometric augmentation, shuffle=True,
-    and drop_last=True so BatchNorm always sees a full batch. Val loader
-    uses the deterministic eval transform, no shuffle, and drop_last=False
-    so every val sample is scored exactly once.
-    """
+def make_loaders(df, train_idx, val_idx, data_root: Path, batch_size: int, num_workers: int,
+                 balance_sampler: bool = False):
     bf_dir = data_root / "BF" / "train"
     fl_dir = data_root / "FL" / "train"
 
@@ -67,8 +62,18 @@ def make_loaders(df, train_idx, val_idx, data_root: Path, batch_size: int, num_w
         paired_transform=None,
     )
 
+    sampler = None
+    shuffle = True
+    if balance_sampler:
+        labels = df.iloc[train_idx]["Diagnosis"].values.astype(int)
+        counts = np.bincount(labels, minlength=2)
+        class_weights = counts.sum() / np.maximum(counts, 1)
+        weights = class_weights[labels]
+        sampler = WeightedRandomSampler(weights, num_samples=len(weights), replacement=True)
+        shuffle = False
+
     train_loader = DataLoader(
-        train_ds, batch_size=batch_size, shuffle=True,
+        train_ds, batch_size=batch_size, shuffle=shuffle, sampler=sampler,
         num_workers=num_workers, pin_memory=True, drop_last=True,
         persistent_workers=num_workers > 0,
     )
@@ -90,23 +95,39 @@ def mixup(bf, fl, y, alpha: float = 0.2):
 
 
 def smooth(y, eps: float = 0.05):
-    """Label-smoothing for binary targets: 0/1 -> eps/2 / (1 - eps/2).
-
-    Reduces over-confident predictions and tends to help calibration. With
-    eps=0.05, target 1 becomes 0.975 and target 0 becomes 0.025.
-    """
     return y * (1.0 - eps) + eps * 0.5
+
+
+def _focal_bce_with_logits(logits: torch.Tensor, targets: torch.Tensor,
+                           pos_weight: torch.Tensor | None, gamma: float) -> torch.Tensor:
+    bce = nn.functional.binary_cross_entropy_with_logits(
+        logits, targets, pos_weight=pos_weight, reduction="none",
+    )
+    pt = torch.exp(-bce)
+    return ((1 - pt) ** gamma) * bce
+
+
+class ModelEMA:
+    def __init__(self, model: nn.Module, decay: float = 0.999):
+        self.decay = decay
+        self.ema = copy.deepcopy(model).eval()
+        for p in self.ema.parameters():
+            p.requires_grad_(False)
+
+    def update(self, model: nn.Module):
+        with torch.no_grad():
+            msd = model.state_dict()
+            for k, v in self.ema.state_dict().items():
+                if v.dtype.is_floating_point:
+                    v.copy_(v * self.decay + msd[k].detach() * (1.0 - self.decay))
+                else:
+                    v.copy_(msd[k])
 
 
 def run_epoch(model, loader, optimizer, scaler, criterion, device, train: bool,
               mixup_alpha: float = 0.0, label_smooth: float = 0.0,
-              grad_clip: float = 0.0, sched=None):
-    """One pass over `loader`. Returns (mean_loss, AUC, hard_labels, sigmoids).
-
-    train=True does backward + optimizer step; train=False is eval-mode
-    inference. AUC is always computed against the un-mixed, un-smoothed
-    hard labels so it stays comparable across augmentation settings.
-    """
+              grad_clip: float = 0.0, sched=None, ema: ModelEMA | None = None,
+              pos_weight: torch.Tensor | None = None, focal_gamma: float = 0.0):
     model.train(train)
     losses, hard_ys, ps = [], [], []
     for batch in loader:
@@ -123,7 +144,10 @@ def run_epoch(model, loader, optimizer, scaler, criterion, device, train: bool,
 
         with torch.amp.autocast("cuda", enabled=scaler is not None):
             logits = model(bf, fl)
-            loss = criterion(logits, y)
+            if focal_gamma > 0:
+                loss = _focal_bce_with_logits(logits, y, pos_weight, focal_gamma).mean()
+            else:
+                loss = criterion(logits, y)
 
         if train:
             optimizer.zero_grad(set_to_none=True)
@@ -139,6 +163,8 @@ def run_epoch(model, loader, optimizer, scaler, criterion, device, train: bool,
                 if grad_clip > 0:
                     nn.utils.clip_grad_norm_(model.parameters(), grad_clip)
                 optimizer.step()
+            if ema is not None:
+                ema.update(model.module if hasattr(model, "module") else model)
             if sched is not None:
                 sched.step()  # OneCycleLR steps per batch
 
@@ -152,13 +178,6 @@ def run_epoch(model, loader, optimizer, scaler, criterion, device, train: bool,
 
 
 def main():
-    """Train one fold to completion.
-
-    Reads train.csv, builds the CV splits, trains one fold with mixup +
-    label smoothing + OneCycleLR, tracks val AUC, saves the best-AUC
-    checkpoint plus an OOF predictions CSV, writes the training history to
-    JSON. Early-stops if val AUC fails to improve for `patience` epochs.
-    """
     ap = argparse.ArgumentParser()
     ap.add_argument("--data-root", type=Path, required=True)
     ap.add_argument("--out-dir", type=Path, required=True)
@@ -180,6 +199,12 @@ def main():
                     choices=["resnet18", "efficientnet_b0"])
     ap.add_argument("--dropout", type=float, default=0.4)
     ap.add_argument("--no-pretrained", action="store_true")
+    ap.add_argument("--balance-sampler", action="store_true",
+                    help="Use a class-balanced sampler instead of shuffle")
+    ap.add_argument("--focal-gamma", type=float, default=0.0,
+                    help="If >0, use focal BCE loss with this gamma")
+    ap.add_argument("--ema-decay", type=float, default=0.0,
+                    help="If >0, use EMA weights for validation/checkpointing")
     args = ap.parse_args()
 
     args.out_dir.mkdir(parents=True, exist_ok=True)
@@ -189,18 +214,22 @@ def main():
     print(f"Loaded {len(df)} rows, {df['patient_id'].nunique()} patients, "
           f"overall pos-rate {df['Diagnosis'].mean():.3f}")
 
+    splits = None
     if args.cv == "sgkf":
         splits = list(stratified_patient_kfold(df, n_splits=args.n_splits, seed=args.seed))
     elif args.cv == "gkf":
         splits = list(patient_group_kfold(df, n_splits=args.n_splits, seed=args.seed))
     elif args.cv == "lopo":
         splits = list(leave_one_patient_out(df))
+    else:
+        raise ValueError(f"Unknown CV scheme: {args.cv}")
     print(f"Total folds in this CV: {len(splits)} ({args.cv})")
     train_idx, val_idx = splits[args.fold]
     print(summarize_split(df, train_idx, val_idx))
 
     train_loader, val_loader = make_loaders(
         df, train_idx, val_idx, args.data_root, args.batch_size, args.num_workers,
+        balance_sampler=args.balance_sampler,
     )
 
     model = MultimodalClassifier(pretrained=not args.no_pretrained,
@@ -230,17 +259,23 @@ def main():
     best_auc = -1.0
     no_improve = 0
     ckpt_path = args.out_dir / f"fold{args.fold}_best.pt"
+    ema = None
+    if args.ema_decay > 0:
+        ema = ModelEMA(model.module if hasattr(model, "module") else model, decay=args.ema_decay)
 
     for epoch in range(args.epochs):
         t0 = time.time()
         tr_loss, tr_auc, _, _ = run_epoch(
             model, train_loader, optimizer, scaler, criterion, device, train=True,
             mixup_alpha=args.mixup_alpha, label_smooth=args.label_smooth,
-            grad_clip=args.grad_clip, sched=sched,
+            grad_clip=args.grad_clip, sched=sched, ema=ema,
+            pos_weight=pos_weight, focal_gamma=args.focal_gamma,
         )
         with torch.no_grad():
+            eval_model = ema.ema if ema is not None else model
             va_loss, va_auc, va_y, va_p = run_epoch(
-                model, val_loader, None, None, criterion, device, train=False,
+                eval_model, val_loader, None, None, criterion, device, train=False,
+                pos_weight=pos_weight, focal_gamma=args.focal_gamma,
             )
         dt = time.time() - t0
         print(f"epoch {epoch:>2d} | tr_loss {tr_loss:.4f} tr_auc {tr_auc:.4f} "
@@ -253,7 +288,9 @@ def main():
         if va_auc > best_auc:
             best_auc = va_auc
             no_improve = 0
-            state = model.module.state_dict() if hasattr(model, "module") else model.state_dict()
+            state = eval_model.state_dict() if ema is not None else (
+                model.module.state_dict() if hasattr(model, "module") else model.state_dict()
+            )
             torch.save({"model": state, "epoch": epoch, "val_auc": va_auc,
                         "args": vars(args)}, ckpt_path)
             oof = pd.DataFrame({

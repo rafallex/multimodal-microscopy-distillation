@@ -46,12 +46,6 @@ def _d4_augments(bf: torch.Tensor, fl: torch.Tensor):
 
 
 def predict_one_ckpt(ckpt_path: Path, loader, device: str, tta: bool) -> np.ndarray:
-    """Load one checkpoint, run inference (optionally with 8-way D4 TTA).
-
-    With tta=True the probabilities are the mean over all 8 elements of the
-    D4 dihedral group (4 rotations x 2 reflections). Returns a 1D array of
-    length len(loader.dataset) with per-sample sigmoid probabilities in [0, 1].
-    """
     state = torch.load(ckpt_path, map_location=device, weights_only=False)
     # Infer backbone from saved args if available; default resnet18 for old ckpts.
     saved_args = state.get("args", {})
@@ -77,13 +71,6 @@ def predict_one_ckpt(ckpt_path: Path, loader, device: str, tta: bool) -> np.ndar
 
 
 def main():
-    """Predict on the test set with an ensemble of fold checkpoints.
-
-    Each checkpoint contributes equally; sigmoid probabilities are averaged
-    across folds (and across D4 augs within each fold if --tta). The
-    resulting per-cell scores are written to --out in the Kaggle-required
-    `Name,Diagnosis` two-column format.
-    """
     ap = argparse.ArgumentParser()
     ap.add_argument("--data-root", type=Path, required=True)
     ap.add_argument("--ckpts", type=Path, nargs="+", required=True)
