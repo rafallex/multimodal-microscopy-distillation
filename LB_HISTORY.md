@@ -19,6 +19,7 @@ The corresponding source notebooks live in `notebooks/improvedvNN_source.ipynb`.
 | v30 | EffNet-B0 | 128 native | v19 + disc LR only (no val), backbone_lr_ratio=0.1 | 0.6448 | disc LR at 0.1 ratio HURT by ~0.10 |
 | **v34** | **ResNet-50** | **128 native** | **v19 recipe, ResNet-50 backbone, no upscale, no disc LR** | **0.7155** | **`notebooks/improvedv34_source.ipynb` — teacher's backbone tested cleanly** |
 | v35 | DenseNet-201 | 128 native | v19 recipe, DenseNet-201 backbone | (queued) | `notebooks/improvedv35_source.ipynb` |
+| **v36** | **SE-ResNet-50** | **128 native** | **v34 recipe + SE channel attention (timm seresnet50) + 20 epochs** | (queued) | `notebooks/improvedv36_source.ipynb` |
 
 ## Top-of-leaderboard reference
 
@@ -34,6 +35,7 @@ LB leader sits at ~0.7832 (per Kaggle competition page).
 | v27 (val patient holdout) | Single 2-patient holdout on N=12 is fundamentally too noisy. pat_5 (saturated FL) + pat_14 (dark FL) are at FL exposure extremes — adversarial val choice. best_epoch=0 = essentially untrained model |
 | v30 (discriminative LR) | Standard "1/10 of original LR" recipe (L4 slide 96) is too aggressive for transferring ImageNet features to microscopy. Backbone needs more LR to learn texture features the ImageNet weights didn't see |
 | **v34 (ResNet-50 clean test)** | **ResNet-50 at 128 native (no upscale, no disc LR) ≈ EffNet-B0 different-seed result (v23). The teacher's recommended backbone works — but doesn't beat v19. v21's 0.7018 was due to the 224 upscale, not ResNet-50 itself.** |
+| v36 (SE-ResNet-50) | SE attention (Hu et al. 2018) added to every bottleneck. EfficientNet has SE built-in; v34 did not. v36 isolates whether channel attention closes the gap. +8 epochs (12→20) since larger model needs more training steps. |
 
 ## Final-submission selection strategy
 
