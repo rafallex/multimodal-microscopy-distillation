@@ -246,3 +246,7 @@ zizlJQk2
 !v15_baseline/**
 !v16_results/
 !v16_results/**
+
+# Presentation: keep the .pptx + builder scripts, ignore derived artifacts
+presentation/A3_cancer_challenge.pdf
+presentation/slides_png/
