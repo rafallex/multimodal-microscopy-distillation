@@ -2,7 +2,7 @@
 
 Coursework for *Advanced Deep Learning for Image Processing* (1MD042), Uppsala University, Spring 2026. Binary cell-level cancer classification on paired bright-field (BF) + fluorescence (FL) microscopy at 128×128 grayscale resolution, with 12 training patients and a strict patient-disjoint test set.
 
-**Current public-LB position: #1 with 0.8236** (29 logged iterations, +0.078 LB lift over the v19 baseline).
+**Current public-LB position: #1 with 0.8264** (30 logged iterations, +0.081 LB lift over the v19 baseline, +0.013 lead over next-best).
 
 ## What's here
 
@@ -20,7 +20,8 @@ The winning recipe is **EfficientNet-B0 dual-branch (BF + FL) with late concat f
 
 1. **v44** — pseudo-labels (Lee 2013) from a v41 teacher at threshold 0.05 / 0.95: +0.025 LB.
 2. **v46** — soft-target distillation (Hinton 2015) using all 59,040 test cells with raw teacher probabilities: **+0.039 LB** (biggest single-experiment gain).
-3. **v47** — iterative noisy-student round 2 (Xie 2020) using v46 as the new teacher: in progress.
+3. **v47** — iterative noisy-student round 2 (Xie 2020) with v46 as the new teacher: **+0.003 LB** (current #1). Round-2 lift compressed 14× from round 1 — diminishing returns confirmed, with the bonus finding that per-seed `tr_auc` band tightened (0.989–0.993 → 0.993–0.994), so round 2 also acts as a variance reducer.
+4. **v48** — Hinton temperature distillation (T=2) on top of v47, single-knob test of whether the actual softening prescribed by Hinton 2015 buys anything beyond v47's raw-probability "soft" pseudo. Queued for the May 29 Kaggle quota reset.
 
 See `LB_HISTORY.md` for the full progression and `REPORT_OUTLINE.md` for the methodological narrative.
 

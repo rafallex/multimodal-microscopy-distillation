@@ -11,7 +11,7 @@
 
 - Problem: binary cell-level cancer classification on multimodal microscopy (paired bright-field BF + fluorescence FL), 128×128, 12 training patients × ~10k cells/patient, ~38.8% positive.
 - Approach: dual EfficientNet-B0 with late concat fusion + per-patient MIL aux loss, then progressive layering of L4-textbook regularizers, followed by a **pseudo-label pipeline** culminating in **Hinton-2015-style soft-target distillation** and **iterative noisy-student training**.
-- Headline result: public LB **0.7455 → 0.8236** across 30 iterations, currently **#1 on the public leaderboard**. The single largest gain (+0.039 LB) came from soft pseudo-labels, not from architecture or regularization changes.
+- Headline result: public LB **0.7455 → 0.8264** across 30 iterations, currently **#1 on the public leaderboard with a +0.013 lead over next-best**. The single largest gain (+0.039 LB) came from soft pseudo-labels (v46), not from architecture or regularization changes; a further +0.003 came from iterative noisy student round 2 (v47).
 - Key methodological insight: **dataset size dominated architectural choices** on this problem. The bottleneck was labeled training set size, not model capacity or regularization.
 
 ---
@@ -21,7 +21,7 @@
 - The challenge: identify malignant cells in microscopy crops, paired BF + FL channels, given a strict patient-grouped split (test patients ≠ train patients).
 - Why this is hard: only 12 training patients, large per-patient FL exposure differences, severe overfitting risk if patient identity leaks into the model.
 - The two specific contributions of this work:
-  1. **A semi-supervised pipeline that uses the test set itself** (pseudo-labels + distillation) to overcome the small-label-set bottleneck, lifting LB by +0.061 over a strong supervised baseline.
+  1. **A semi-supervised pipeline that uses the test set itself** (pseudo-labels + distillation + iterative noisy student) to overcome the small-label-set bottleneck, lifting LB by **+0.070** over a strong supervised baseline (v41 → v47).
   2. **A systematic record of failures** (cross-recipe ensemble collapse, SSL patient-shortcut, regularizer stack regression) that clarifies *why* certain methods don't transfer to this setup.
 - Roadmap for the rest of the paper.
 
@@ -115,8 +115,8 @@
 
 ### 6.1. Version progression headline
 
-- **Suggested figure (the report's centerpiece):** LB vs. version-index line chart, with annotations on key versions (v19 baseline, v41 regularizer stack, v44 hard pseudo, v46 soft pseudo, v47 noisy student round 2)
-- Headline: 0.7455 (v19) → 0.8236 (v46), a **+0.078 LB lift**
+- **Suggested figure (the report's centerpiece):** LB vs. version-index line chart, with annotations on key versions (v19 baseline, v41 regularizer stack, v44 hard pseudo, v46 soft pseudo, v47 noisy student round 2). The chart is built and current at `report/figures/lb_progression.png`.
+- Headline: 0.7455 (v19) → 0.8264 (v47), a **+0.081 LB lift**
 
 ### 6.2. Component table
 
@@ -132,7 +132,8 @@ Suggested table format:
 | v44 | v43 + hard pseudo from v41 | 0.7812 | +0.025 over v41 |
 | v44 seed1 | v44 single-seed extract | 0.7844 | +0.003 over ensemble |
 | v46 | v44 stripped + soft pseudo from v44_seed1 | **0.8236** | **+0.039** ← biggest single gain |
-| v47 | v46 with v46 as teacher (noisy student round 2) | (your result) | — |
+| **v47** | **v46 with v46 ensemble as teacher (iterative noisy student round 2, Xie 2020)** | **0.8264** | **+0.003 ← still #1 (+0.013 over next-best)** |
+| v48 | v47 with Hinton T=2 temperature distillation (single-knob T test, v46 teacher) | (queued, May 29) | — |
 
 ### 6.3. Key ablations
 
@@ -206,10 +207,10 @@ This is your highest-leverage section — analyses of why methods *didn't* work 
 
 ### 8.3. Iterative noisy student (Xie 2020) — when does it pay off?
 
-- Round 1 (v46) was a +0.039 lift over its teacher
-- Round 2 (v47) tests whether the lift compounds with a stronger teacher
-- *(Insert your v47 result here when available.)*
-- General principle: iterations help when (a) the new teacher is meaningfully stronger than the old, (b) the threshold/weighting filters out the noisy targets, (c) the student has spare capacity. Conditions (a) and (b) hold here; (c) is unclear.
+- Round 1 (v46) was a +0.039 lift over its teacher (v44_seed1).
+- Round 2 (v47) tested whether the lift compounds with a stronger teacher (v46 ensemble). Result: **+0.003 LB** — about a 14× compression from round 1.
+- **Per-seed `tr_auc` tightened** from v46's 0.989–0.993 spread to v47's 0.993–0.994 band. So even when round-2 contributes little to the *mean* it acts as a **variance reducer** — useful for private-LB stability under split shake-out.
+- General principle re-stated: iterative noisy student's biggest payoff is **the first time** you flip from hard pseudo to soft-all-cells distillation. Subsequent rounds iterate the same channel with a marginally better-calibrated teacher and the marginal lift collapses quickly. To get further gains the *mechanism* (not the iteration count) needs to change — which is what v48 tests via Hinton temperature softening (v47 nominally uses "soft pseudo" but with T=1, so Hinton's actual softening prescription was never exercised).
 
 ### 8.4. What did NOT work and why
 
@@ -231,16 +232,18 @@ This is your highest-leverage section — analyses of why methods *didn't* work 
 
 Kaggle private LB picks (2 max):
 
-1. **v46 (LB 0.8236)** — primary. Soft pseudo + 3-seed × SWA, the methodology's strongest standalone.
+1. **v47 (LB 0.8264)** — primary. Iterative noisy student round 2 (v46 ensemble as teacher) + 3-seed × SWA + 40-way TTA. The methodology's strongest standalone result.
 2. **v41 (LB 0.7563)** — safety net. No pseudo at all (different mechanism), so it hedges against any pseudo-label overfitting to the public split.
 
-We deliberately avoid using v44 or v47 as the safety pick because both share the pseudo-label lineage with v46 — a correlated pair would offer no diversification.
+We deliberately avoid using v44 or v46 as the safety pick because both share the pseudo-label lineage with v47 (v46 IS v47's teacher). A correlated pair would offer no diversification.
+
+If v48 (Hinton T=2) lands above v47, the primary slot upgrades to v48 and the v41 safety net stays unchanged.
 
 ---
 
 ## 10. Conclusion (~0.25 page)
 
-- Summary of the journey: 30 iterations, +0.078 LB lift, #1 on public board
+- Summary of the journey: 30 iterations, +0.081 LB lift, #1 on public board with +0.013 lead
 - Three takeaways:
   1. On small-N patient-grouped datasets, growing the *effective* labeled set via pseudo-labels and distillation outperforms architectural or regularization gains by an order of magnitude.
   2. Cross-recipe ensembling has a hard LB-gap limit (~0.02 in this regime).
