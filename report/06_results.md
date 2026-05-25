@@ -1,22 +1,23 @@
 # 6. Results
 
-We ran 29 logged Kaggle iterations between v15 (early baseline) and v46 (current best). The complete record with per-version recipe diffs, public-LB scores, and one-line lessons is maintained in [`LB_HISTORY.md`](../LB_HISTORY.md). This section summarizes the headline progression, the four most informative ablations, and the within-recipe ensembling result.
+We ran 30 logged Kaggle iterations between v15 (early baseline) and v47 (current best). The complete record with per-version recipe diffs, public-LB scores, and one-line lessons is maintained in [`LB_HISTORY.md`](../LB_HISTORY.md). This section summarizes the headline progression, the four most informative ablations, and the within-recipe ensembling result.
 
 ## 6.1 Headline progression
 
 Figure 1 plots the chronological public-LB sequence with the most consequential inflections annotated.
 
-![Figure 1: Public LB progression across 29 logged iterations.](figures/lb_progression.png)
+![Figure 1: Public LB progression across 30 logged iterations.](figures/lb_progression.png)
 
 The arc is:
 
 - **v19 (LB 0.7455)** — baseline EfficientNet-B0 dual-branch with MIL aux loss, AdaBN, test-stain normalization, and strong augmentation. This was our reference floor for ~3 weeks.
 - **v41 (LB 0.7563, +0.011)** — stacked four textbook regularizers on top of v19: label smoothing ε=0.05, dropout 0.4 (up from 0.3), paired RandomResizedCrop, and 24-way multiscale TTA. A clean L4-aligned win, additive across components.
 - **v43 (LB 0.7444, −0.012 regression)** — added four further changes simultaneously (FL-tuned augmentation, WD 1e-4 → 3e-4, 3-seed × SWA ensemble, 40-way TTA). The stack regressed; see §7.5 for the post-mortem.
-- **v44 (LB 0.7812, +0.025 over v41)** — added Lee 2013–style hard pseudo-labels from v41 (threshold 0.05 / 0.95, ≈9,350 confident test cells with `patient_id = −1` so the MIL loss skips them). The single most impactful change of the project until v46.
+- **v44 (LB 0.7812, +0.025 over v41)** — added Lee 2013–style hard pseudo-labels from v41 (threshold 0.05 / 0.95, ≈9,350 confident test cells with `patient_id = −1` so the MIL loss skips them).
 - **v46 (LB 0.8236, +0.039 over v44_seed1)** — soft-target distillation (Hinton 2015): instead of hard-thresholded pseudos, we use the teacher's raw probabilities as BCE targets for all 59,040 test cells, weighted at 0.5. Took #1 on the public leaderboard.
+- **v47 (LB 0.8264, +0.003 over v46)** — iterative noisy student round 2 (Xie 2020): same recipe as v46 but with v46's ensemble as the new teacher. Smaller-than-expected gain confirms a diminishing-returns regime; round-2 acts more as a *variance reducer* (per-seed `tr_auc` tightened from v46's 0.989–0.993 spread to v47's 0.993–0.994 band) than as a mean improver. Holds #1 on the public LB with +0.013 over next-best.
 
-The headline number is a **+0.078 LB lift over the v19 baseline**, with the soft-pseudo step (v44 → v46) contributing exactly half of that on its own.
+The headline number is a **+0.081 LB lift over the v19 baseline**. The soft-pseudo step (v44 → v46) contributed +0.039 of that — the single largest jump — while round-2 noisy student (v46 → v47) added a further +0.003.
 
 ## 6.2 Version progression table
 
@@ -41,7 +42,8 @@ The headline number is a **+0.078 LB lift over the v19 baseline**, with the soft
 | v46_seed1 | single-seed extract from v46 | 0.8157 | below v46 ensemble |
 | v46_seed2 | single-seed extract from v46 | 0.8229 | below v46 ensemble |
 | **v46** | v44 stripped + soft pseudo from v44_seed1 (all 59k cells, raw probs, weight 0.5) | **0.8236** | **+0.039, #1 on public LB** |
-| v47 | v46 with v46 as new teacher (noisy-student round 2) | (queued) | — |
+| **v47** | v46 recipe with v46 ensemble as new teacher (iterative noisy student round 2, Xie 2020) | **0.8264** | **+0.003, still #1 (now +0.013 over next-best)** |
+| v48 | v47 with Hinton T=2 temperature distillation (single-knob T test, teacher unchanged) | (queued, v46 teacher) | — |
 
 ## 6.3 Key ablations and their lessons
 
@@ -60,6 +62,17 @@ v43 added four changes simultaneously on top of v41 and lost 0.012 LB. The compo
 ### Hard vs soft pseudo-labels: a 6× expansion of the labeled training set (v44 vs v46)
 
 The hard-pseudo threshold of 0.05 / 0.95 in v44 used ~9,350 of 59,040 test cells (16%). v46's soft formulation uses **all 59,040**, weighting each cell's contribution by the teacher's confidence. The training set grew from 124k effective cells to 173k, and the soft probabilities preserve the "dark knowledge" (Hinton 2015) — the directional + magnitude information of teacher uncertainty that hard binarization discards. The +0.039 LB jump is the single largest gain we measured.
+
+### Iterative noisy student: round-2 lift compresses 14× (v47 vs v46)
+
+v47 is identical to v46 except for one variable: the pseudo-label CSV is v46's ensemble output (LB 0.8236) instead of v44_seed1's (LB 0.7844). This is Xie et al. 2020's "iterative noisy student" pattern — round 2 of the teacher→student loop. We forecast +0.005 to +0.020 LB based on Xie's per-iteration figures. We observed **+0.003** — substantially compressed from round 1's +0.039.
+
+Two findings emerge:
+
+1. **The dataset-size lever's biggest payoff is the first time you flip from hard to soft-all-cells distillation.** Round 1 unlocked the calibration channel that hard pseudo-labels discard. Subsequent rounds re-iterate the same channel with a marginally better-calibrated teacher; the marginal lift collapses fast.
+2. **Round-2 noisy student acts as a variance reducer in addition to a mean improver.** Per-seed `tr_auc` tightened from v46's 0.989–0.993 spread to v47's 0.993–0.994 band (3 seeds). The ensemble of more-similar models gives less averaging benefit on the LB but more stability — a useful property for the private-LB shake-out.
+
+The diminishing-returns observation directly motivated v48: instead of a vanilla round-3 we change the *mechanism* (Hinton 2015 temperature softening at T=2, which v46 and v47 nominally used but with T=1 — i.e., never actually softened).
 
 ## 6.4 Within-recipe vs cross-recipe ensembling
 
