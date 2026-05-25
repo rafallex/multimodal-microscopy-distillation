@@ -30,9 +30,10 @@ RUNS = [
     ("v46_seed1",    0.8157, "darkgreen",   None),
     ("v46_seed2",    0.8229, "darkgreen",   None),
     ("v46",          0.8236, "tab:green",   (-1.1, 0.015)),
+    ("v47",          0.8264, "tab:green",   (0.5, 0.012)),
 ]
-# v47 placeholder (queued)
-V47_PLACEHOLDER = ("v47", None, "tab:orange")
+# v48 placeholder (queued — Hinton T=2 temperature distillation)
+V48_PLACEHOLDER = ("v48", None, "tab:orange")
 
 PRIOR_LEADER = 0.7916  # was the public LB top before v46 took #1
 V19_BASELINE = 0.7455
@@ -61,12 +62,12 @@ ax.axhline(V19_BASELINE, color="tab:blue", linestyle=":", linewidth=1.2, alpha=0
 ax.axhline(PRIOR_LEADER, color="black", linestyle="--", linewidth=1.0, alpha=0.5,
            label=f"prior LB leader = {PRIOR_LEADER:.4f} (pre-v46)")
 
-# Headline annotation on v46
-v46_x = labels.index("v46")
-v46_y = RUNS[v46_x][1]
-ax.annotate("NEW BEST  #1 on LB\nv46 = 0.8236",
-            xy=(v46_x, v46_y),
-            xytext=(v46_x - 4.5, v46_y + 0.025),
+# Headline annotation on v47 (current best, #1 on LB)
+v47_x = labels.index("v47")
+v47_y = RUNS[v47_x][1]
+ax.annotate("NEW BEST  #1 on LB\nv47 = 0.8264",
+            xy=(v47_x, v47_y),
+            xytext=(v47_x - 5.0, v47_y + 0.025),
             fontsize=11, fontweight="bold", color="tab:green",
             ha="left", va="bottom",
             arrowprops=dict(arrowstyle="->", color="tab:green",
@@ -97,19 +98,19 @@ ax.annotate("v42 SSL collapse\n(patient shortcut)",
             fontsize=9, color="tab:red", ha="left",
             arrowprops=dict(arrowstyle="->", color="tab:red", lw=0.9))
 
-# v47 placeholder zone (orange dashed)
-v47_x = len(RUNS)
-ax.axvspan(v47_x - 0.4, v47_x + 0.4, color="tab:orange", alpha=0.10, zorder=0)
-ax.text(v47_x, 0.83, "v47\n(queued)", color="tab:orange",
+# v48 placeholder zone (orange) — Hinton T=2 distillation queued
+v48_x = len(RUNS)
+ax.axvspan(v48_x - 0.4, v48_x + 0.4, color="tab:orange", alpha=0.10, zorder=0)
+ax.text(v48_x, 0.85, "v48\n(queued)", color="tab:orange",
         fontsize=10, fontweight="bold", ha="center", va="bottom")
-ax.scatter(v47_x, 0.82, s=120, color="tab:orange", marker="o",
+ax.scatter(v48_x, 0.84, s=120, color="tab:orange", marker="o",
            edgecolor="white", linewidth=1.5, alpha=0.55, zorder=3)
-ax.text(v47_x, 0.82, "?", color="white", fontsize=11, fontweight="bold",
+ax.text(v48_x, 0.84, "?", color="white", fontsize=11, fontweight="bold",
         ha="center", va="center", zorder=4)
 
 # X axis
-ax.set_xticks(list(xs) + [v47_x])
-ax.set_xticklabels(labels + ["v47"], rotation=45, ha="right", fontsize=9)
+ax.set_xticks(list(xs) + [v48_x])
+ax.set_xticklabels(labels + ["v48"], rotation=45, ha="right", fontsize=9)
 
 # Y axis
 ax.set_ylabel("Public Kaggle LB (AUC)", fontsize=12)
@@ -121,7 +122,7 @@ ax.spines["top"].set_visible(False)
 ax.spines["right"].set_visible(False)
 
 # Title
-ax.set_title("Public LB progression across 29 logged iterations  ·  v19 → v46 = +0.078",
+ax.set_title("Public LB progression across 30 logged iterations  ·  v19 → v47 = +0.081",
              fontsize=14, fontweight="bold", pad=12, loc="left")
 
 # Custom legend (color categories)
@@ -131,7 +132,7 @@ legend_handles = [
     mpatches.Patch(color="darkgreen", label="v46 per-seed extract"),
     mpatches.Patch(color="tab:red",   label="Regression / negative result"),
     mpatches.Patch(color="tab:gray",  label="Neutral / replication"),
-    mpatches.Patch(color="tab:orange", label="v47 (queued)"),
+    mpatches.Patch(color="tab:orange", label="v48 (queued)"),
 ]
 # Two-line legend setup: marker legend on left, axhline legend on right
 leg1 = ax.legend(handles=legend_handles, loc="lower right",

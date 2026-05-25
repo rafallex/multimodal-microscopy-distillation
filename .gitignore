@@ -251,5 +251,9 @@ zizlJQk2
 presentation/A3_cancer_challenge.pdf
 presentation/slides_png/
 
+# Reference paper PDFs (root-level only — see REFERENCES.md for canonical citations).
+# Figure PDFs under report/figures/ remain version-controlled.
+/*.pdf
+
 # Node
 node_modules/

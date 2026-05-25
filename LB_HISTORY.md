@@ -32,18 +32,19 @@ The corresponding source notebooks live in `notebooks/improvedvNN_source.ipynb`.
 | **v46** | **EffNet-B0** | **128 native** | **v44 stripped (no FL aug, WD 1e-4) + SOFT pseudo-labels from v44_seed1 (the lucky teacher): all 59k test cells, raw probs as BCE targets (Hinton 2015 distillation), pseudo loss weighted 0.5** | **0.8236** | **`notebooks/improvedv46_source.ipynb` — ★ NEW BEST + #1 ON LB ★. +0.039 over v44 seed1, +0.042 over v44 ensemble. Distillation crushed expectations (I forecast +0.005 to +0.015). All 3 seeds reached tr_auc ≈ 0.993 (vs v44's 0.989). Now 0.010 ahead of Group 1 @ 0.8136. Need +0.0264 more to reach 0.85** |
 | v46_seed1 | EffNet-B0 | 128 native | single-seed extract from v46 (submission_seed1.csv) | 0.8157 | v46 seed1 alone scored 0.0079 below the v46 ensemble |
 | v46_seed2 | EffNet-B0 | 128 native | single-seed extract from v46 (submission_seed2.csv) | 0.8229 | v46 seed2 alone scored 0.0007 below the v46 ensemble. **Different pattern from v44**: in v46 the ensemble beat both observed seeds, meaning within-recipe averaging genuinely added signal here (consistent with the tighter tr_auc convergence ≈ 0.993 across seeds vs v44's 0.989 spread) |
-| **v47** | **EffNet-B0** | **128 native** | **Same recipe as v46, but teacher swapped: SOFT pseudo from v46 ensemble (LB 0.8236) instead of v44_seed1. Iterative noisy student round 2 (Xie 2020). Single-variable test of whether stronger teacher → stronger student in round 2** | (queued) | **`notebooks/improvedv47_source.ipynb` — requires `submissionv46` Kaggle dataset (upload v46's submission.csv). Target ~0.825-0.850 LB. Highest-EV single experiment available. If v47 stalls (≤ v46 + 0.005), distillation lift is saturating and v48 needs a different mechanism (NoisyStudent JFT pretrain, MixUp, temperature scaling)** |
+| **v47** | **EffNet-B0** | **128 native** | **Same recipe as v46, but teacher swapped: SOFT pseudo from v46 ensemble (LB 0.8236) instead of v44_seed1. Iterative noisy student round 2 (Xie 2020). Single-variable test of stronger teacher → stronger student in round 2** | **0.8264** | **`notebooks/improvedv47_source.ipynb` — ★ NEW BEST + STILL #1 ON LB ★. +0.0028 over v46. Diminishing returns confirmed: round 1 (v44→v46) gained +0.039, round 2 (v46→v47) gained +0.003. tr_auc cluster very tight (0.9937/0.9929/0.9932 across 3 seeds) — noisy-student round 2 acts as variance reducer in addition to mean improver. Decision: do NOT do a vanilla round 3; the right next experiment is Hinton temperature distillation (v48)** |
+| **v48** | **EffNet-B0** | **128 native** | **v47 recipe with ONE knob changed: Hinton 2015 temperature distillation at T=2.0. Teacher is v46 (UNCHANGED — same as v47). Softens v46 teacher targets by sigmoid(logit(q)/T) at load, softens student logits by z/T at train, scales pseudo loss by T². Pure single-knob test of whether the "soft" in v46/v47's soft-pseudo BCE was actually firing** | (queued) | **`notebooks/improvedv48_source.ipynb` — requires `submissionv46` Kaggle dataset (same as v47, no new upload needed). Quota reset 2026-05-29. Decision rule: ≥0.829 = T=2 is the missing piece (consider v49 = T=2 + v47 teacher); 0.826-0.829 = T=2 helps marginally; ≈v47 ±0.002 = T=1 already captured Hinton's signal (publishable flat); <0.825 = T=2 destroys signal at this teacher quality (publishable negative). All four outcomes give the report a defensible finding.** |
 
-## Top-of-leaderboard reference (post-v46)
+## Top-of-leaderboard reference (post-v47)
 
 | # | Team | Score |
 |---|---|---|
-| **1** | **Group 15 (us)** | **0.8236** |
+| **1** | **Group 15 (us)** | **0.8264** |
 | 2 | Group 1 | 0.8136 |
 | 3 | NicoleChao | 0.8125 |
 | 4 | Group 2 | 0.7916 |
 
-We took #1 with v46 (soft pseudo / Hinton distillation), +0.010 ahead of next-best. Teacher target reportedly 0.85 — we need +0.0264 more.
+We extended our #1 lead with v47 (iterative noisy student round 2): +0.0128 ahead of next-best, up from +0.010 at v46. Teacher target reportedly 0.85 — we need +0.0236 more.
 
 ## Lessons by experiment
 
@@ -63,19 +64,20 @@ We took #1 with v46 (soft pseudo / Hinton distillation), +0.010 ahead of next-be
 | v42 (CoMIR cross-modal SSL) | InfoNCE loss converged to 0.02 (suspiciously low — log(128)≈4.85 is random) in epoch 1, then plateaued. Failure mode: with only one patient per cell, paired BF/FL of cell *i* always share a patient and unpaired BF/FL of cell *j*≠*i* usually don't, so encoding *patient identity* solves the contrastive task at ≥95%. Backbone got optimized to *strengthen* patient signature; finetune memorized it; test patients are different patients → tr_auc 0.96 vs LB 0.59. Cross-modal SSL needs positive pairs that span patient boundaries to work as a patient-shortcut remover. |
 | v43 standalone (stack-on-v41) | v41 was at a local max. Stacking FL-tuned aug + WD 1e-4→3e-4 + wider TTA + 3-seed/SWA ensemble all at once produced LB 0.7444 — a −0.012 regression. Lesson: don't compose 4 unvalidated changes in one experiment; at least one of them was a net negative and the others didn't cover for it. The seed ensemble + SWA didn't even rescue the regression. |
 | **v44 (pseudo carries everything)** | **v44 = v43 + pseudo-labels (only diff). v44 (0.7812) beat v43 (0.7444) by +0.037 and v41 (0.7563) by +0.025. Arithmetic: pseudo-labels alone are worth ≥+0.037 LB, because they also had to overcome v43's −0.012 negative stack. Lee 2013-style confidence-thresholded pseudo-labeling is dramatically more valuable than any combination of L4 regularizers when the teacher is decent (v41 at 0.7563 was enough). The bottleneck wasn't the loss or the augmentation — it was the size of the labeled training set.** |
+| **v47 (diminishing returns in iterative noisy student)** | **v47 = v46 recipe with teacher swapped v44_seed1→v46. Single-knob test of round 2. Result: +0.0028 LB (0.8236→0.8264). Compare to round 1's +0.039 (v44_seed1→v46). The lift compressed by ~14× in one iteration despite using a strictly stronger teacher. Two takeaways: (a) the dominant gain from distillation is in round 1 when the teacher first becomes "soft enough" to convey calibration signal; (b) seed variance compressed too — v47's 3 seeds clustered at tr_auc 0.9937/0.9929/0.9932 vs v46's wider 0.989-0.993 band. So round 2 acts as a *variance reducer*, not just a mean improver. Decision: don't waste 5h GPU on a vanilla round 3 — change the mechanism (Hinton temperature, the missing half of v46's "soft pseudo" implementation).** |
 
 ## Final-submission selection strategy
 
-Kaggle lets you pick 2 submissions for private LB. Updated plan after v44 took the lead:
+Kaggle lets you pick 2 submissions for private LB. Updated plan after v47 extended our lead at #1:
 
-1. **v44 (LB 0.7812)** — new best, primary pick. Pseudo-labels + 3-seed ensemble + SWA.
-2. **v41 (LB 0.7563)** — safety net. Pick reasoning: (a) third-highest LB after v44 (and v44 already includes the v41 lineage), (b) v41 does NOT use pseudo-labels at all — fully different mechanism, so it hedges against the chance that v44 overfits to v41's pseudo-label distribution or to the public split.
+1. **v47 (LB 0.8264)** — new best, primary pick. Iterative noisy-student round 2: 3 seeds × SWA, soft pseudo from v46 ensemble, 40-way TTA. Comfortable +0.013 ahead of next-best public submission.
+2. **v41 (LB 0.7563)** — safety net. Pick reasoning: (a) v41 does NOT use pseudo-labels at all — fully different mechanism, so it hedges against the chance that the v46/v47 distillation chain overfits to v46's specific calibration of the public split, and (b) it's the highest-LB result we have whose recipe doesn't lineage-share with v44/v46/v47.
 
-Why NOT pick v43 as the safety net even though it shares recipe lineage with v44: v43 sits at 0.7444, below v19 (0.7455). It's a strict regression. v41 is both higher-LB and more-different.
+Why NOT pick v46 as the safety net even though it's our second-highest LB at 0.8236: v46 is the teacher v47 distills from. They share recipe lineage almost completely (only difference: teacher source CSV). A correlated pair offers no diversification on private LB. v41 is the lowest-correlation pick available among submitted recipes.
 
-A v44+v41 sigmoid-average submission is worth one slot test before the deadline. Members are 0.025 apart (v22 collapsed at 0.05 apart, so this is borderline), but the recipes share little (v44 has pseudo + ensemble + SWA + FL aug; v41 has none of those) so the ensemble could find new signal.
+A v47 + v41 sigmoid-average submission is **NOT** worth a slot test — the members are 0.070 LB apart, far outside the 0.02 cross-recipe ensembling threshold we established empirically via v22 and v45_probe (M2).
 
-Gap to LB leader (0.7832): just **−0.0020** with v44 — well within seed/threshold noise. v44 is plausibly already in private-LB winning range, depending on how the private split shakes out.
+Gap to next-best LB (Group 1 at 0.8136): **+0.0128** with v47 — well outside seed/threshold noise. We hold a comfortable #1 lead even before final-private-LB shake-out. v48 (Hinton T=2) is queued for the May 29 quota reset; if it gains we extend further, if it's flat or worse v47 remains the primary pick.
 
 ## What's NOT tracked here
 
@@ -89,9 +91,11 @@ Gap to LB leader (0.7832): just **−0.0020** with v44 — well within seed/thre
 
 Five insights that recur across multiple experiments and that drove the final-version recipe choices. These consolidate the per-experiment lessons above into reusable claims.
 
-### M1. The dataset-size lever dominates on small-N patient-grouped data
+### M1. The dataset-size lever dominates on small-N patient-grouped data — but with diminishing returns
 
 Between v19 and v41 we gained +0.011 LB from four textbook regularizers stacked cleanly (label smoothing, dropout 0.4, paired RandomResizedCrop, multiscale TTA). Between v41 and v46 we gained +0.067 LB by *growing the labeled training set* — first via hard pseudo-labels (+0.025) and then via soft-target distillation that used 6× more pseudo cells (+0.039 additional). The ratio is roughly **6× more LB per unit of effort by adding labeled-ish data than by improving the model**. On 12 training patients with ~10k cells each, the bottleneck was the size and quality of the supervisory signal, not the model's capacity.
+
+**v47 added a diminishing-returns nuance**: iterating noisy student to round 2 with an even stronger teacher (v46 → v47) added only +0.003 LB — about 14× smaller than the round-1 gain. The dataset-size lever's biggest payoff is **the first time** you flip from hard labels to soft, all-cells distillation; subsequent rounds compress quickly. This suggests the lever is mostly about *unlocking the calibration channel*, not about endlessly stacking more noisy supervision.
 
 ### M2. Within-recipe ensembling works; cross-recipe ensembling fails for any practical LB gap
 

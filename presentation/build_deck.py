@@ -201,7 +201,7 @@ add_text(s, Inches(0.8), Inches(1.35), Inches(8.5), Inches(1.5),
 
 # Subtitle
 add_text(s, Inches(0.8), Inches(3.05), Inches(8.5), Inches(0.5),
-         "From SSL collapse to #1 on the leaderboard — 30+ versions, 5 acts, +0.078 LB",
+         "From SSL collapse to #1 on the leaderboard — 30 versions, 5 acts, +0.081 LB",
          font="Georgia", size=18, italic=True, color=CREAM,
          align=PP_ALIGN.LEFT)
 
@@ -250,7 +250,7 @@ add_bullets(s, Inches(0.4), Inches(1.5), Inches(5.0), Inches(3.5), [
     ("Inputs: paired BF + FL microscopy, 128×128 grayscale",),
     ("Train: 12 patients with leave-one-patient-out CV",),
     ("Test: unknown patients → OOD generalization is the dominant failure mode",),
-    ("Current LB position: we hold #1 at 0.8236 (+0.04 above prior leader)",),
+    ("Current LB position: we hold #1 at 0.8264 (+0.013 above next-best)",),
 ], size=14)
 
 # Right column: stat cards
@@ -284,8 +284,8 @@ set_notes(s, (
     "test patients are unknown. That second point ends up dominating everything. Our cross-"
     "validation has to be leave-one-patient-out, and even that turns out not to be enough.\n\n"
     "Anchor for the audience: by the end of this presentation we currently hold the "
-    "public LB at 0.8236 — but I'll trace how we got there through 5 acts. The earlier "
-    "leader was at 0.78; we passed it with the v46 distillation step."
+    "public LB at 0.8264 — but I'll trace how we got there through 5 acts. The earlier "
+    "leader was at 0.78; we passed it with v46's distillation step and extended further with v47."
 ))
 
 
@@ -308,7 +308,7 @@ phases = [
     (1.70, "Act 1+2", "v10–v16", "Baselines & SSL", TERRA),
     (3.90, "Act 3", "v17–v19", "EffNet pivot", SLATE),
     (6.10, "Act 4", "v20–v41", "Regularizer search", DARK),
-    (8.30, "Act 5", "v42–v46", "Semi-supervised", RGBColor(0x2A, 0x8A, 0x4A)),
+    (8.30, "Act 5", "v42–v47", "Semi-supervised", RGBColor(0x2A, 0x8A, 0x4A)),
 ]
 for px, act, vers, label, color in phases:
     # Dot
@@ -334,7 +334,7 @@ results = [
     (1.70, "0.572 → 0.503", "SSL collapse"),
     (3.90, "0.7455", "supervised floor"),
     (6.10, "0.7563", "v41 stacked L4 regs"),
-    (8.30, "0.8236", "v46 #1 on LB"),
+    (8.30, "0.8264", "v47 #1 on LB"),
 ]
 for px, lb, note in results:
     add_text(s, Inches(px - 0.95), Inches(3.20), Inches(1.9), Inches(0.4),
@@ -367,9 +367,10 @@ set_notes(s, (
     "Act 4, v20–v41, was about understanding what each ingredient actually "
     "contributed. Lots of failures with lessons. v34 — ResNet-50 cleanly — hit 0.7155. "
     "Act 4 climaxed in v41, which stacked four L4 regularizers cleanly for +0.011 over v19 → 0.7563.\n\n"
-    "Act 5 — the new chapter, v42 through v46 — was the semi-supervised pivot. "
-    "v44 added Lee 2013 hard pseudo-labels (+0.025 LB) and v46 swapped to Hinton 2015 "
-    "soft-target distillation on all 59k test cells (+0.039 LB more). v46 at 0.8236 took #1."
+    "Act 5 — the new chapter, v42 through v47 — was the semi-supervised pivot. "
+    "v44 added Lee 2013 hard pseudo-labels (+0.025 LB), v46 swapped to Hinton 2015 "
+    "soft-target distillation on all 59k test cells (+0.039 LB), and v47 iterated to "
+    "round 2 with v46 as the new teacher (+0.003 LB, Xie 2020). v47 at 0.8264 holds #1."
 ))
 
 
@@ -884,7 +885,7 @@ s = pres.slides.add_slide(BLANK)
 set_bg(s, CREAM)
 add_accent_bar(s)
 add_title(s, "Act 5: the semi-supervised pivot took us to #1",
-          eyebrow="Postscript  ·  v41 → v46")
+          eyebrow="Postscript  ·  v41 → v47")
 
 # LB chart on the right side
 LB_CHART_PNG = PROJECT_ROOT / "report" / "figures" / "lb_progression.png"
@@ -896,15 +897,16 @@ if LB_CHART_PNG.exists():
 add_bullets(s, Inches(0.4), Inches(1.5), Inches(3.7), Inches(3.6), [
     ("v41: +0.011 LB from 4 L4 regularizers",),
     ("v43: stacked 4 more changes → −0.012 regression",),
-    ("v44: hard pseudo-labels (Lee 2013) +0.025 LB",),
+    ("v44: hard pseudo (Lee 2013) +0.025 LB",),
     ("v46: SOFT pseudo / Hinton 2015 distillation +0.039 LB",),
-    ("Result: 0.8236, #1 on the public leaderboard",),
-], size=13)
+    ("v47: noisy-student round 2 (Xie 2020) +0.003 LB",),
+    ("Result: 0.8264, #1 on public LB (+0.013 lead)",),
+], size=12)
 
 # Bottom banner — the headline
 add_rect(s, Inches(0.4), Inches(4.55), Inches(9.2), Inches(0.55), NAVY)
 add_text(s, Inches(0.6), Inches(4.62), Inches(9.0), Inches(0.42),
-         "Dataset-size lever (+0.064 from pseudo+distillation) dominated regularization gains (+0.011 from v41).",
+         "Dataset-size lever (+0.067 from pseudo+distillation) dwarfed regularization gains (+0.011 from v41).",
          font="Georgia", size=13, italic=True, color=CREAM,
          align=PP_ALIGN.LEFT, anchor=MSO_ANCHOR.MIDDLE)
 
@@ -920,7 +922,11 @@ set_notes(s, (
     "v46 was the bigger breakthrough: Hinton 2015 distillation. Use ALL 59,000 test cells, "
     "not just the confident ones. Soft target = teacher's raw probability. +0.039 LB. We "
     "took #1 on the public LB at 0.8236.\n\n"
-    "The key methodological insight (bottom banner): the +0.064 LB lift from pseudo+distillation "
+    "v47 closed the loop: Xie 2020-style iterative noisy student round 2. Same recipe as v46 "
+    "but with v46's ensemble as the new teacher. +0.003 LB — small, but enough to extend "
+    "our LB lead to +0.013 over next-best. The per-seed tr_auc spread also tightened (0.989-0.993 "
+    "in v46 → 0.993-0.994 in v47), so round 2 acts as a variance reducer as well.\n\n"
+    "The key methodological insight (bottom banner): the +0.067 LB lift from pseudo+distillation "
     "dwarfed the +0.011 from textbook regularization. On 12 patients, the dataset-size lever "
     "is bigger than the model-quality lever."
 ))
