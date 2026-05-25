@@ -29,17 +29,21 @@ The corresponding source notebooks live in `notebooks/improvedvNN_source.ipynb`.
 | v45_probe | (v41 + v44) | — | local CSV ensemble (sigmoid_avg) | 0.7729 | underperformed v44 alone by −0.008 but added +0.004 over the naive LB-average of members. Pearson(v41,v44)=0.936. Gap of 0.025 LB between members was too wide to gain — same pattern as v22, gentler magnitude |
 | **v44_seed1** | **EffNet-B0** | **128 native** | **single-seed extraction from v44's 3-seed ensemble (submission_seed1.csv)** | **0.7844** | **NEW BEST. +0.0032 over the v44 ensemble. Seed 1 of v44 happened to be the lucky one. Confirms the seed-luck hypothesis at this LB regime. Now 3rd on LB; leader at 0.7916. v44_seed1 is now the teacher for v46's distillation** |
 | **v45** | **EffNet-B0** | **128 native** | **v44 minus FL-tuned aug + WD reverted 3e-4→1e-4 + pseudo source upgraded v41→v44 (noisy student iteration, Xie 2020). Keeps 3-seed × SWA, 40-way TTA, paired RRC, label smoothing, dropout 0.4** | (queued) | **`notebooks/improvedv45_source.ipynb` — requires `submissionv44` Kaggle dataset (upload v44's submission.csv as a new private Kaggle dataset). Target ~0.79–0.80 LB. Gap to leader is 0.0020 so plausibly tops** |
-| **v46** | **EffNet-B0** | **128 native** | **v44 stripped (no FL aug, WD 1e-4) + SOFT pseudo-labels from v44: all 59k test cells, raw v44 probabilities as BCE targets (Hinton 2015 distillation), pseudo loss weighted 0.5. 6× more pseudo training signal than v44** | (queued) | **`notebooks/improvedv46_source.ipynb` — requires `submissionv44` Kaggle dataset (same as v45). Target ~0.79–0.80 LB. Orthogonal hypothesis to v45 (soft vs hard pseudo); pick the winner, don't ensemble** |
+| **v46** | **EffNet-B0** | **128 native** | **v44 stripped (no FL aug, WD 1e-4) + SOFT pseudo-labels from v44_seed1 (the lucky teacher): all 59k test cells, raw probs as BCE targets (Hinton 2015 distillation), pseudo loss weighted 0.5** | **0.8236** | **`notebooks/improvedv46_source.ipynb` — ★ NEW BEST + #1 ON LB ★. +0.039 over v44 seed1, +0.042 over v44 ensemble. Distillation crushed expectations (I forecast +0.005 to +0.015). All 3 seeds reached tr_auc ≈ 0.993 (vs v44's 0.989). Now 0.010 ahead of Group 1 @ 0.8136. Need +0.0264 more to reach 0.85** |
+| v46_seed1 | EffNet-B0 | 128 native | single-seed extract from v46 (submission_seed1.csv) | 0.8157 | v46 seed1 alone scored 0.0079 below the v46 ensemble |
+| v46_seed2 | EffNet-B0 | 128 native | single-seed extract from v46 (submission_seed2.csv) | 0.8229 | v46 seed2 alone scored 0.0007 below the v46 ensemble. **Different pattern from v44**: in v46 the ensemble beat both observed seeds, meaning within-recipe averaging genuinely added signal here (consistent with the tighter tr_auc convergence ≈ 0.993 across seeds vs v44's 0.989 spread) |
+| **v47** | **EffNet-B0** | **128 native** | **Same recipe as v46, but teacher swapped: SOFT pseudo from v46 ensemble (LB 0.8236) instead of v44_seed1. Iterative noisy student round 2 (Xie 2020). Single-variable test of whether stronger teacher → stronger student in round 2** | (queued) | **`notebooks/improvedv47_source.ipynb` — requires `submissionv46` Kaggle dataset (upload v46's submission.csv). Target ~0.825-0.850 LB. Highest-EV single experiment available. If v47 stalls (≤ v46 + 0.005), distillation lift is saturating and v48 needs a different mechanism (NoisyStudent JFT pretrain, MixUp, temperature scaling)** |
 
-## Top-of-leaderboard reference (2026-05-24 19:10)
+## Top-of-leaderboard reference (post-v46)
 
 | # | Team | Score |
 |---|---|---|
-| 1 | Group 2 | 0.7916 |
-| 2 | Group 6 | 0.7890 |
-| **3** | **Group 15 (us)** | **0.7844** |
+| **1** | **Group 15 (us)** | **0.8236** |
+| 2 | Group 1 | 0.8136 |
+| 3 | NicoleChao | 0.8125 |
+| 4 | Group 2 | 0.7916 |
 
-Leader has pushed up from 0.7832 to 0.7916 (+0.008). Gap to leader is now 0.0072.
+We took #1 with v46 (soft pseudo / Hinton distillation), +0.010 ahead of next-best. Teacher target reportedly 0.85 — we need +0.0264 more.
 
 ## Lessons by experiment
 
