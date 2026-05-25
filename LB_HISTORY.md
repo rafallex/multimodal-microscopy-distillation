@@ -84,3 +84,27 @@ Gap to LB leader (0.7832): just **−0.0020** with v44 — well within seed/thre
   local-only `results/vNN/` tree. The `submission.csv`, `history.json`, and `learning_curves.png`
   are kept locally for offline analysis but excluded from git.
 - A more detailed local-only summary lives at `results/LB_SUMMARY.md` (also gitignored).
+
+## Meta-lessons (cross-experiment synthesis)
+
+Five insights that recur across multiple experiments and that drove the final-version recipe choices. These consolidate the per-experiment lessons above into reusable claims.
+
+### M1. The dataset-size lever dominates on small-N patient-grouped data
+
+Between v19 and v41 we gained +0.011 LB from four textbook regularizers stacked cleanly (label smoothing, dropout 0.4, paired RandomResizedCrop, multiscale TTA). Between v41 and v46 we gained +0.067 LB by *growing the labeled training set* — first via hard pseudo-labels (+0.025) and then via soft-target distillation that used 6× more pseudo cells (+0.039 additional). The ratio is roughly **6× more LB per unit of effort by adding labeled-ish data than by improving the model**. On 12 training patients with ~10k cells each, the bottleneck was the size and quality of the supervisory signal, not the model's capacity.
+
+### M2. Within-recipe ensembling works; cross-recipe ensembling fails for any practical LB gap
+
+v44 and v46 internally average 3 seeds × SWA, the standard Izmailov-2018 within-recipe pattern. Both gained from it (v46 ensemble beat all observed individual seeds). We tested cross-recipe sigmoid averaging twice — v22 (v19+v21, 0.05 LB member gap) and v45_probe (v41+v44, 0.025 LB gap). Both regressed below the better member. The operational rule we adopted: **don't ensemble across recipes if the LB gap is wider than ~0.015**. The two failed attempts confirmed this rule at progressively tighter gaps.
+
+### M3. Patient identity is the dominant spurious correlation; treat it as adversarial
+
+The training data has 12 patients, the test set has disjoint patients, and per-patient FL exposure varies by ~20% mean intensity. Any method that can encode patient identity will preferentially learn it. v42 confirmed this catastrophically: cross-modal SSL on paired (BF, FL) of the same cell exploited patient identity to solve the contrastive task at ≥95% accuracy, then collapsed to LB 0.59. Mitigations that worked: (a) MIL auxiliary loss with per-patient mean-logit BCE, (b) AdaBN to absorb the train→test distribution shift, (c) test-set stain normalization, (d) `patient_id = −1` sentinel for pseudo cells so MIL skips them.
+
+### M4. The transfer-from-paper bet pays out rarely; validate every borrowed ablation
+
+Three attempts to transfer published results to our setup failed (v37 Lian §5.2 FL aug, v38 Lian Table 3 early fusion, v42 CoMIR cross-modal SSL). The common cause: our 1-channel grayscale at 128 native input has a different signal/noise profile than the source papers' multi-channel emission stacks or higher-resolution variants. The one cross-paper bet that *did* pay (Lee 2013 pseudo-labels and Hinton 2015 distillation in v44/v46) succeeded because both are dataset-agnostic mechanisms — they don't depend on signal-modality specifics.
+
+### M5. Negative results compound; we got #1 by reading our failures faithfully
+
+The v46 recipe is a direct response to the diagnosed failures in earlier versions: stripped the v37/v43 FL-aug suspect, kept the within-recipe seed ensemble (M2), used `patient_id = −1` to keep MIL patient-grouped on real cells (M3), and combined Lee 2013 + Hinton 2015 (M4) on top of the v41 regularizer floor (M1). Each component traces to a specific failure analysis in the rows above. The wins are not separate from the losses — the wins are the losses, processed.

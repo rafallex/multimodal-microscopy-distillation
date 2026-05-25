@@ -145,7 +145,7 @@ def add_accent_bar(slide):
     add_rect(slide, Inches(0), Inches(0), Inches(0.08), Inches(5.625), TERRA)
 
 
-def add_footer(slide, page_num, total=11):
+def add_footer(slide, page_num, total=12):
     add_text(slide, Inches(0.4), Inches(5.30), Inches(6), Inches(0.25),
              "Multimodal Cancer Cell Classification  ·  Uppsala 1MD042 A3",
              font="Calibri", size=9, color=MUTED, align=PP_ALIGN.LEFT)
@@ -201,7 +201,7 @@ add_text(s, Inches(0.8), Inches(1.35), Inches(8.5), Inches(1.5),
 
 # Subtitle
 add_text(s, Inches(0.8), Inches(3.05), Inches(8.5), Inches(0.5),
-         "What 36 versions taught us about the CV ↔ LB gap",
+         "From SSL collapse to #1 on the leaderboard — 30+ versions, 5 acts, +0.078 LB",
          font="Georgia", size=18, italic=True, color=CREAM,
          align=PP_ALIGN.LEFT)
 
@@ -228,7 +228,9 @@ set_notes(s, (
     "between cross-validation AUC and public leaderboard AUC. The arc goes from "
     "an ambitious SSL pipeline that scored highest CV ever but collapsed on the LB, "
     "through a careful but unsuccessful 9-change rescue attempt, to a much "
-    "simpler EfficientNet recipe that landed our best single-model LB at 0.7455.\n\n"
+    "simpler EfficientNet recipe at LB 0.7455 — which then became the foundation for a "
+    "semi-supervised pipeline (Lee 2013 pseudo-labels, then Hinton 2015 distillation) that "
+    "reached LB 0.8236 and currently holds #1 on the public leaderboard.\n\n"
     "Time budget: ~50 seconds per slide, 11 slides, leaves ~30s of buffer for Q&A."
 ))
 
@@ -248,7 +250,7 @@ add_bullets(s, Inches(0.4), Inches(1.5), Inches(5.0), Inches(3.5), [
     ("Inputs: paired BF + FL microscopy, 128×128 grayscale",),
     ("Train: 12 patients with leave-one-patient-out CV",),
     ("Test: unknown patients → OOD generalization is the dominant failure mode",),
-    ("Public LB leader sits at ≈0.7832",),
+    ("Current LB position: we hold #1 at 0.8236 (+0.04 above prior leader)",),
 ], size=14)
 
 # Right column: stat cards
@@ -281,8 +283,9 @@ set_notes(s, (
     "Two things make this hard. First, only 12 training patients — small dataset. Second, "
     "test patients are unknown. That second point ends up dominating everything. Our cross-"
     "validation has to be leave-one-patient-out, and even that turns out not to be enough.\n\n"
-    "Anchor for the audience: the leaderboard leader is around 0.78. That's the ceiling we're "
-    "comparing against."
+    "Anchor for the audience: by the end of this presentation we currently hold the "
+    "public LB at 0.8236 — but I'll trace how we got there through 5 acts. The earlier "
+    "leader was at 0.78; we passed it with the v46 distillation step."
 ))
 
 
@@ -302,10 +305,10 @@ add_rect(s, TIMELINE_X, TIMELINE_Y, TIMELINE_W, Inches(0.06), MUTED)
 
 # Four phase markers along the line (px symmetric around slide centre 5.0)
 phases = [
-    (1.70, "Act 1", "v10–v14", "Baselines + iteration", DARK),
-    (3.90, "Act 2", "v15–v16", "SSL ambition", TERRA),
-    (6.10, "Act 3", "v17–v19", "The pivot", SLATE),
-    (8.30, "Act 4", "v20–v36", "Backbone exploration", DARK),
+    (1.70, "Act 1+2", "v10–v16", "Baselines & SSL", TERRA),
+    (3.90, "Act 3", "v17–v19", "EffNet pivot", SLATE),
+    (6.10, "Act 4", "v20–v41", "Regularizer search", DARK),
+    (8.30, "Act 5", "v42–v46", "Semi-supervised", RGBColor(0x2A, 0x8A, 0x4A)),
 ]
 for px, act, vers, label, color in phases:
     # Dot
@@ -328,10 +331,10 @@ for px, act, vers, label, color in phases:
 
 # Bottom row: result per act (same px positions, narrower boxes)
 results = [
-    (1.70, "—", "(no LB tracked)"),
-    (3.90, "0.572 → 0.503", "highest CV, lowest LB"),
-    (6.10, "0.7455", "best single model"),
-    (8.30, "0.7155", "v34 ResNet-50 clean"),
+    (1.70, "0.572 → 0.503", "SSL collapse"),
+    (3.90, "0.7455", "supervised floor"),
+    (6.10, "0.7563", "v41 stacked L4 regs"),
+    (8.30, "0.8236", "v46 #1 on LB"),
 ]
 for px, lb, note in results:
     add_text(s, Inches(px - 0.95), Inches(3.20), Inches(1.9), Inches(0.4),
@@ -361,8 +364,12 @@ set_notes(s, (
     "to 0.943 but the LB stayed near random at 0.503.\n\n"
     "Act 3, v17–v19, was the pivot — drop the SSL complexity, go back to a simple "
     "EffNet-B0 + heavy augmentation. v19 landed our best single-model LB at 0.7455.\n\n"
-    "Act 4, v20 through v36, was about understanding what each ingredient actually "
-    "contributed. Lots of failures with lessons. v34 — ResNet-50 cleanly — hit 0.7155."
+    "Act 4, v20–v41, was about understanding what each ingredient actually "
+    "contributed. Lots of failures with lessons. v34 — ResNet-50 cleanly — hit 0.7155. "
+    "Act 4 climaxed in v41, which stacked four L4 regularizers cleanly for +0.011 over v19 → 0.7563.\n\n"
+    "Act 5 — the new chapter, v42 through v46 — was the semi-supervised pivot. "
+    "v44 added Lee 2013 hard pseudo-labels (+0.025 LB) and v46 swapped to Hinton 2015 "
+    "soft-target distillation on all 59k test cells (+0.039 LB more). v46 at 0.8236 took #1."
 ))
 
 
@@ -871,7 +878,56 @@ set_notes(s, (
 
 
 # =========================
-# Slide 11: TAKE-HOME / CLOSING
+# Slide 11: ACT 5 — THE SEMI-SUPERVISED PIVOT (post-deck-build addition)
+# =========================
+s = pres.slides.add_slide(BLANK)
+set_bg(s, CREAM)
+add_accent_bar(s)
+add_title(s, "Act 5: the semi-supervised pivot took us to #1",
+          eyebrow="Postscript  ·  v41 → v46")
+
+# LB chart on the right side
+LB_CHART_PNG = PROJECT_ROOT / "report" / "figures" / "lb_progression.png"
+if LB_CHART_PNG.exists():
+    s.shapes.add_picture(str(LB_CHART_PNG), Inches(4.2), Inches(1.5),
+                         width=Inches(5.6), height=Inches(2.9))
+
+# Left-column bullets summarizing the arc
+add_bullets(s, Inches(0.4), Inches(1.5), Inches(3.7), Inches(3.6), [
+    ("v41: +0.011 LB from 4 L4 regularizers",),
+    ("v43: stacked 4 more changes → −0.012 regression",),
+    ("v44: hard pseudo-labels (Lee 2013) +0.025 LB",),
+    ("v46: SOFT pseudo / Hinton 2015 distillation +0.039 LB",),
+    ("Result: 0.8236, #1 on the public leaderboard",),
+], size=13)
+
+# Bottom banner — the headline
+add_rect(s, Inches(0.4), Inches(4.55), Inches(9.2), Inches(0.55), NAVY)
+add_text(s, Inches(0.6), Inches(4.62), Inches(9.0), Inches(0.42),
+         "Dataset-size lever (+0.064 from pseudo+distillation) dominated regularization gains (+0.011 from v41).",
+         font="Georgia", size=13, italic=True, color=CREAM,
+         align=PP_ALIGN.LEFT, anchor=MSO_ANCHOR.MIDDLE)
+
+add_footer(s, 11)
+set_notes(s, (
+    "Act 5 — the chapter that didn't exist when this deck was first built.\n\n"
+    "Quick arc: v41 stacked four L4-textbook regularizers cleanly for +0.011 LB. v43 then "
+    "stacked four MORE changes simultaneously and regressed by 0.012 — a methodological "
+    "warning we paid the price to learn.\n\n"
+    "v44 was the first breakthrough: Lee 2013 pseudo-labels. Teacher (v41) predicts on the "
+    "test set; cells with confidence >0.95 or <0.05 get added to training with patient_id=-1 "
+    "so MIL skips them. +0.025 LB.\n\n"
+    "v46 was the bigger breakthrough: Hinton 2015 distillation. Use ALL 59,000 test cells, "
+    "not just the confident ones. Soft target = teacher's raw probability. +0.039 LB. We "
+    "took #1 on the public LB at 0.8236.\n\n"
+    "The key methodological insight (bottom banner): the +0.064 LB lift from pseudo+distillation "
+    "dwarfed the +0.011 from textbook regularization. On 12 patients, the dataset-size lever "
+    "is bigger than the model-quality lever."
+))
+
+
+# =========================
+# Slide 12: TAKE-HOME / CLOSING
 # =========================
 s = pres.slides.add_slide(BLANK)
 set_bg(s, NAVY)
@@ -890,14 +946,14 @@ add_text(s, Inches(0.8), Inches(0.85), Inches(8.5), Inches(0.7),
 takeaways = [
     ("Higher CV ≠ higher LB.",
      "v15 had the best CV we ever saw (0.866). It had the worst LB (0.572)."),
-    ("Simpler often wins.",
-     "v19 — EffNet-B0 + augmentation + TTA — beat the elaborate v16 SSL pipeline by 0.24 AUC."),
+    ("Don't stack unvalidated changes.",
+     "v43 added 4 simultaneous tweaks on top of v41 → −0.012 LB regression with no way to attribute blame."),
     ("Seed variance is huge.",
      "Same recipe, different seed: 0.03 LB shift. Most single-seed A/B claims < 0.03 are noise."),
-    ("Beware confounds.",
-     "v21 made ResNet-50 look bad. v34 showed it was the 224 upscale all along."),
-    ("Some OOD is beyond CV.",
-     "Site/protocol-level OOD can't be diagnosed from train-only data. Model the test distribution directly."),
+    ("On small-N, dataset size > regularization.",
+     "v41 stacked four regularizers: +0.011 LB. v46 added soft pseudo-labels for ~50k extra cells: +0.039 LB."),
+    ("Negative results are the methodology.",
+     "v42 SSL collapse, v22 + v45_probe ensemble failures, v43 regression — every failure shaped the next version."),
 ]
 y0 = 1.85
 for i, (head, body) in enumerate(takeaways):
@@ -920,21 +976,23 @@ add_text(s, Inches(0.8), Inches(5.30), Inches(8), Inches(0.25),
          font="Calibri", size=10, italic=True, color=MUTED, align=PP_ALIGN.LEFT)
 
 set_notes(s, (
-    "Five things we'll carry into future projects. I'll read them quickly and "
-    "leave the slide up for questions.\n\n"
-    "1. Higher CV doesn't mean higher LB. v15 had our best CV — 0.866 — and our "
-    "worst LB — 0.572. If you only have CV, you don't know what you have.\n\n"
-    "2. Simpler often wins. v19 was a standard EffNet-B0 with five well-known tricks. "
-    "It beat our elaborate SSL pipeline by a quarter AUC point. Complexity is not the "
-    "same as quality.\n\n"
+    "Five things we'll carry forward. I'll read them quickly and leave the slide up for "
+    "questions.\n\n"
+    "1. Higher CV doesn't mean higher LB. v15 had our best CV — 0.866 — and our worst "
+    "LB — 0.572. If you only have CV, you don't know what you have.\n\n"
+    "2. Don't stack unvalidated changes. v43 added four tweaks at once on top of v41 and "
+    "regressed by 0.012 LB. We had no way to attribute blame and the run cost 5 hours of "
+    "Kaggle GPU. After v43 we adopted a one-or-two-variables-per-experiment rule.\n\n"
     "3. Seed variance is huge. v23 was v19 with a different random seed. 0.03 LB shift. "
     "Most A/B comparisons in the literature with deltas under 0.03 are not reliable.\n\n"
-    "4. Beware confounds. v21 changed two things — backbone AND input scale — and the "
-    "wrong one got blamed. v34 had to fix that mistake months later.\n\n"
-    "5. Some OOD is beyond CV. The site-level OOD that broke v15 and v16 was invisible "
-    "in patient-LOPO validation. The fix wasn't a smarter validation scheme; it was "
-    "directly modeling the test distribution with AdaBN and stain normalization.\n\n"
-    "Thanks. Questions?"
+    "4. On small-N patient-grouped data, dataset size beats regularization. v41 stacked "
+    "four textbook regularizers for +0.011 LB. v46 added soft pseudo-labels for ~50,000 "
+    "extra effective cells: +0.039 LB. Three and a half times the gain from a different "
+    "lever entirely.\n\n"
+    "5. Negative results are the methodology. v42 SSL collapse, v22 and v45_probe ensemble "
+    "failures, v43 stacked regression — six diagnosed failure modes, each shaped the next "
+    "version. The wins came from cleanly understanding the failures.\n\n"
+    "Thanks. Code + full LB history at github.com/rafallex/A3-ADL. Questions?"
 ))
 
 
