@@ -50,7 +50,7 @@ This paper reports a long-running empirical study on a binary cell-level classif
 
 \begin{enumerate}
   \item \textbf{A pseudo-label pipeline that uses the test set itself.} A teacher predicts on the unlabeled test cells; the student is trained on the union of real labeled cells (BCE against the smoothed hard label) and pseudo cells (BCE against the teacher's raw probability, weight 0.5). This unlocks an additional $+0.064$ LB over the strongest supervised baseline and demonstrates Hinton's soft-target argument~\cite{hinton2015distilling} on a small-$N$ medical-imaging dataset.
-  \item \textbf{An empirical characterization of iterative noisy student~\cite{xie2020noisystudent} in this regime.} Round 1 (hard pseudo $\rightarrow$ soft pseudo / all 59k cells) returned $+0.039$ LB; round 2 (soft $\rightarrow$ soft with a stronger teacher) returned $+0.003$ LB on the ensemble but $+0.091$ LB on the best single seed --- the round-2 mean lift compressed $\sim$14$\times$ while the seed dispersion expanded $\sim$3$\times$.
+  \item \textbf{An empirical characterization of iterative noisy student~\cite{xie2020noisystudent} in this regime.} Round 1 (hard pseudo $\rightarrow$ soft pseudo / all 59k cells) returned $+0.039$ LB; round 2 (soft $\rightarrow$ soft with a stronger teacher) returned $+0.003$ LB on the ensemble and $+0.012$ LB on the best single seed (both measured against the v46 round-1 ensemble) --- the round-2 mean lift compressed $\sim$13$\times$ from round 1, while the seed dispersion expanded $\sim$3$\times$.
   \item \textbf{Six diagnosed failure modes} (cross-recipe sigmoid-averaging at wide LB gaps, single 2-patient holdout collapse, Lian-paper transfer of FL ColorJitter and early fusion, cross-modal contrastive SSL learning the patient shortcut, four-component regularizer stacking, within-recipe ensemble net-negative under an outlier seed) and the per-failure mechanism diagnosis.
 \end{enumerate}
 
@@ -153,7 +153,7 @@ Code release: \texttt{github.com/rafallex/A3-ADL} (notebooks per version, exact 
 
 \subsection{Headline progression}
 
-Fig.~\ref{fig:lb} plots the chronological public-LB sequence with the most consequential inflections annotated. The arc is: v19 baseline at LB $0.7455$ (EfficientNet-B0 dual-branch + MIL + AdaBN + test stain normalization); v41 at $0.7563$ ($+0.011$, four-component L4-regularizer stack); v44 at $0.7812$ ($+0.025$ over v41, hard pseudo-labels added); v46 at $0.8236$ ($+0.039$ over its lucky-seed teacher, soft pseudo-labels replacing hard); v47 at $0.8264$ for the ensemble and $0.8355$ for the best single seed ($+0.091$ over v46, iterative noisy student round 2). The cumulative lift from baseline to best single-seed v47 is $+0.090$ LB; the ensemble of v47 holds first place on the public leaderboard with a $+0.013$ margin over the next competitor.
+Fig.~\ref{fig:lb} plots the chronological public-LB sequence with the most consequential inflections annotated. The arc is: v19 baseline at LB $0.7455$ (EfficientNet-B0 dual-branch + MIL + AdaBN + test stain normalization); v41 at $0.7563$ ($+0.011$, four-component L4-regularizer stack); v44 at $0.7812$ ($+0.025$ over v41, hard pseudo-labels added); v46 at $0.8236$ ($+0.039$ over its lucky-seed teacher, soft pseudo-labels replacing hard); v47 at $0.8264$ for the ensemble (iterative noisy student round 2, $+0.003$ over the v46 ensemble) and $0.8355$ for the best single seed ($+0.012$ over the v46 ensemble, $+0.090$ over the v19 baseline). The cumulative lift from baseline to best single-seed v47 is $+0.090$ LB; the ensemble of v47 holds first place on the public leaderboard with a $+0.013$ margin over the next competitor.
 
 \begin{figure*}[!t]
   \centering
@@ -189,12 +189,12 @@ Table~\ref{tab:progression} lists the submitted versions, their recipe summaries
     v43 & v41 + 4-component stack & 0.7444 & $\downarrow$ (\S\ref{sec:negative}-E) \\
     \textbf{v44} & v43 + hard pseudo from v41 & \textbf{0.7812} & $\mathbf{+0.025}$ \\
     v44\_s1 & v44 single seed & 0.7844 & seed luck \\
-    v45p & sigmoid-avg of v41$+$v44 & 0.7729 & $\downarrow$ (\S\ref{sec:negative}-F) \\
+    v45\_probe & sigmoid-avg of v41$+$v44 & 0.7729 & $\downarrow$ (\S\ref{sec:negative}-F) \\
     \textbf{v46} & v44 stripped + soft pseudo, all 59k cells & \textbf{0.8236} & $\mathbf{+0.039}$ \\
     v46\_s1 & v46 single seed & 0.8157 & --- \\
     v46\_s2 & v46 single seed & 0.8229 & --- \\
     \textbf{v47} & v46 recipe, v46 ensemble as teacher (iter.~NS round 2) & \textbf{0.8264} & $\mathbf{+0.003}$ \\
-    v47\_s2 & v47 single seed (best) & \textbf{0.8355} & \textbf{+0.091} \\
+    v47\_s2 & v47 single seed (best) & \textbf{0.8355} & \textbf{+0.090} \\
     v47\_s1 & v47 single seed & 0.8150 & $\downarrow$ vs s2 \\
     v47\_s3 & v47 single seed & 0.8126 & $\downarrow$ vs s2 \\
     \bottomrule
@@ -288,7 +288,7 @@ We argue that the failure-mode diagnoses below are the most methodologically inf
 
 \textbf{Rule.} Cross-modal SSL on a strongly patient-grouped dataset can amplify the patient shortcut. To use it productively we would need positive pairs that span patient boundaries (e.g., two cells from different patients that share an annotated phenotype), which our annotations do not support.
 
-\subsection{v43 --- four-component stack regressed --0.012}
+\subsection{v43 --- four-component stack regressed $-0.012$}
 
 \textbf{Setup.} v41 plus four simultaneous changes: (a) FL-tuned ColorJitter (brightness $0.5$, contrast $0.3$) $+$ RandomGamma $0.85$--$1.15$ on the FL branch only, (b) weight decay $10^{-4} \rightarrow 3\times 10^{-4}$, (c) 3-seed $\times$ SWA ensembling, (d) 40-way TTA replacing 24-way.
 
@@ -347,7 +347,7 @@ Table~\ref{tab:failures} consolidates the seven diagnosed failures, their mechan
     v38 & Early fusion needs tighter pixel alignment & yes \\
     v42 & Contrastive SSL learned patient identity, not cell content & yes \\
     v43 & Four-change stack confounded; $\ge 1$ component net-negative & yes \\
-    v45\_p & Cross-recipe ensemble fails at $0.025$ gap & yes \\
+    v45\_probe & Cross-recipe ensemble fails at $0.025$ gap & yes \\
     v47 & Within-recipe ensemble net-negative under outlier seed & open \\
     \bottomrule
   \end{tabular}

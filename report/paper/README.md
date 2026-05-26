@@ -18,8 +18,9 @@ plus figure PDFs read from `../figures/`.
 ## Local build (Windows: MiKTeX; macOS/Linux: TeX Live)
 
 Requirements: `texlive-publishers` (provides `IEEEtran.cls`) and
-`texlive-fonts-recommended` (provides T1 fontenc). MiKTeX installs missing
-packages on-demand by default.
+`texlive-fonts-recommended` (recommended T1-encoded fonts; the `fontenc`
+package itself is part of the LaTeX base). MiKTeX installs missing packages
+on-demand by default.
 
 ```
 cd report/paper
@@ -37,7 +38,9 @@ Output: `main.pdf` in the same folder.
 
 ## Figure paths
 
-`main.tex` sets `\graphicspath{{../figures/}}`. The figure PDFs are produced by
+`main.tex` sets `\graphicspath{{./}{../figures/}}` (dual-purpose: the `./` entry
+lets Overleaf find the figures after a flat upload; the `../figures/` entry
+resolves them in the local repo layout without a copy step). The figure PDFs are produced by
 the `build_*.py` scripts in `../figures/` and committed via the curated-
 artifacts policy in `.gitignore`. To regenerate them, run the corresponding
 `build_*.py` script with the `results/` artifacts present.
