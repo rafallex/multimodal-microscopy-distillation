@@ -1,6 +1,6 @@
 # 7. Negative results and failure-mode analysis
 
-Six experiments did not work, in informative ways. We analyze each individually because the instructor's grading framework explicitly values *what was done and how it was presented* over LB score, and because diagnosing failures was empirically more useful for guiding subsequent versions than studying the wins.
+Seven experiments did not work, in informative ways. We analyze each individually because the instructor's grading framework explicitly values *what was done and how it was presented* over LB score, and because diagnosing failures was empirically more useful for guiding subsequent versions than studying the wins.
 
 ## 7.1 v22 — cross-recipe ensemble collapse
 
@@ -64,9 +64,22 @@ The Lian et al. 2024 paper (same multimodal microscopy problem class, published 
 
 **Diagnosis.** Pearson(v41, v44) = 0.936 — the two sets of predictions are highly correlated but not redundant. The ensemble adds small per-cell signal (4,770 of 59,040 cells flipped sigmoid sign vs v44 alone), and that signal manifests as the +0.004 lift above naive linear-LB-averaging. But the 0.025 LB member gap is wide enough that the penalty from the weaker member dominates the small lift. The result is below the stronger member.
 
-**Lesson.** Cross-recipe ensemble at this dataset's scale is favorable only when member LB-gap is ≤ ~0.015. Within-recipe ensemble (v44, v46) remains the safe pattern.
+**Lesson.** Cross-recipe ensemble at this dataset's scale is favorable only when member LB-gap is ≤ ~0.015. Within-recipe ensemble (v44, v46) remains the safe pattern in principle — though v47 (§7.7) shows even within-recipe averaging can fail when seed dispersion expands.
 
-## 7.7 Summary
+## 7.7 v47 — within-recipe ensemble net-negative under an outlier seed
+
+**Setup.** v47 trains 3 independent seeds of the iterative-noisy-student recipe and sigmoid-averages their TTA predictions. Each seed sees the same teacher (v46 ensemble, LB 0.8236) but with independent data shuffling, SWA epoch averaging, and random augmentation streams. This is the same within-recipe averaging pattern that worked for v46.
+
+**Result.** Per-seed public LB: seed 1 = 0.8150, seed 2 = **0.8355**, seed 3 = 0.8126 (range 0.0229). The 3-seed ensemble landed at 0.8264 — **below the best single seed by 0.0091**. By contrast, v46's per-seed range was 0.0072 and the v46 ensemble (0.8236) beat each individual seed.
+
+**Diagnosis.** Two-way story:
+
+1. Round 2 of the noisy-student loop *expanded* seed dispersion (3× wider per-seed LB range vs round 1). The v46-ensemble teacher signal is denser and more confident than the v44_seed1 teacher used for v46, but it also carries more pseudo-label noise that the student seeds amplify differently. The widened dispersion produced an outlier (seed2 = 0.8355) that the sigmoid-average hedges against.
+2. We cannot distinguish from public LB alone whether seed2's lift is real signal (in which case the ensemble cost us 0.009 of true performance) or public-split luck (in which case the ensemble correctly hedged). With no held-out validation pool, this stays "open" until the private LB resolves.
+
+**Lesson.** Within-recipe ensembling is not unconditionally net-positive. It is favorable when seed dispersion is tight relative to the underlying generalization gap (v46), and ambiguous when one seed is a clear outlier (v47). Operationally we now submit *both* the ensemble and the best single seed as separate final-stage candidates, instead of relying on the within-recipe ensemble as the unconditional safe pick. This is also the methodology argument for keeping v41 (the strongest non-pseudo baseline) as a different-mechanism safety net for the final selection — see §6.4 and the v48 plan.
+
+## 7.8 Summary
 
 | Failure | Mechanism diagnosed | Was the lesson actioned? |
 |---|---|---|
@@ -77,5 +90,6 @@ The Lian et al. 2024 paper (same multimodal microscopy problem class, published 
 | v42 | Contrastive SSL learned patient identity, not cell content | Yes (abandoned SSL pretraining path) |
 | v43 | Four-change stack confounded; ≥1 component was net-negative | Yes (v46 reverted suspects, gained +0.079) |
 | v45_probe | Cross-recipe ensemble fails at 0.025 LB gap (still > ~0.015) | Yes (rule tightened; stopped attempting cross-recipe ensembles) |
+| v47 | Within-recipe ensemble net-negative under outlier seed (dispersion widened in round 2) | Open — submit ensemble *and* best seed as separate final candidates |
 
-Six discrete failure modes diagnosed; six discrete lessons fed forward into the version that took #1 on the public leaderboard. The negative results are not separate from the methodology — they *are* the methodology.
+Seven discrete failure modes diagnosed; seven discrete lessons fed forward into the version that took #1 on the public leaderboard. The negative results are not separate from the methodology — they *are* the methodology.

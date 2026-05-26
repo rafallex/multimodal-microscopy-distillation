@@ -15,9 +15,9 @@ The arc is:
 - **v43 (LB 0.7444, −0.012 regression)** — added four further changes simultaneously (FL-tuned augmentation, WD 1e-4 → 3e-4, 3-seed × SWA ensemble, 40-way TTA). The stack regressed; see §7.5 for the post-mortem.
 - **v44 (LB 0.7812, +0.025 over v41)** — added Lee 2013–style hard pseudo-labels from v41 (threshold 0.05 / 0.95, ≈9,350 confident test cells with `patient_id = −1` so the MIL loss skips them).
 - **v46 (LB 0.8236, +0.039 over v44_seed1)** — soft-target distillation (Hinton 2015): instead of hard-thresholded pseudos, we use the teacher's raw probabilities as BCE targets for all 59,040 test cells, weighted at 0.5. Took #1 on the public leaderboard.
-- **v47 (LB 0.8264, +0.003 over v46)** — iterative noisy student round 2 (Xie 2020): same recipe as v46 but with v46's ensemble as the new teacher. Smaller-than-expected gain confirms a diminishing-returns regime; round-2 acts more as a *variance reducer* (per-seed `tr_auc` tightened from v46's 0.989–0.993 spread to v47's 0.993–0.994 band) than as a mean improver. Holds #1 on the public LB with +0.013 over next-best.
+- **v47 (LB 0.8264 ensemble, +0.003 over v46; 0.8355 best single seed, +0.012 over v46 ensemble)** — iterative noisy student round 2 (Xie 2020): same recipe as v46 but with v46's ensemble as the new teacher. The mean ensemble lift compressed ~13× from round 1 (+0.039) to round 2 (+0.003), while the per-seed public-LB range expanded ~3× (v46: 0.0072 across seeds, v47: 0.0229). The v47 ensemble at 0.8264 underperformed its own best seed (0.8355) by 0.0091 — within-recipe averaging is not unconditionally net-positive when one seed is an outlier (§7.7). Holds #1 on the public LB with +0.013 over next-best.
 
-The headline number is a **+0.081 LB lift over the v19 baseline**. The soft-pseudo step (v44 → v46) contributed +0.039 of that — the single largest jump — while round-2 noisy student (v46 → v47) added a further +0.003.
+The headline number is a **+0.081 LB lift over the v19 baseline** on the v47 ensemble (or **+0.090** on v47's best single seed). The soft-pseudo step (v44 → v46) contributed +0.039 of that — the single largest jump — while round-2 noisy student (v46 → v47) added a further +0.003 on the ensemble and +0.012 on the best seed.
 
 ## 6.2 Version progression table
 
@@ -42,7 +42,10 @@ The headline number is a **+0.081 LB lift over the v19 baseline**. The soft-pseu
 | v46_seed1 | single-seed extract from v46 | 0.8157 | below v46 ensemble |
 | v46_seed2 | single-seed extract from v46 | 0.8229 | below v46 ensemble |
 | **v46** | v44 stripped + soft pseudo from v44_seed1 (all 59k cells, raw probs, weight 0.5) | **0.8236** | **+0.039, #1 on public LB** |
-| **v47** | v46 recipe with v46 ensemble as new teacher (iterative noisy student round 2, Xie 2020) | **0.8264** | **+0.003, still #1 (now +0.013 over next-best)** |
+| **v47** | v46 recipe with v46 ensemble as new teacher (iterative noisy student round 2, Xie 2020) | **0.8264** | **+0.003 (ensemble); still #1, +0.013 over next-best** |
+| v47_s1 | single-seed extract from v47 | 0.8150 | — |
+| **v47_s2** | single-seed extract from v47 (best) | **0.8355** | **+0.012 over v46 ensemble, +0.090 over v19** |
+| v47_s3 | single-seed extract from v47 | 0.8126 | — |
 | v48 | v47 with Hinton T=2 temperature distillation (single-knob T test, teacher unchanged) | (queued, v46 teacher) | — |
 
 ## 6.3 Key ablations and their lessons
@@ -63,19 +66,26 @@ v43 added four changes simultaneously on top of v41 and lost 0.012 LB. The compo
 
 The hard-pseudo threshold of 0.05 / 0.95 in v44 used ~9,350 of 59,040 test cells (16%). v46's soft formulation uses **all 59,040**, weighting each cell's contribution by the teacher's confidence. The training set grew from 124k effective cells to 173k, and the soft probabilities preserve the "dark knowledge" (Hinton 2015) — the directional + magnitude information of teacher uncertainty that hard binarization discards. The +0.039 LB jump is the single largest gain we measured.
 
-### Iterative noisy student: round-2 lift compresses 14× (v47 vs v46)
+### Iterative noisy student: mean lift compresses ~13×, dispersion expands ~3× (v47 vs v46)
 
-v47 is identical to v46 except for one variable: the pseudo-label CSV is v46's ensemble output (LB 0.8236) instead of v44_seed1's (LB 0.7844). This is Xie et al. 2020's "iterative noisy student" pattern — round 2 of the teacher→student loop. We forecast +0.005 to +0.020 LB based on Xie's per-iteration figures. We observed **+0.003** — substantially compressed from round 1's +0.039.
+v47 is identical to v46 except for one variable: the pseudo-label CSV is v46's ensemble output (LB 0.8236) instead of v44_seed1's (LB 0.7844). This is Xie et al. 2020's "iterative noisy student" pattern — round 2 of the teacher→student loop. We forecast +0.005 to +0.020 LB based on Xie's per-iteration figures. We observed **+0.003 on the ensemble** — substantially compressed from round 1's +0.039. At the same time the per-seed public-LB range *widened*: v46's 3 seeds spanned 0.0072 (0.8157–0.8229), v47's spanned 0.0229 (0.8126–0.8355).
 
-Two findings emerge:
+Three findings emerge:
 
 1. **The dataset-size lever's biggest payoff is the first time you flip from hard to soft-all-cells distillation.** Round 1 unlocked the calibration channel that hard pseudo-labels discard. Subsequent rounds re-iterate the same channel with a marginally better-calibrated teacher; the marginal lift collapses fast.
-2. **Round-2 noisy student acts as a variance reducer in addition to a mean improver.** Per-seed `tr_auc` tightened from v46's 0.989–0.993 spread to v47's 0.993–0.994 band (3 seeds). The ensemble of more-similar models gives less averaging benefit on the LB but more stability — a useful property for the private-LB shake-out.
+2. **The best single seed beats the ensemble.** v47_seed2 = 0.8355, +0.0091 above the v47 ensemble (0.8264) and +0.012 above the v46 ensemble (0.8236). Within-recipe averaging is not unconditionally net-positive — when one seed is a clear outlier the ensemble hedges *against* it, which is the desired behavior only if that outlier is overfit. We cannot tell from public-LB alone whether v47_seed2's lift is real signal or public-split luck; the private LB will decide. This is also the §7.7 negative-result finding.
+3. **Round-2 expanded seed dispersion rather than tightening it.** The widened per-seed LB range (0.0229) suggests the v46 ensemble teacher carries more pseudo-label noise than v44_seed1 did — or equivalently, that the round-2 students are less constrained by a single confident-channel teacher signal. Either way, the diminishing-mean / expanding-dispersion pattern is the opposite of a noise-floor smoothing process.
 
 The diminishing-returns observation directly motivated v48: instead of a vanilla round-3 we change the *mechanism* (Hinton 2015 temperature softening at T=2, which v46 and v47 nominally used but with T=1 — i.e., never actually softened).
 
 ## 6.4 Within-recipe vs cross-recipe ensembling
 
-v44 internally averages 3 seeds × SWA per the standard within-recipe pattern (Izmailov 2018). For v44 this gave a result (0.7812) that was actually below its lucky individual seed (0.7844). For v46 the opposite held: the 3-seed ensemble at 0.8236 beat all observed seeds (seed1 = 0.8157, seed2 = 0.8229, seed3 not submitted). The difference reflects how tightly the seeds converged — v46's per-seed `tr_auc ≈ 0.993` was a tighter band than v44's `0.989`, leaving more room for averaging to add signal.
+All three pseudo-label versions internally average 3 seeds × SWA per the standard within-recipe pattern (Izmailov 2018). The three observed seed-spread regimes:
 
-Cross-recipe ensembling, by contrast, failed twice (v22 in §7.1, v45_probe in §7.6). The operational rule we adopted: keep within-recipe seed × SWA averaging on by default, do not attempt cross-recipe sigmoid-averaging unless the members are within ~0.02 LB of each other.
+- **v44 (wide spread, lucky outlier):** 3-seed ensemble 0.7812, single lucky seed v44_seed1 = 0.7844. Ensemble below outlier by 0.0032.
+- **v46 (tight spread, ensemble wins):** per-seed range 0.0072 (0.8157–0.8229), ensemble 0.8236 beat *all* observed seeds. Tight dispersion with no clear outlier — averaging adds signal cleanly.
+- **v47 (wide spread, ensemble net-negative under outlier):** per-seed range 0.0229 (0.8126–0.8355), ensemble 0.8264 sits **below** the best seed by 0.0091. The widened dispersion exposed an outlier (seed2 = 0.8355); the ensemble hedged against it.
+
+So within-recipe ensembling is favorable when seed dispersion is tight relative to the underlying generalization gap, and net-negative when one seed is a clear outlier. The v47 case is treated as a negative result in §7.7 because it is the first time within-recipe averaging cost us LB.
+
+Cross-recipe ensembling, by contrast, failed twice (v22 in §7.1, v45_probe in §7.6). The operational rule we adopted: keep within-recipe seed × SWA averaging on by default, do not attempt cross-recipe sigmoid-averaging unless the members are within ~0.015 LB of each other.
