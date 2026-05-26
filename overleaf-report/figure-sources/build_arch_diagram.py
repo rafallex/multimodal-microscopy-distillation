@@ -3,7 +3,9 @@
 Shows: BF + FL inputs → two EffNet-B0 backbones → GAP → concat → MLP head → ŷ.
 Side branch shows the per-patient MIL aux loss.
 
-Output: report/figures/arch_diagram.png
+Outputs:
+  presentation/figures/arch_diagram.png  (used by the PPT)
+  overleaf-report/arch_diagram.pdf       (used by the LaTeX paper)
 """
 from pathlib import Path
 import matplotlib.pyplot as plt
@@ -11,7 +13,10 @@ import matplotlib.patches as mpatches
 from matplotlib.patches import FancyBboxPatch, FancyArrowPatch
 from matplotlib.patches import ConnectionPatch
 
-OUT = Path(__file__).resolve().parent / "arch_diagram.png"
+HERE = Path(__file__).resolve().parent              # overleaf-report/figure-sources/
+PROJECT_ROOT = HERE.parent.parent                    # A3/
+OUT_PNG = PROJECT_ROOT / "presentation" / "figures" / "arch_diagram.png"
+OUT_PDF = PROJECT_ROOT / "overleaf-report" / "arch_diagram.pdf"
 
 # Palette consistent with the deck
 NAVY    = "#1A3A52"
@@ -132,8 +137,8 @@ ax.text(0.20, 4.78, "Dual EfficientNet-B0 backbone · late concat fusion · per-
 
 # Save
 plt.tight_layout()
-plt.savefig(OUT, dpi=300, bbox_inches="tight", facecolor="white", pad_inches=0.15)
-plt.savefig(OUT.with_suffix(".pdf"), bbox_inches="tight", facecolor="white", pad_inches=0.15)
+plt.savefig(OUT_PNG, dpi=300, bbox_inches="tight", facecolor="white", pad_inches=0.15)
+plt.savefig(OUT_PDF, bbox_inches="tight", facecolor="white", pad_inches=0.15)
 print(f"Saved {OUT}")
 print(f"Saved {OUT.with_suffix('.pdf')}")
 print(f"PNG size: {OUT.stat().st_size / 1024:.1f} KB")

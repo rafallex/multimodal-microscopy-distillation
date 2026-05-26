@@ -888,7 +888,7 @@ add_title(s, "Act 5: the semi-supervised pivot took us to #1",
           eyebrow="Postscript  ·  v41 → v47")
 
 # LB chart on the right side
-LB_CHART_PNG = PROJECT_ROOT / "report" / "figures" / "lb_progression.png"
+LB_CHART_PNG = PROJECT_ROOT / "presentation" / "figures" / "lb_progression.png"
 if LB_CHART_PNG.exists():
     s.shapes.add_picture(str(LB_CHART_PNG), Inches(4.2), Inches(1.5),
                          width=Inches(5.6), height=Inches(2.9))

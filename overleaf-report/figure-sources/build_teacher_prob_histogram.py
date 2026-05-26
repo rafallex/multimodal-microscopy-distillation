@@ -4,7 +4,9 @@ Shows the distribution of v46 ensemble predictions over all 59,040 test cells.
 Annotates the p<0.05 and p>0.95 hard-pseudo thresholds, the tails (HARD kept),
 and the middle band that soft pseudo-labeling uses ("dark knowledge").
 
-Output: report/figures/teacher_prob_histogram.png
+Outputs:
+  presentation/figures/teacher_prob_histogram.png  (used by the PPT)
+  overleaf-report/teacher_prob_histogram.pdf       (used by the LaTeX paper)
 """
 from pathlib import Path
 import numpy as np
@@ -12,10 +14,11 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 
-HERE = Path(__file__).resolve().parent
-PROJECT_ROOT = HERE.parent.parent
+HERE = Path(__file__).resolve().parent              # overleaf-report/figure-sources/
+PROJECT_ROOT = HERE.parent.parent                    # A3/
 TEACHER_CSV = PROJECT_ROOT / "results" / "v46" / "submission.csv"
-OUT = HERE / "teacher_prob_histogram.png"
+OUT_PNG = PROJECT_ROOT / "presentation" / "figures" / "teacher_prob_histogram.png"
+OUT_PDF = PROJECT_ROOT / "overleaf-report" / "teacher_prob_histogram.pdf"
 
 # Palette consistent with the deck (Microscopy Indigo)
 NAVY    = "#1A3A52"
@@ -107,8 +110,8 @@ ax.set_title(
     fontsize=12, fontweight="bold", color=NAVY, pad=10, loc="left")
 
 plt.tight_layout()
-plt.savefig(OUT, dpi=300, bbox_inches="tight", facecolor="white")
-plt.savefig(OUT.with_suffix(".pdf"), bbox_inches="tight", facecolor="white")
+plt.savefig(OUT_PNG, dpi=300, bbox_inches="tight", facecolor="white")
+plt.savefig(OUT_PDF, bbox_inches="tight", facecolor="white")
 print(f"\nSaved {OUT}")
 print(f"Saved {OUT.with_suffix('.pdf')}")
 print(f"PNG size: {OUT.stat().st_size / 1024:.1f} KB")

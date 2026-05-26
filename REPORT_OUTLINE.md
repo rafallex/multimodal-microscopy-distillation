@@ -115,7 +115,7 @@
 
 ### 6.1. Version progression headline
 
-- **Suggested figure (the report's centerpiece):** LB vs. version-index line chart, with annotations on key versions (v19 baseline, v41 regularizer stack, v44 hard pseudo, v46 soft pseudo, v47 noisy student round 2). The chart is built and current at `report/figures/lb_progression.png`.
+- **Suggested figure (the report's centerpiece):** LB vs. version-index line chart, with annotations on key versions (v19 baseline, v41 regularizer stack, v44 hard pseudo, v46 soft pseudo, v47 noisy student round 2). The chart is built and current at `presentation/figures/lb_progression.png` (PNG for the PPT) and `overleaf-report/lb_progression.pdf` (PDF for the LaTeX paper).
 - Headline: 0.7455 (v19) → 0.8264 (v47), a **+0.081 LB lift**
 
 ### 6.2. Component table
