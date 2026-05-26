@@ -1,27 +1,34 @@
 # overleaf-report/ — the Overleaf upload bundle
 
-Everything you need to upload to Overleaf lives in this single folder.
-Drag and drop **all 6 files below** (excluding this README, which Overleaf
-will ignore) into a fresh Overleaf project and click **Recompile**.
+Everything paper-related lives in this single folder. To send the paper to
+Overleaf, upload only the **6 files at the root of this folder** (the
+`notes/` and `figure-sources/` subfolders below are paper-development
+material and stay local).
 
-## Folder contents
+## What goes to Overleaf
+
+Upload these 6 files into a fresh Overleaf project (drag-and-drop):
 
 | File | Role |
 |---|---|
 | `main.tex` | The paper (IEEE conference template, ~8 pages compiled). **This is the canonical source — edit it here.** |
 | `refs.bib` | Bibliography (BibTeX format, 13 cited entries). |
 | `arch_diagram.pdf` | Figure 1 (dual EfficientNet-B0 + MIL aux). |
-| `lb_progression.pdf` | Figure 3 (public-LB progression chart). |
 | `pseudo_pipeline.pdf` | Figure 2 (v44 hard → v46 soft → v47 iterated). |
+| `lb_progression.pdf` | Figure 3 (public-LB progression chart). |
 | `teacher_prob_histogram.pdf` | Figure 4 (v46 teacher probability distribution). |
-| `README.md` | This file (skip the upload, or upload — Overleaf ignores it). |
 
-## Overleaf upload (recommended)
+Then: Menu → Settings → **Compiler = pdfLaTeX**, **Main document = `main.tex`**
+→ click **Recompile**. BibTeX runs automatically.
 
-1. Create a new Overleaf project (blank).
-2. Upload all 6 files (`main.tex` + `refs.bib` + the 4 figure PDFs) into the project root.
-3. Menu → Settings: set **Compiler = pdfLaTeX**, **Main document = `main.tex`**.
-4. Click **Recompile**. BibTeX runs automatically.
+## What stays local (don't upload)
+
+| Path | Role |
+|---|---|
+| `notes/06_results.md` | Long-form results draft (paper-development notes). |
+| `notes/07_negative_results.md` | Long-form negative-results draft (paper-development notes). |
+| `figure-sources/build_*.py` | Python scripts that regenerate the 4 figure PDFs (and the matching PNGs for the PPT in `../presentation/figures/`). |
+| `README.md` | This file. |
 
 ## Local build (no Overleaf)
 
@@ -44,31 +51,28 @@ reads it to write `main.bbl`, the second pass embeds the bibliography, and
 the third pass resolves any remaining cross-references and page numbers.
 Output: `main.pdf` in this folder.
 
-## Figure path semantics
+## Figure paths
 
-`main.tex` sets `\graphicspath{{./}{../report/figures/}}`. The two entries
-are dual-purpose:
-
-- `./` — finds the figure PDFs sitting next to `main.tex` (works on both
-  Overleaf's flat upload AND a local build from inside `overleaf-report/`).
-- `../report/figures/` — fallback for a local build, resolves to the
-  canonical figure-PDF location in the repo if the copies in this folder
-  ever fall out of sync with the originals.
+`main.tex` sets `\graphicspath{{./}}`. The four figure PDFs sit at the root
+of this folder, next to `main.tex`. This works for both Overleaf (after the
+flat upload) and a local build from inside `overleaf-report/`.
 
 ## Regenerating figures
 
-The figure PDFs in this folder are **copies** of the canonical artifacts in
-`../report/figures/`, where the figure-build scripts (`build_*.py`) write
-their output. If you regenerate any figure, re-sync the copies with:
+The figure PDFs in this folder are produced by the scripts in
+`figure-sources/`. Each script writes **two** outputs:
 
-```powershell
-# from the A3 repo root (Windows PowerShell)
-Copy-Item report/figures/*.pdf overleaf-report/ -Force
-```
+- `overleaf-report/<name>.pdf` — consumed by the LaTeX paper
+- `../presentation/figures/<name>.png` — consumed by the PPT deck builder
+
+To regenerate, run from the A3 repo root (the scripts read from
+`results/v*/submission.csv`, which must be present):
 
 ```bash
-# from the A3 repo root (macOS/Linux/Git Bash)
-cp report/figures/*.pdf overleaf-report/
+python overleaf-report/figure-sources/build_lb_progression.py
+python overleaf-report/figure-sources/build_arch_diagram.py
+python overleaf-report/figure-sources/build_pseudo_pipeline.py
+python overleaf-report/figure-sources/build_teacher_prob_histogram.py
 ```
 
 Then re-upload the changed PDFs to Overleaf (drag-replace works).
@@ -76,7 +80,7 @@ Then re-upload the changed PDFs to Overleaf (drag-replace works).
 ## Manuscript provenance
 
 Content draws from the project's master outline (`../REPORT_OUTLINE.md`)
-and the long-form markdown drafts (`../report/06_results.md`,
-`../report/07_negative_results.md`), updated for the v47 per-seed finding
+and the long-form markdown drafts (`notes/06_results.md`,
+`notes/07_negative_results.md`), updated for the v47 per-seed finding
 (seed 2 at LB 0.8355; the within-recipe ensemble net-negative under an
 outlier seed is documented in §VII-G).

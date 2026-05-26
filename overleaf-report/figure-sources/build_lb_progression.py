@@ -3,7 +3,9 @@
 Plots public LB vs chronological version order, annotates the key milestones,
 and adds horizontal reference lines for the v19 baseline and the prior leader.
 
-Output: results/figures/lb_progression.png (300 dpi, ~1600x900 px)
+Outputs:
+  presentation/figures/lb_progression.png  (300 dpi, ~1600x900 px, used by the PPT)
+  overleaf-report/lb_progression.pdf        (used by the LaTeX paper)
 """
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
@@ -38,7 +40,10 @@ V48_PLACEHOLDER = ("v48", None, "tab:orange")
 PRIOR_LEADER = 0.7916  # was the public LB top before v46 took #1
 V19_BASELINE = 0.7455
 
-OUT = Path(__file__).resolve().parent / "lb_progression.png"
+HERE = Path(__file__).resolve().parent              # overleaf-report/figure-sources/
+PROJECT_ROOT = HERE.parent.parent                    # A3/
+OUT_PNG = PROJECT_ROOT / "presentation" / "figures" / "lb_progression.png"
+OUT_PDF = PROJECT_ROOT / "overleaf-report" / "lb_progression.pdf"
 
 # === Figure ===
 fig, ax = plt.subplots(figsize=(13, 6.5), dpi=120)
@@ -142,8 +147,8 @@ ax.add_artist(leg1)
 ax.legend(loc="upper left", frameon=True, fontsize=8.5)
 
 plt.tight_layout()
-plt.savefig(OUT, dpi=300, bbox_inches="tight", facecolor="white")
-plt.savefig(OUT.with_suffix(".pdf"), bbox_inches="tight", facecolor="white")
-print(f"Saved {OUT}")
-print(f"Saved {OUT.with_suffix('.pdf')}")
-print(f"Image size: {OUT.stat().st_size / 1024:.1f} KB")
+plt.savefig(OUT_PNG, dpi=300, bbox_inches="tight", facecolor="white")
+plt.savefig(OUT_PDF, bbox_inches="tight", facecolor="white")
+print(f"Saved {OUT_PNG}")
+print(f"Saved {OUT_PDF}")
+print(f"Image size: {OUT_PNG.stat().st_size / 1024:.1f} KB")

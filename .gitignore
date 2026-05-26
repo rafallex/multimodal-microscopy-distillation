@@ -253,8 +253,9 @@ zizlJQk2
 # === Curated Kaggle run artifacts for reproducibility ===
 # Re-include small artifacts (CSVs, history JSONs, learning curves) from the
 # inflection-point versions only (v19, v41, v44, v46, v47). This lets the
-# figure-builder scripts (report/figures/build_*) run from a fresh clone and
-# makes the report's per-version numbers independently verifiable.
+# figure-builder scripts (overleaf-report/figure-sources/build_*) run from a
+# fresh clone and makes the report's per-version numbers independently
+# verifiable.
 # Still gitignored: .pt model weights (~38 MB each), full Kaggle .ipynb dumps,
 # Kaggle metadata folders (__results___files, __huggingface_repos__.json).
 !results/v19/
@@ -297,7 +298,7 @@ presentation/A3_cancer_challenge.pdf
 presentation/slides_png/
 
 # Reference paper PDFs (root-level only — see REFERENCES.md for canonical citations).
-# Figure PDFs under report/figures/ remain version-controlled.
+# Figure PDFs under overleaf-report/ remain version-controlled.
 /*.pdf
 
 # Node

@@ -41,10 +41,10 @@ Canonical citations for the methods and ideas this project builds on. The corres
 ### Methods that did NOT transfer (negative-results citations)
 
 - **Lian, C., Liu, M., Zhang, J., and Shen, D. (2024).** Same-class multimodal microscopy paper that was the source of v37/v38 experiment ideas. CAFNet architecture, reported F1 = 0.83 on a 4-channel-emission setup.
-  Used in: v37 (Lian §5.2 modality-specific FL augmentation — regressed −0.036) and v38 (Lian Table 3 early fusion — regressed −0.031). See `report/07_negative_results.md` §7.3 for the post-mortem.
+  Used in: v37 (Lian §5.2 modality-specific FL augmentation — regressed −0.036) and v38 (Lian Table 3 early fusion — regressed −0.031). See `overleaf-report/notes/07_negative_results.md` §7.3 for the post-mortem.
 
 - **Pielawski, N., Wetzer, E., Öfverstedt, J., Lu, J., Wählby, C., Lindblad, J., and Sladoje, N. (2020).** *CoMIR: Contrastive Multimodal Image Representation for Registration.* In *Advances in Neural Information Processing Systems (NeurIPS) 33*, pp. 18433–18444.
-  Used in: v15 / v16 / v42 — the CoMIR-style cross-modal InfoNCE pretrain that catastrophically collapsed to the patient-identity shortcut. See `report/07_negative_results.md` §7.4 for the post-mortem.
+  Used in: v15 / v16 / v42 — the CoMIR-style cross-modal InfoNCE pretrain that catastrophically collapsed to the patient-identity shortcut. See `overleaf-report/notes/07_negative_results.md` §7.4 for the post-mortem.
   arXiv: [2006.06325](https://arxiv.org/abs/2006.06325)
 
 ## Local PDF files (not committed)
@@ -58,4 +58,4 @@ The user may have copies of these PDFs at the repo root or in a personal `~/pape
 | `compression.kdd06.pdf` | Bucilă, Caruana & Niculescu-Mizil 2006 |
 | `pseudo_label_final.pdf` | Lee 2013 |
 
-These are gitignored via `/*.pdf` in `.gitignore` (root-level only — figure PDFs under `report/figures/` are still version-controlled).
+These are gitignored via `/*.pdf` in `.gitignore` (root-level only — figure PDFs under `overleaf-report/` are still version-controlled).

@@ -3,13 +3,18 @@
 Shows the teacher → test cells → hard/soft split → student → output chain,
 with v47's iterative noisy-student round-2 step appended.
 
-Output: report/figures/pseudo_pipeline.png
+Outputs:
+  presentation/figures/pseudo_pipeline.png  (used by the PPT)
+  overleaf-report/pseudo_pipeline.pdf       (used by the LaTeX paper)
 """
 from pathlib import Path
 import matplotlib.pyplot as plt
 from matplotlib.patches import FancyBboxPatch, FancyArrowPatch
 
-OUT = Path(__file__).resolve().parent / "pseudo_pipeline.png"
+HERE = Path(__file__).resolve().parent              # overleaf-report/figure-sources/
+PROJECT_ROOT = HERE.parent.parent                    # A3/
+OUT_PNG = PROJECT_ROOT / "presentation" / "figures" / "pseudo_pipeline.png"
+OUT_PDF = PROJECT_ROOT / "overleaf-report" / "pseudo_pipeline.pdf"
 
 # Palette
 NAVY    = "#1A3A52"
@@ -153,8 +158,8 @@ ax.text(0.2, 0.05,
         fontsize=9.5, fontweight="bold", color=NAVY, ha="left", va="bottom")
 
 plt.tight_layout()
-plt.savefig(OUT, dpi=300, bbox_inches="tight", facecolor="white", pad_inches=0.15)
-plt.savefig(OUT.with_suffix(".pdf"), bbox_inches="tight", facecolor="white", pad_inches=0.15)
-print(f"Saved {OUT}")
-print(f"Saved {OUT.with_suffix('.pdf')}")
-print(f"PNG size: {OUT.stat().st_size / 1024:.1f} KB")
+plt.savefig(OUT_PNG, dpi=300, bbox_inches="tight", facecolor="white", pad_inches=0.15)
+plt.savefig(OUT_PDF, bbox_inches="tight", facecolor="white", pad_inches=0.15)
+print(f"Saved {OUT_PNG}")
+print(f"Saved {OUT_PDF}")
+print(f"PNG size: {OUT_PNG.stat().st_size / 1024:.1f} KB")

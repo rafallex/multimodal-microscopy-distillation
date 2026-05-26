@@ -54,7 +54,7 @@ pres.author = "Rafael Tavares Proença";
 pres.title  = "Multimodal Cancer Cell Classification";
 
 const REPO_ROOT  = path.resolve(__dirname, "..");
-const FIG_DIR    = path.join(REPO_ROOT, "report", "figures");
+const FIG_DIR    = path.join(REPO_ROOT, "presentation", "figures");
 const FIG_ARCH   = path.join(FIG_DIR, "arch_diagram.png");
 const FIG_PIPE   = path.join(FIG_DIR, "pseudo_pipeline.png");
 const FIG_HIST   = path.join(FIG_DIR, "teacher_prob_histogram.png");
