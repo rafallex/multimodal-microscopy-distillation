@@ -2,28 +2,29 @@
 
 Coursework for *Advanced Deep Learning for Image Processing* (1MD042), Uppsala University, Spring 2026. Binary cell-level cancer classification on paired bright-field (BF) + fluorescence (FL) microscopy at 128×128 grayscale resolution, with 12 training patients and a strict patient-disjoint test set.
 
-**Current public-LB position: #1 with 0.8264** (30 logged iterations, +0.081 LB lift over the v19 baseline, +0.013 lead over next-best).
+**Current public-LB position: #1.** v47 ensemble at **0.8264** (+0.013 vs next-best); v47 best single seed at **0.8355**. The cumulative lift over the v19 supervised baseline is **+0.081** (ensemble) / **+0.090** (best seed) across 30 logged iterations.
 
 ## What's here
 
 | Path | Description |
 |---|---|
-| [`LB_HISTORY.md`](LB_HISTORY.md) | Every Kaggle submission in chronological order: recipe diff, public LB, one-line lesson. Includes negative-result analyses for v22, v27, v37/v38, v42, v43, and v45_probe. |
-| [`REPORT_OUTLINE.md`](REPORT_OUTLINE.md) | Drafting guide for the final A3 report — structured around the experimental narrative with explicit hooks for each negative-result section. |
+| [`overleaf-report/`](overleaf-report/) | **IEEE conference paper** (main.tex, refs.bib, four embedded PDF figures). Drop-in upload to Overleaf. `notes/` holds the local section drafts; `figure-sources/` holds the build scripts (each writes PNG for the deck + PDF for the paper in one invocation). |
+| [`presentation/`](presentation/) | **In-class deck** (`A3_cancer_challenge_claude.pptx` is the lead version; the python-pptx build is kept as backup). PNG figures live in `figures/`, regenerated from `overleaf-report/figure-sources/`. |
+| [`LB_HISTORY.md`](LB_HISTORY.md) | Every Kaggle submission in chronological order: recipe diff, public LB, one-line lesson. Includes the seven diagnosed negative-result analyses (v22, v27, v37/v38, v42, v43, v45_probe, v47 ensemble-vs-outlier). |
+| [`REPORT_OUTLINE.md`](REPORT_OUTLINE.md) | Original drafting guide for the report — structured around the experimental narrative with hooks for each negative-result section. |
 | `notebooks/` | One source notebook per iteration (`improvedvNN_source.ipynb`). Designed to run end-to-end on a Kaggle T4 ×2 in ~5–6 hours. |
-| `presentation/` | Builder scripts for the in-class presentation deck. |
-| `results/` *(gitignored)* | Local-only training artifacts: per-seed history JSON, SWA checkpoints, submission CSVs. |
+| `results/` | Per-version submission CSVs (`v19`, `v41`, `v44`, `v46`, `v47` are committed for reproducibility, including per-seed extracts; intermediate training artifacts are gitignored). |
 
 ## Headline approach
 
 The winning recipe is **EfficientNet-B0 dual-branch (BF + FL) with late concat fusion**, trained with patient-grouped MIL auxiliary loss, AdaBN + test-stain normalization, 3-seed × SWA ensembling, and 40-way TTA. The decisive lift came from a **semi-supervised pipeline**:
 
-1. **v44** — pseudo-labels (Lee 2013) from a v41 teacher at threshold 0.05 / 0.95: +0.025 LB.
-2. **v46** — soft-target distillation (Hinton 2015) using all 59,040 test cells with raw teacher probabilities: **+0.039 LB** (biggest single-experiment gain).
-3. **v47** — iterative noisy-student round 2 (Xie 2020) with v46 as the new teacher: **+0.003 LB** (current #1). Round-2 lift compressed 14× from round 1 — diminishing returns confirmed, with the bonus finding that per-seed `tr_auc` band tightened (0.989–0.993 → 0.993–0.994), so round 2 also acts as a variance reducer.
-4. **v48** — Hinton temperature distillation (T=2) on top of v47, single-knob test of whether the actual softening prescribed by Hinton 2015 buys anything beyond v47's raw-probability "soft" pseudo. Queued for the May 29 Kaggle quota reset.
+1. **v44 — hard pseudo-labels (Lee 2013).** Teacher v41 at threshold 0.05 / 0.95 keeps ~9,400 confident test cells. **+0.025 LB** over v41.
+2. **v46 — soft-target distillation (Hinton 2015).** Teacher v44_seed1, all 59,040 test cells, raw probabilities as BCE targets. **+0.039 LB** — the largest single-experiment gain.
+3. **v47 — iterative noisy student (Xie 2020), round 2.** Teacher swapped to v46 ensemble; otherwise identical to v46. **+0.003 LB on the ensemble**, +0.012 on the best single seed. The mean lift compressed ~13× from round 1 while the per-seed public-LB dispersion *expanded* ~3× (v46 range 0.0072 → v47 range 0.0229). The v47 ensemble at 0.8264 sits 0.0091 below the best seed (0.8355) — within-recipe averaging hedged against an outlier.
+4. **v48 — Hinton temperature distillation (T=2).** Single-knob test on top of v47 to check whether the actual softening prescribed by Hinton 2015 buys anything beyond raw-probability soft pseudo. Queued for the 2026-05-29 Kaggle quota reset.
 
-See `LB_HISTORY.md` for the full progression and `REPORT_OUTLINE.md` for the methodological narrative.
+See [`LB_HISTORY.md`](LB_HISTORY.md) for the full progression and the seven negative-result diagnoses, and [`overleaf-report/main.tex`](overleaf-report/main.tex) for the IEEE paper write-up (§VII covers the negative results, §VIII-E discusses the noise floor and limitations).
 
 ## Reproducing a run
 
@@ -31,13 +32,13 @@ See `LB_HISTORY.md` for the full progression and `REPORT_OUTLINE.md` for the met
 2. Attach the required Kaggle inputs (listed in the notebook header markdown cell):
    - `rafaelproena/a3-adl` — competition data
    - A pseudo-label dataset for runs that use distillation (e.g., `ensamble-result-v46` for v47)
-3. **Save Version → Save & Run All**. The notebook handles caching, training, SWA, AdaBN, TTA, and writes ensemble + per-seed submission CSVs to `/kaggle/working/`.
+3. **Save Version → Save & Run All.** The notebook handles caching, training, SWA, AdaBN, TTA, and writes ensemble + per-seed submission CSVs to `/kaggle/working/`.
 
-Compute: a single Kaggle T4 ×2 commit run, ~5–6 hours per version.
+Compute budget: a single Kaggle T4 ×2 commit run, ~5–6 hours per pseudo-label version.
 
 ## Course context
 
-Grades for this assignment are based on **methodology and presentation**, not on the leaderboard score itself (per instructor announcement). The experimental record in `LB_HISTORY.md` and the analytical scaffolding in `REPORT_OUTLINE.md` are written with that grading framework in mind.
+Grades for this assignment are based on **methodology and presentation**, not on the leaderboard score itself (per instructor announcement). The experimental record in `LB_HISTORY.md`, the seven failure-mode diagnoses in the paper §VII, and the noise-floor discussion in §VIII-E are written with that grading framework in mind.
 
 ## License
 

@@ -33,6 +33,9 @@ RUNS = [
     ("v46_seed2",    0.8229, "darkgreen",   None),
     ("v46",          0.8236, "tab:green",   (-1.1, 0.015)),
     ("v47",          0.8264, "tab:green",   (0.5, 0.012)),
+    ("v47_s1",       0.8150, "#0E5C2F",     None),  # darker green for v47 per-seed extracts
+    ("v47_s2",       0.8355, "#0E5C2F",     None),  # ← best single seed across the whole project
+    ("v47_s3",       0.8126, "#0E5C2F",     None),
 ]
 # v48 placeholder (queued — Hinton T=2 temperature distillation)
 V48_PLACEHOLDER = ("v48", None, "tab:orange")
@@ -67,16 +70,41 @@ ax.axhline(V19_BASELINE, color="tab:blue", linestyle=":", linewidth=1.2, alpha=0
 ax.axhline(PRIOR_LEADER, color="black", linestyle="--", linewidth=1.0, alpha=0.5,
            label=f"prior LB leader = {PRIOR_LEADER:.4f} (pre-v46)")
 
-# Headline annotation on v47 (current best, #1 on LB)
+# Headline annotation on v47_s2 (best single seed, +0.090 over v19)
+v47s2_x = labels.index("v47_s2")
+v47s2_y = RUNS[v47s2_x][1]
+ax.annotate("v47_s2 = 0.8355\nbest seed, +0.090 vs v19",
+            xy=(v47s2_x, v47s2_y),
+            xytext=(v47s2_x - 6.0, v47s2_y + 0.012),
+            fontsize=10, fontweight="bold", color="#0E5C2F",
+            ha="left", va="bottom",
+            arrowprops=dict(arrowstyle="->", color="#0E5C2F",
+                            lw=1.4, connectionstyle="arc3,rad=-0.2"))
+
+# Secondary annotation on v47 ensemble (#1 on public LB)
 v47_x = labels.index("v47")
 v47_y = RUNS[v47_x][1]
-ax.annotate("NEW BEST  #1 on LB\nv47 = 0.8264",
+ax.annotate("v47 ensemble = 0.8264\n#1 on LB, +0.013 vs next-best",
             xy=(v47_x, v47_y),
-            xytext=(v47_x - 5.0, v47_y + 0.025),
-            fontsize=11, fontweight="bold", color="tab:green",
+            xytext=(v47_x - 4.0, 0.787),
+            fontsize=9, fontweight="bold", color="tab:green",
             ha="left", va="bottom",
             arrowprops=dict(arrowstyle="->", color="tab:green",
-                            lw=1.4, connectionstyle="arc3,rad=-0.2"))
+                            lw=1.2, connectionstyle="arc3,rad=0.25"))
+
+# Vertical bracket showing v47 seed range (0.0229, ~3x v46's 0.0072)
+v47_seed_x = labels.index("v47_s2")
+seed_top = 0.8355
+seed_bot = 0.8126
+ax.plot([v47_seed_x + 1.4, v47_seed_x + 1.4], [seed_bot, seed_top],
+        color="#0E5C2F", lw=1.2, alpha=0.75)
+ax.plot([v47_seed_x + 1.3, v47_seed_x + 1.5], [seed_top, seed_top],
+        color="#0E5C2F", lw=1.2, alpha=0.75)
+ax.plot([v47_seed_x + 1.3, v47_seed_x + 1.5], [seed_bot, seed_bot],
+        color="#0E5C2F", lw=1.2, alpha=0.75)
+ax.text(v47_seed_x + 1.7, (seed_top + seed_bot) / 2,
+        "v47 seed\nrange = 0.0229\n(~3× v46's 0.0072)",
+        fontsize=8, color="#0E5C2F", ha="left", va="center")
 
 # Smaller annotations on key inflections
 ax.annotate("v41 +0.011\n(L4 regularizers)",
@@ -120,21 +148,22 @@ ax.set_xticklabels(labels + ["v48"], rotation=45, ha="right", fontsize=9)
 # Y axis
 ax.set_ylabel("Public Kaggle LB (AUC)", fontsize=12)
 ax.set_xlabel("Chronological version", fontsize=11)
-ax.set_ylim(0.54, 0.88)
-ax.set_yticks([0.55, 0.60, 0.65, 0.70, 0.75, 0.80, 0.85])
+ax.set_ylim(0.54, 0.90)
+ax.set_yticks([0.55, 0.60, 0.65, 0.70, 0.75, 0.80, 0.85, 0.90])
 ax.grid(True, axis="y", alpha=0.3, linestyle="--")
 ax.spines["top"].set_visible(False)
 ax.spines["right"].set_visible(False)
 
 # Title
-ax.set_title("Public LB progression across 30 logged iterations  ·  v19 → v47 = +0.081",
-             fontsize=14, fontweight="bold", pad=12, loc="left")
+ax.set_title("Public LB progression across 30 logged iterations  ·  v19 → v47_s2 = +0.090 (best seed) / v47 ens = +0.081",
+             fontsize=13, fontweight="bold", pad=12, loc="left")
 
 # Custom legend (color categories)
 legend_handles = [
-    mpatches.Patch(color="tab:green", label="Best / breakthrough"),
+    mpatches.Patch(color="tab:green", label="Best / breakthrough (ensemble)"),
     mpatches.Patch(color="tab:blue",  label="Useful gain"),
     mpatches.Patch(color="darkgreen", label="v46 per-seed extract"),
+    mpatches.Patch(color="#0E5C2F",   label="v47 per-seed extract"),
     mpatches.Patch(color="tab:red",   label="Regression / negative result"),
     mpatches.Patch(color="tab:gray",  label="Neutral / replication"),
     mpatches.Patch(color="tab:orange", label="v48 (queued)"),
