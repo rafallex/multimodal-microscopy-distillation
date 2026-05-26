@@ -231,7 +231,10 @@ multimodal-cancer-classification-challenge-2026/
 multimodal-cancer-classification-challenge-2026.zip
 *.zip
 .claude/
-results/
+# Use results/* (not results/) so that specific subdirectories below can be
+# re-included via ! exceptions. With `results/` the directory itself is excluded
+# and gitignore won't recurse into it, making re-includes impossible.
+results/*
 results (*)/
 runs/
 *.pt
@@ -246,6 +249,48 @@ zizlJQk2
 !v15_baseline/**
 !v16_results/
 !v16_results/**
+
+# === Curated Kaggle run artifacts for reproducibility ===
+# Re-include small artifacts (CSVs, history JSONs, learning curves) from the
+# inflection-point versions only (v19, v41, v44, v46, v47). This lets the
+# figure-builder scripts (report/figures/build_*) run from a fresh clone and
+# makes the report's per-version numbers independently verifiable.
+# Still gitignored: .pt model weights (~38 MB each), full Kaggle .ipynb dumps,
+# Kaggle metadata folders (__results___files, __huggingface_repos__.json).
+!results/v19/
+!results/v19/submission*.csv
+!results/v19/learning_curves.png
+!results/v19/runs/
+!results/v19/runs/history*.json
+!results/v41/
+!results/v41/submission*.csv
+!results/v41/learning_curves.png
+!results/v41/runs/
+!results/v41/runs/history*.json
+!results/v44/
+!results/v44/submission*.csv
+!results/v44/learning_curves.png
+!results/v44/runs/
+!results/v44/runs/history*.json
+!results/v46/
+!results/v46/submission*.csv
+!results/v46/learning_curves.png
+!results/v46/runs/
+!results/v46/runs/history*.json
+!results/v47/
+!results/v47/submission*.csv
+!results/v47/learning_curves.png
+!results/v47/runs/
+!results/v47/runs/history*.json
+
+# Inside the re-included results/vN/ dirs, still exclude the heavy / junk artifacts
+# the global *.pt and runs/ rules don't reach (full Kaggle .ipynb dumps with
+# embedded outputs, Kaggle metadata files/dirs, Kaggle logs).
+results/v*/improved*.ipynb
+results/v*/__huggingface_repos__.json
+results/v*/__results___files/
+results/v*/*.log
+results/v*/download*.txt
 
 # Presentation: keep the .pptx + builder scripts, ignore derived artifacts
 presentation/A3_cancer_challenge.pdf
