@@ -31,6 +31,17 @@ Outputs (all in results/cpu_ensembles/):
                                       risk per §VII-A diagnosis; defensible
                                       as one test, suspect as a strategy.
 
+  G_v47_per_cell_confidence_weighted.csv
+                                    — per-cell weighting by each seed's own
+                                      decisiveness |p_i - 0.5|. In confident-tail
+                                      cells (where all seeds agree) ~= equal
+                                      weighting. In middle-band cells the most
+                                      decisive seed per cell dominates. Directly
+                                      motivated by the 97%-middle-band finding:
+                                      lets the seed that "broke the tie" win
+                                      in exactly the region where v47_s2
+                                      outperformed the ensemble.
+
 Each file has the Kaggle-required (Name, Diagnosis) columns. Upload directly.
 """
 from pathlib import Path
@@ -109,6 +120,23 @@ F = weights[0] * p_s1 + weights[1] * p_s2 + weights[2] * p_s3
 save("F_v47_lb_weighted.csv", F,
      f"LB-weighted (§VII-A risk). weights s1={weights[0]:.2f}/s2={weights[1]:.2f}/s3={weights[2]:.2f}.")
 
+# === G: v47 per-cell confidence-weighted ensemble ===
+# For each cell, each seed's weight = its own decisiveness |p - 0.5|.
+# In tail cells (all seeds confident in same direction) ~= equal weighting.
+# In middle-band cells, whichever seed is most decisive dominates -
+# directly exploits the 97% middle-band finding from build_v47_seed_vs_ensemble_analysis.py.
+eps = 1e-9
+c1, c2, c3 = np.abs(p_s1 - 0.5), np.abs(p_s2 - 0.5), np.abs(p_s3 - 0.5)
+csum = c1 + c2 + c3 + eps
+G = (c1 * p_s1 + c2 * p_s2 + c3 * p_s3) / csum
+mean_max_seed = np.argmax(np.column_stack([c1, c2, c3]), axis=1)
+s1_dom = (mean_max_seed == 0).sum() / len(p_s1) * 100
+s2_dom = (mean_max_seed == 1).sum() / len(p_s1) * 100
+s3_dom = (mean_max_seed == 2).sum() / len(p_s1) * 100
+print(f"\n  G: per-cell most-confident-seed distribution:  s1={s1_dom:.1f}%  s2={s2_dom:.1f}%  s3={s3_dom:.1f}%")
+save("G_v47_per_cell_confidence_weighted.csv", G,
+     "per-cell confidence-weighted (exploits 97% middle-band finding).")
+
 # === Summary stats for the paper ===
 print()
 print("Per-cell agreement summary (vs v47_s2 = the score-anchor):")
@@ -118,7 +146,8 @@ for name, p, lbl in [("B_v47_top2_mean", B, "B"),
                      ("C_v47_per_cell_median", C, "C"),
                      ("D_v47s2_plus_v46_ens", D, "D"),
                      ("E_v47s2_plus_v44s1", E, "E"),
-                     ("F_v47_lb_weighted", F, "F")]:
+                     ("F_v47_lb_weighted", F, "F"),
+                     ("G_v47_per_cell_confidence_weighted", G, "G")]:
     delta = (p - p_s2).mean()
     r = np.corrcoef(p, p_s2)[0, 1]
     flip = ((p > 0.5) != (p_s2 > 0.5)).mean() * 100
@@ -127,7 +156,7 @@ for name, p, lbl in [("B_v47_top2_mean", B, "B"),
 print()
 print("=" * 78)
 print("UPLOAD ORDER (max paper value first):")
-print("  Tomorrow (May 28): B, C, D, F  — 4 slots, 4 hypotheses")
-print("  May 29:            E + retries / variants if any landed unexpectedly")
+print("  Tomorrow (May 28): B, C, G, D  - 4 slots (B+C+G test §VII-G hypotheses, D tests §VII-F)")
+print("  May 29:            F, E + retries / variants if any landed unexpectedly")
 print("=" * 78)
 print(f"\nAll 5 CSVs written to: {OUT_DIR}")
