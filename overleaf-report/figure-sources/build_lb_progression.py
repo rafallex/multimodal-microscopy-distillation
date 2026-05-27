@@ -31,11 +31,12 @@ RUNS = [
     ("v45_probe",    0.7729, "tab:red",     None),
     ("v46_seed1",    0.8157, "darkgreen",   None),
     ("v46_seed2",    0.8229, "darkgreen",   None),
+    ("v46_seed3",    0.8187, "darkgreen",   None),  # found 2026-05-27 in full Kaggle submission list
     ("v46",          0.8236, "tab:green",   (-1.1, 0.015)),
     ("v47",          0.8264, "tab:green",   (0.5, 0.012)),
     ("v47_s1",       0.8150, "#0E5C2F",     None),  # darker green for v47 per-seed extracts
     ("v47_s2",       0.8355, "#0E5C2F",     None),  # ← best single seed across the whole project
-    ("v47_s3",       0.8187, "#0E5C2F",     None),  # corrected from 0.8126 on 2026-05-27
+    ("v47_s3",       0.8126, "#0E5C2F",     None),  # correct (the 0.8187 was actually v46_s3, fixed 2026-05-27)
 ]
 # v48 placeholder (queued — Hinton T=2 temperature distillation)
 V48_PLACEHOLDER = ("v48", None, "tab:orange")
@@ -99,10 +100,10 @@ ax.annotate("v47 ensemble = 0.8264\n(below v47_s2 by 0.009)",
             arrowprops=dict(arrowstyle="->", color="tab:green",
                             lw=1.2, connectionstyle="arc3,rad=0.25"))
 
-# Vertical bracket showing v47 seed range (~2.3x v46's 0.0072)
+# Vertical bracket showing v47 seed range (~3x v46's 0.0072)
 v47_seed_x = labels.index("v47_s2")
 seed_top = 0.8355
-seed_bot = 0.8150  # v47_s1 is the lowest after the 2026-05-27 correction
+seed_bot = 0.8126  # v47_s3 is the lowest (corrected back from 0.8187 mis-attribution)
 v47_range = seed_top - seed_bot
 ax.plot([v47_seed_x + 1.4, v47_seed_x + 1.4], [seed_bot, seed_top],
         color="#0E5C2F", lw=1.2, alpha=0.75)

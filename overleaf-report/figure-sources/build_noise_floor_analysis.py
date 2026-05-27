@@ -41,11 +41,11 @@ LB = {
     "v46":        0.8236,   # ensemble
     "v46_seed1":  0.8157,
     "v46_seed2":  0.8229,
-    # v46_seed3 not submitted standalone
+    "v46_seed3":  0.8187,   # discovered 2026-05-27 in full Kaggle submission list
     "v47":        0.8264,   # ensemble
     "v47_seed1":  0.8150,
     "v47_seed2":  0.8355,
-    "v47_seed3":  0.8187,   # corrected from 0.8126 on 2026-05-27 (Kaggle submissions panel)
+    "v47_seed3":  0.8126,   # the 0.8187 reported on 2026-05-27 was actually v46_s3 (file collision: both named submission_seed3.csv)
 }
 
 HEADLINE_PAIRS = [
@@ -67,22 +67,24 @@ def load_csv(name):
     df = pd.read_csv(path).sort_values("Name").reset_index(drop=True)
     return df["Diagnosis"].values
 
-# === 1. Per-seed LB stats for v47 (the only n=3 we have) ===
+# === 1. Per-seed LB stats for v47 (n=3) and v46 (now also n=3) ===
 v47_seeds = np.array([LB["v47_seed1"], LB["v47_seed2"], LB["v47_seed3"]])
 v47_mean = v47_seeds.mean()
 v47_sd   = v47_seeds.std(ddof=1)
 v47_se   = v47_sd / np.sqrt(3)
 v47_range = v47_seeds.max() - v47_seeds.min()
 
-# Bootstrap percentile CI (n=3 is small but instructive)
+v46_seeds = np.array([LB["v46_seed1"], LB["v46_seed2"], LB["v46_seed3"]])
+v46_mean = v46_seeds.mean()
+v46_sd   = v46_seeds.std(ddof=1)
+v46_se   = v46_sd / np.sqrt(3)
+v46_range = v46_seeds.max() - v46_seeds.min()
+
+# Bootstrap percentile CI for v47 (n=3 is small but instructive)
 rng = np.random.default_rng(seed=42)
 n_boot = 10_000
 boots = np.array([rng.choice(v47_seeds, size=3, replace=True).mean() for _ in range(n_boot)])
 v47_boot_lo, v47_boot_hi = np.percentile(boots, [2.5, 97.5])
-
-# v46 (only n=2 seeds standalone) — quote range only
-v46_seeds = np.array([LB["v46_seed1"], LB["v46_seed2"]])
-v46_range = v46_seeds.max() - v46_seeds.min()
 
 # === 2. Per-cell prediction-difference SD across v47 seeds (no ground truth needed) ===
 v47_s1_p = load_csv("v47_seed1")
@@ -138,9 +140,14 @@ print(f"  range = {v47_range:.4f}")
 print(f"  bootstrap 95% CI of mean (n_boot={n_boot:,}): "
       f"[{v47_boot_lo:.4f}, {v47_boot_hi:.4f}]")
 
-print(f"\n--- v46 per-seed public LB (n=2, range only) ---")
+print(f"\n--- v46 per-seed public LB (n=3) ---")
 print(f"  seeds: {v46_seeds.tolist()}")
-print(f"  range = {v46_range:.4f}  ({v47_range/v46_range:.1f}x narrower than v47)")
+print(f"  mean  = {v46_mean:.4f}")
+print(f"  SD    = {v46_sd:.4f}  (sample, ddof=1)")
+print(f"  SE    = {v46_se:.4f}  (SD/sqrt(3))")
+print(f"  range = {v46_range:.4f}")
+print(f"  v47 SE / v46 SE = {v47_se/v46_se:.2f}x  (v47 seed noise is {v47_se/v46_se:.1f}x larger)")
+print(f"  v47 range / v46 range = {v47_range/v46_range:.2f}x wider")
 
 print("\n--- v47 within-recipe per-cell prediction stability ---")
 print(f"  mean per-cell SD across 3 seeds      = {mean_per_cell_sd:.4f}")
