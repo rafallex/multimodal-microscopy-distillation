@@ -2,19 +2,19 @@
 % Headline-delta significance test against the v47 per-seed noise floor.
 \begin{table}[!t]
   \centering
-  \caption{Headline LB deltas with prediction-level stability statistics. $\mathrm{SE}_\Delta = \sqrt{2} \cdot \mathrm{SE}_{v47}$ $= 0.0089$, using the v47 per-seed SE (0.0063) as a conservative single-seed noise estimate. Pearson $r$ is between ensemble probability outputs over the 59{,}040 test cells; flip\% is the fraction of cells where the sigmoid sign disagrees between the two versions.}
+  \caption{Headline LB deltas with prediction-level stability statistics. $\mathrm{SE}_\Delta = \sqrt{2} \cdot \mathrm{SE}_{v47}$ $= 0.0103$, using the v47 per-seed SE (0.0073) as a conservative single-seed noise estimate. Pearson $r$ is between ensemble probability outputs over the 59{,}040 test cells; flip\% is the fraction of cells where the sigmoid sign disagrees between the two versions.}
   \label{tab:noisefloor}
   \footnotesize
   \begin{tabular}{@{}lrrrrl@{}}
     \toprule
     Pair & $\Delta$LB & Pearson $r$ & Flip\% & $|\Delta|/\mathrm{SE}_\Delta$ & Verdict \\
     \midrule
-    v19 $\to$ v41 & $+0.0108$ & $0.854$ & $14.43\%$ & $+1.21$ & marginal ($\ge 1\sigma$) \\
-    v41 $\to$ v44 & $+0.0249$ & $0.936$ & $9.53\%$ & $+2.79$ & supported ($\ge 2\sigma$) \\
-    v44 $\to$ v46 & $+0.0424$ & $0.963$ & $9.22\%$ & $+4.75$ & \textbf{robust} ($\ge 4\sigma$) \\
-    v44\_seed1 $\to$ v46 & $+0.0392$ & $0.957$ & $9.22\%$ & $+4.39$ & \textbf{robust} ($\ge 4\sigma$) \\
-    v46 $\to$ v47 & $+0.0028$ & $0.990$ & $3.99\%$ & $+0.31$ & indistinguishable ($<1\sigma$) \\
-    v46 $\to$ v47\_seed2 & $+0.0119$ & $0.967$ & $9.00\%$ & $+1.33$ & marginal ($\ge 1\sigma$) \\
+    v19 $\to$ v41 & $+0.0108$ & $0.854$ & $14.43\%$ & $+1.05$ & marginal ($\ge 1\sigma$) \\
+    v41 $\to$ v44 & $+0.0249$ & $0.936$ & $9.53\%$ & $+2.42$ & supported ($\ge 2\sigma$) \\
+    v44 $\to$ v46 & $+0.0424$ & $0.963$ & $9.22\%$ & $+4.13$ & \textbf{robust} ($\ge 4\sigma$) \\
+    v44\_seed1 $\to$ v46 & $+0.0392$ & $0.957$ & $9.22\%$ & $+3.81$ & supported ($\ge 2\sigma$) \\
+    v46 $\to$ v47 & $+0.0028$ & $0.990$ & $3.99\%$ & $+0.27$ & indistinguishable ($<1\sigma$) \\
+    v46 $\to$ v47\_seed2 & $+0.0119$ & $0.967$ & $9.00\%$ & $+1.16$ & marginal ($\ge 1\sigma$) \\
     \bottomrule
   \end{tabular}
 \end{table}
