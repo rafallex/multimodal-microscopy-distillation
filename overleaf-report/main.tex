@@ -34,7 +34,7 @@
 \maketitle
 
 \begin{abstract}
-We study the binary cell-level classification of paired bright-field (BF) and fluorescence (FL) microscopy on a small-sample patient-grouped benchmark (12 training patients, 114{,}302 labeled cells; disjoint test patients, 59{,}040 cells). Starting from a dual EfficientNet-B0 backbone with late concat fusion and a per-patient multiple-instance-learning (MIL) auxiliary loss, we progressively layer textbook regularizers (label smoothing, dropout, paired RandomResizedCrop, multiscale TTA) for a $+0.011$ public-leaderboard (LB) gain, then add a pseudo-label pipeline that culminates in Hinton-style soft-target distillation and iterative noisy-student training. Across 30 logged Kaggle iterations the public-LB area-under-ROC moves from $0.7455$ (supervised baseline) to a best single-seed value of $0.8355$ (a $+0.090$ lift), with a 3-seed ensemble at $0.8264$ that currently holds first place on the public leaderboard. The single largest gain ($+0.039$ LB) comes from substituting all 59{,}040 raw teacher probabilities for the $\sim$9{,}400 confidently-thresholded hard pseudo-labels of Lee~2013, validating Hinton's ``dark knowledge'' argument on a small-$N$ patient-grouped problem. We additionally document six diagnosed failure modes that materially shaped the recipe and one within-recipe ensemble collapse uncovered during the final-pick analysis. We argue that on this regime the dataset-size lever dominates architectural choice by an order of magnitude, and that systematic post-mortems of failed experiments contribute more methodological signal than the wins.
+We study the binary cell-level classification of paired bright-field (BF) and fluorescence (FL) microscopy on a small-sample patient-grouped benchmark (12 training patients, 114{,}302 labeled cells; disjoint test patients, 59{,}040 cells). Starting from a dual EfficientNet-B0 backbone with late concat fusion and a per-patient multiple-instance-learning (MIL) auxiliary loss, we progressively layer textbook regularizers (label smoothing, dropout, paired RandomResizedCrop, multiscale TTA) for a $+0.011$ public-leaderboard (LB) gain, then add a pseudo-label pipeline that culminates in Hinton-style soft-target distillation and iterative noisy-student training. Across 30 logged Kaggle iterations the public-LB area-under-ROC moves from $0.7455$ (supervised baseline) to a best single-seed value of $0.8355$ (a $+0.090$ lift), with a 3-seed ensemble at $0.8264$; at submission time the best-seed score holds $3$\textsuperscript{rd} on the public leaderboard, $\sim$$0.009$ behind the first two teams. The single largest gain ($+0.042$ LB, $4.75\sigma$ relative to the empirical seed noise floor) comes from substituting all 59{,}040 raw teacher probabilities for the $\sim$9{,}400 confidently-thresholded hard pseudo-labels of Lee~2013, validating Hinton's ``dark knowledge'' argument on a small-$N$ patient-grouped problem. A noise-floor analysis (Table~\ref{tab:noisefloor}) shows that the v46$\rightarrow$v47 round-2 ensemble gain is indistinguishable from zero ($0.31\sigma$), reframing the round-2 finding as a diminishing-returns saturation rather than a continued improvement. We additionally document six diagnosed failure modes that materially shaped the recipe and one within-recipe ensemble collapse uncovered during the final-pick analysis. We argue that on this regime the dataset-size lever dominates architectural choice by an order of magnitude, and that systematic post-mortems of failed experiments contribute more methodological signal than the wins.
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -153,12 +153,12 @@ Code release: \texttt{github.com/rafallex/A3-ADL} (notebooks per version, exact 
 
 \subsection{Headline progression}
 
-Fig.~\ref{fig:lb} plots the chronological public-LB sequence with the most consequential inflections annotated. The arc is: v19 baseline at LB $0.7455$ (EfficientNet-B0 dual-branch + MIL + AdaBN + test stain normalization); v41 at $0.7563$ ($+0.011$, four-component L4-regularizer stack); v44 at $0.7812$ ($+0.025$ over v41, hard pseudo-labels added); v46 at $0.8236$ ($+0.039$ over its lucky-seed teacher, soft pseudo-labels replacing hard); v47 at $0.8264$ for the ensemble (iterative noisy student round 2, $+0.003$ over the v46 ensemble) and $0.8355$ for the best single seed ($+0.012$ over the v46 ensemble, $+0.090$ over the v19 baseline). The cumulative lift from baseline to best single-seed v47 is $+0.090$ LB; the ensemble of v47 holds first place on the public leaderboard with a $+0.013$ margin over the next competitor.
+Fig.~\ref{fig:lb} plots the chronological public-LB sequence with the most consequential inflections annotated. The arc is: v19 baseline at LB $0.7455$ (EfficientNet-B0 dual-branch + MIL + AdaBN + test stain normalization); v41 at $0.7563$ ($+0.011$, four-component L4-regularizer stack); v44 at $0.7812$ ($+0.025$ over v41, hard pseudo-labels added); v46 at $0.8236$ ($+0.039$ over its lucky-seed teacher, soft pseudo-labels replacing hard); v47 at $0.8264$ for the ensemble (iterative noisy student round 2, $+0.003$ over the v46 ensemble) and $0.8355$ for the best single seed ($+0.012$ over the v46 ensemble, $+0.090$ over the v19 baseline). The cumulative lift from baseline to best single-seed v47 is $+0.090$ LB. As of the manuscript snapshot the best-seed score holds $3$\textsuperscript{rd} on the public leaderboard, $0.0090$--$0.0093$ behind the first two teams (Group~1 at $0.8448$, Group10 at $0.8445$); the v47 ensemble at $0.8264$ would place us $4$\textsuperscript{th}, which is itself evidence for the within-recipe ensemble collapse discussed in \S\ref{sec:negative}-G. The four headline deltas are statistically scored against an empirical seed noise floor in \S\ref{sec:discussion}-E.
 
 \begin{figure*}[!t]
   \centering
   \includegraphics[width=0.95\textwidth]{lb_progression.pdf}
-  \caption{Public-LB progression across 30 logged iterations. Color encodes outcome category: green for breakthrough versions (v41, v44, v46, v47), blue for useful gains, red for regressions and negative results, gray for neutral / replication runs, orange for queued versions. The reference dotted line marks the v19 baseline at $0.7455$; the dashed line marks the prior LB leader at $0.7916$. v47 takes the top of the chart at $0.8264$ (ensemble); the per-seed dispersion of v47 (seed range $0.8126$--$0.8355$) is discussed in \S\ref{sec:negative}-G.}
+  \caption{Public-LB progression across 30 logged iterations. Color encodes outcome category: green for breakthrough versions (v41, v44, v46, v47 ensemble), darker green for v47 per-seed extracts, blue for useful gains, red for regressions and negative results, gray for neutral / replication runs, orange for the queued v48. Dotted line: v19 baseline $0.7455$. Dotted black: prior LB leader $0.7916$ (pre-v46). Dashed red: current LB \#1 at $0.8448$ (Group~1, captured 2026-05-27). v47\_s2 sits at the top of our chart at $0.8355$ (best single seed, $+0.090$ over v19, $3$\textsuperscript{rd} on LB); the v47 ensemble at $0.8264$ underperforms it by $0.009$ (\S\ref{sec:negative}-G). The per-seed dispersion of v47 (seed range $0.8150$--$0.8355$, span $0.0205$) is $\sim$$2.8\times$ wider than v46's.}
   \label{fig:lb}
 \end{figure*}
 
@@ -196,7 +196,7 @@ Table~\ref{tab:progression} lists the submitted versions, their recipe summaries
     \textbf{v47} & v46 recipe, v46 ensemble as teacher (iter.~NS round 2) & \textbf{0.8264} & $\mathbf{+0.003}$ \\
     v47\_s2 & v47 single seed (best) & \textbf{0.8355} & \textbf{+0.090} \\
     v47\_s1 & v47 single seed & 0.8150 & $\downarrow$ vs s2 \\
-    v47\_s3 & v47 single seed & 0.8126 & $\downarrow$ vs s2 \\
+    v47\_s3 & v47 single seed & 0.8187 & $\downarrow$ vs s2 \\
     \bottomrule
   \end{tabular}
 \end{table*}
@@ -214,7 +214,7 @@ Fig.~\ref{fig:hist} plots the teacher-probability distribution that v46 sees ove
 
 \subsection{Iterative noisy student: mean lift compresses, dispersion expands}
 
-v47 differs from v46 by exactly one variable: the pseudo-label CSV is v46's ensemble output (LB $0.8236$) instead of v44\_seed1's (LB $0.7844$). On the ensemble, round 2 lifts LB by $+0.003$ --- substantially compressed from round 1's $+0.039$. The per-seed picture is more interesting and is summarized in Table~\ref{tab:seedspread}: the spread between best and worst seed widens from v46's $0.0072$ to v47's $0.0229$, and the v47 ensemble underperforms its best single seed by $-0.0091$. We return to the within-recipe ensemble failure in \S\ref{sec:negative}-G.
+v47 differs from v46 by exactly one variable: the pseudo-label CSV is v46's ensemble output (LB $0.8236$) instead of v44\_seed1's (LB $0.7844$). On the ensemble, round 2 lifts LB by $+0.003$ --- below the empirical seed noise floor ($\mathrm{SE}_\Delta = 0.0089$, see Table~\ref{tab:noisefloor}). The per-seed picture is more interesting and is summarized in Table~\ref{tab:seedspread}: the spread between best and worst seed widens from v46's $0.0072$ to v47's $0.0205$, and the v47 ensemble underperforms its best single seed by $-0.0091$. We return to the within-recipe ensemble failure in \S\ref{sec:negative}-G.
 
 \begin{table}[!t]
   \centering
@@ -226,11 +226,11 @@ v47 differs from v46 by exactly one variable: the pseudo-label CSV is v46's ense
     Family & Worst seed & Best seed & Ensemble \\
     \midrule
     v46 & 0.8157 & 0.8229 & \textbf{0.8236} ($+0.0007$) \\
-    v47 & 0.8126 & 0.8355 & 0.8264 ($-0.0091$) \\
+    v47 & 0.8150 & 0.8355 & 0.8264 ($-0.0091$) \\
     \midrule
     Seed range & --- & --- & --- \\
     v46 & \multicolumn{3}{r}{$0.0072$} \\
-    v47 & \multicolumn{3}{r}{$0.0229$ \quad ($\sim$3$\times$ wider)} \\
+    v47 & \multicolumn{3}{r}{$0.0205$ \quad ($\sim$$2.8\times$ wider)} \\
     \bottomrule
   \end{tabular}
 \end{table}
@@ -314,7 +314,7 @@ We argue that the failure-mode diagnoses below are the most methodologically inf
 
 \textbf{Setup.} v47 trains 3 independent seeds of the iterative-noisy-student recipe and sigmoid-averages their TTA predictions. Each seed sees the same teacher (v46 ensemble) but with independent data shuffling, SWA epoch averaging, and random augmentation streams.
 
-\textbf{Result.} Per-seed public LB: seed 1 $0.8150$, seed 2 $\mathbf{0.8355}$, seed 3 $0.8126$ (range $0.0229$). The 3-seed ensemble landed at $0.8264$, \emph{below} the best single seed by $0.0091$. By contrast, v46's per-seed range was $0.0072$ and the v46 ensemble at $0.8236$ beat each individual seed.
+\textbf{Result.} Per-seed public LB: seed 1 $0.8150$, seed 2 $\mathbf{0.8355}$, seed 3 $0.8187$ (range $0.0205$). The 3-seed ensemble landed at $0.8264$, \emph{below} the best single seed by $0.0091$. By contrast, v46's per-seed range was $0.0072$ and the v46 ensemble at $0.8236$ beat each individual seed. The ensemble shortfall is also observable on the public leaderboard: the v47\_s2 score holds $3$\textsuperscript{rd}, while the v47 ensemble would place $4$\textsuperscript{th}.
 
 \textbf{Diagnosis.} The dynamic is identical to the cross-recipe collapse of \S\ref{sec:negative}-A and \S\ref{sec:negative}-F, but operating \emph{within} a single recipe at the seed level. Seed 2 is sufficiently strong on the public LB that averaging it with the two weaker seeds pulls the ensemble closer to their mean. There are two non-mutually-exclusive explanations: (i) seed 2 is a genuine outlier on the recipe's seed distribution and the ensemble is correctly hedging against its private-LB risk; (ii) seed 2 happened to land on a favorable public-LB sample and the ensemble's pull-toward-the-mean will be net-positive on the held-out private split.
 
@@ -368,7 +368,7 @@ Hard pseudo at threshold $0.05/0.95$ discards 84\% of test cells (49{,}640 of 59
 
 Round 1 (v44 hard $\rightarrow$ v46 soft) returned $+0.039$ LB. Round 2 (v46 soft $\rightarrow$ v47 soft with v46 ensemble as teacher) returned $+0.003$ LB on the ensemble. The mean lift compressed $\sim$14$\times$. Two observations:
 
-\emph{The mean compresses, the per-seed dispersion expands.} The v47 per-seed LB range ($0.8126$--$0.8355$, span $0.0229$) is $3.2\times$ wider than v46's ($0.8157$--$0.8229$, span $0.0072$). This is the inverse of what an earlier draft of this paper hypothesized (``round 2 acts as a variance reducer''); the training-AUC tightened but the generalization spread widened. The empirically correct framing is that round 2 with a much-stronger teacher creates a higher-variance student distribution, with seed-2 landing on a favorable mode of that distribution.
+\emph{The mean compresses, the per-seed dispersion expands.} The v47 per-seed LB range ($0.8150$--$0.8355$, span $0.0205$) is $\sim$$2.8\times$ wider than v46's ($0.8157$--$0.8229$, span $0.0072$). This is the inverse of what an earlier draft of this paper hypothesized (``round 2 acts as a variance reducer''); the training-AUC tightened but the generalization spread widened. The empirically correct framing is that round 2 with a much-stronger teacher creates a higher-variance student distribution, with seed-2 landing on a favorable mode of that distribution.
 
 \emph{The diminishing-returns regime starts after one round.} Round 1 unlocks the calibration channel that hard pseudo discards; subsequent rounds re-iterate the same channel with a marginally better-calibrated teacher. To extract a further mean lift one would need to change the mechanism, not the iteration count --- for instance, by softening the teacher distribution via Hinton's temperature parameter (v48, queued at $T=2$) or by introducing student-side input/dropout noise more aggressively than v47 does.
 
@@ -384,7 +384,9 @@ The common mechanism is that sigmoid-averaging is symmetric; whenever one member
 
 \subsection{Limitations and threats to validity}
 
-\textbf{Single public-LB number per submission.} Each LB delta in this paper is a single noisy estimate from one public-LB split. The v47 per-seed spread of $0.023$ provides a direct measurement of the noise floor: any reported delta below $\sim$$0.01$ should be treated as not reliably distinguishable from zero. The $+0.011$ v19$\rightarrow$v41 gain is just above this floor; the $+0.039$ v44$\rightarrow$v46 gain is well above it.
+\textbf{Single public-LB number per submission.} Each LB delta in this paper is a single noisy estimate from one public-LB split. The three submitted v47 seeds give a direct empirical noise-floor measurement: $\mathrm{SE}_{v47} = 0.0063$ (mean $0.8231$, sample SD $0.0109$ across LBs $\{0.8150, 0.8187, 0.8355\}$). Treating each version's LB as a single noisy observation with that SE, the SE of a paired delta is $\mathrm{SE}_\Delta = \sqrt{2} \cdot \mathrm{SE}_{v47} = 0.0089$. Table~\ref{tab:noisefloor} expresses each headline delta as a multiple of this $\mathrm{SE}_\Delta$, alongside two prediction-level stability statistics (Pearson $r$ between ensemble probability outputs, and the per-cell sigmoid-sign-flip rate). The v44$\rightarrow$v46 soft-pseudo gain at $4.75\sigma$ is the only \emph{robust} delta; the v41$\rightarrow$v44 hard-pseudo gain at $2.79\sigma$ is supported; the v19$\rightarrow$v41 regularizer-stack gain at $1.21\sigma$ is marginal; the v46$\rightarrow$v47 round-2 ensemble gain at $0.31\sigma$ is \emph{indistinguishable from zero} at this noise floor. We note further that the within-v47 cross-seed sigmoid-sign-flip rate ($12.6\%$ averaged across the three seed pairs) is \emph{larger} than the v46$\rightarrow$v47 ensemble cross-version flip rate ($4.0\%$); seed-level variation dominates round-2 signal.
+
+\input{noise_floor_table}
 
 \textbf{Possible overfitting to public LB.} Aggressive iteration on a single LB signal risks tailoring to the public split. v41 (the strongest non-pseudo baseline) is kept as the safety pick precisely because it shares no pseudo-label lineage with the v44/v46/v47 chain.
 
@@ -397,7 +399,7 @@ The seven negative results in \S\ref{sec:negative} fall into three families. Cro
 \section{Conclusion}
 \label{sec:conclusion}
 
-Across 30 logged iterations on a small-sample patient-grouped multimodal-microscopy benchmark, we layered EfficientNet-B0 dual-branch architecture, MIL auxiliary loss, batch-normalization adaptation, multiscale TTA, label-smoothing and dropout regularization, hard pseudo-labels, soft-target distillation, and iterative noisy student training. The public-LB lift over a strong supervised baseline (v19 $0.7455$ $\rightarrow$ v47 ensemble $0.8264$ / best seed $0.8355$) is $+0.081$--$+0.090$. The single largest gain ($+0.039$ LB) is from soft pseudo-labels replacing hard, and is one order of magnitude larger than the cumulative regularizer-stack gain. Seven failure modes are diagnosed, including a within-recipe ensemble net-negative under an outlier seed that informs the final-pick decision.
+Across 30 logged iterations on a small-sample patient-grouped multimodal-microscopy benchmark, we layered EfficientNet-B0 dual-branch architecture, MIL auxiliary loss, batch-normalization adaptation, multiscale TTA, label-smoothing and dropout regularization, hard pseudo-labels, soft-target distillation, and iterative noisy student training. The public-LB lift over a strong supervised baseline (v19 $0.7455$ $\rightarrow$ v47 ensemble $0.8264$ / best seed $0.8355$) is $+0.081$--$+0.090$. The single largest gain ($+0.042$ LB, $4.75\sigma$ relative to the seed noise floor) is from soft pseudo-labels replacing hard, and is one order of magnitude larger than the cumulative regularizer-stack gain. The round-2 noisy-student gain ($+0.003$ ensemble) is below the noise floor and is treated as a saturation rather than a continued improvement. At submission time the best-seed score holds $3$\textsuperscript{rd} on the public leaderboard, $\sim$$0.009$ behind the first two teams. Seven failure modes are diagnosed, including a within-recipe ensemble net-negative under an outlier seed that informs the final-pick decision.
 
 Three take-aways:
 \begin{enumerate}

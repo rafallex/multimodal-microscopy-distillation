@@ -230,7 +230,7 @@ set_notes(s, (
     "through a careful but unsuccessful 9-change rescue attempt, to a much "
     "simpler EfficientNet recipe at LB 0.7455 — which then became the foundation for a "
     "semi-supervised pipeline (Lee 2013 pseudo-labels, then Hinton 2015 distillation) that "
-    "reached LB 0.8236 and currently holds #1 on the public leaderboard.\n\n"
+    "reached LB 0.8264 (ensemble) / 0.8355 (best single seed). v47_seed2 holds #3 on the public leaderboard as of 2026-05-27.\n\n"
     "Time budget: ~50 seconds per slide, 11 slides, leaves ~30s of buffer for Q&A."
 ))
 
@@ -334,7 +334,7 @@ results = [
     (1.70, "0.572 → 0.503", "SSL collapse"),
     (3.90, "0.7455", "supervised floor"),
     (6.10, "0.7563", "v41 stacked L4 regs"),
-    (8.30, "0.8264", "v47 #1 on LB"),
+    (8.30, "0.8355", "v47_s2 best single seed (#3 on LB)"),
 ]
 for px, lb, note in results:
     add_text(s, Inches(px - 0.95), Inches(3.20), Inches(1.9), Inches(0.4),
@@ -370,7 +370,7 @@ set_notes(s, (
     "Act 5 — the new chapter, v42 through v47 — was the semi-supervised pivot. "
     "v44 added Lee 2013 hard pseudo-labels (+0.025 LB), v46 swapped to Hinton 2015 "
     "soft-target distillation on all 59k test cells (+0.039 LB), and v47 iterated to "
-    "round 2 with v46 as the new teacher (+0.003 LB, Xie 2020). v47 at 0.8264 holds #1."
+    "round 2 with v46 as the new teacher (+0.003 LB ensemble, +0.012 best seed, Xie 2020). v47_seed2 at 0.8355 holds #3."
 ))
 
 
@@ -900,7 +900,7 @@ add_bullets(s, Inches(0.4), Inches(1.5), Inches(3.7), Inches(3.6), [
     ("v44: hard pseudo (Lee 2013) +0.025 LB",),
     ("v46: SOFT pseudo / Hinton 2015 distillation +0.039 LB",),
     ("v47: noisy-student round 2 (Xie 2020) +0.003 LB",),
-    ("Result: 0.8264, #1 on public LB (+0.013 lead)",),
+    ("Result: 0.8264 ensemble / 0.8355 best seed — #3 on public LB (2026-05-27)",),
 ], size=12)
 
 # Bottom banner — the headline
@@ -921,7 +921,7 @@ set_notes(s, (
     "so MIL skips them. +0.025 LB.\n\n"
     "v46 was the bigger breakthrough: Hinton 2015 distillation. Use ALL 59,000 test cells, "
     "not just the confident ones. Soft target = teacher's raw probability. +0.039 LB. We "
-    "took #1 on the public LB at 0.8236.\n\n"
+    "took #1 on the public LB at 0.8236 (subsequently overtaken; now #3 with v47_seed2 at 0.8355).\n\n"
     "v47 closed the loop: Xie 2020-style iterative noisy student round 2. Same recipe as v46 "
     "but with v46's ensemble as the new teacher. +0.003 LB — small, but enough to extend "
     "our LB lead to +0.013 over next-best. The per-seed tr_auc spread also tightened (0.989-0.993 "

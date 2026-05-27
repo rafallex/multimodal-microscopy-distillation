@@ -11,7 +11,7 @@
 
 - Problem: binary cell-level cancer classification on multimodal microscopy (paired bright-field BF + fluorescence FL), 128×128, 12 training patients × ~10k cells/patient, ~38.8% positive.
 - Approach: dual EfficientNet-B0 with late concat fusion + per-patient MIL aux loss, then progressive layering of L4-textbook regularizers, followed by a **pseudo-label pipeline** culminating in **Hinton-2015-style soft-target distillation** and **iterative noisy-student training**.
-- Headline result: public LB **0.7455 → 0.8264** across 30 iterations, currently **#1 on the public leaderboard with a +0.013 lead over next-best**. The single largest gain (+0.039 LB) came from soft pseudo-labels (v46), not from architecture or regularization changes; a further +0.003 came from iterative noisy student round 2 (v47).
+- Headline result: public LB **0.7455 → 0.8264** (ensemble) / **0.8355** (best single seed) across 30 iterations. **Currently #3** on the public leaderboard (Group 1 0.8448, Group10 0.8445, our v47_s2 0.8355). The single largest gain (+0.042 LB / 4.75σ) came from soft pseudo-labels (v46), not from architecture or regularization changes; a further +0.003 ensemble / +0.012 best-seed came from iterative noisy student round 2 (v47). A noise-floor analysis places the round-2 ensemble gain below the seed noise floor (0.31σ).
 - Key methodological insight: **dataset size dominated architectural choices** on this problem. The bottleneck was labeled training set size, not model capacity or regularization.
 
 ---

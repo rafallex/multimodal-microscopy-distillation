@@ -29,8 +29,8 @@ import pandas as pd
 HERE = Path(__file__).resolve().parent
 PROJECT_ROOT = HERE.parent.parent
 RESULTS = PROJECT_ROOT / "results"
-OUT_CSV = HERE.parent / "notes" / "noise_floor_stats.csv"
-OUT_TEX = HERE.parent / "notes" / "noise_floor_table.tex"
+OUT_CSV = HERE.parent / "notes" / "noise_floor_stats.csv"      # local-only, machine-readable
+OUT_TEX = HERE.parent / "noise_floor_table.tex"                 # part of Overleaf upload (\input from main.tex)
 
 # === Known per-seed public LB values (from Kaggle submissions) ===
 LB = {
@@ -45,7 +45,7 @@ LB = {
     "v47":        0.8264,   # ensemble
     "v47_seed1":  0.8150,
     "v47_seed2":  0.8355,
-    "v47_seed3":  0.8126,
+    "v47_seed3":  0.8187,   # corrected from 0.8126 on 2026-05-27 (Kaggle submissions panel)
 }
 
 HEADLINE_PAIRS = [

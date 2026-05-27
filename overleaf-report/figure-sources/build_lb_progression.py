@@ -35,13 +35,18 @@ RUNS = [
     ("v47",          0.8264, "tab:green",   (0.5, 0.012)),
     ("v47_s1",       0.8150, "#0E5C2F",     None),  # darker green for v47 per-seed extracts
     ("v47_s2",       0.8355, "#0E5C2F",     None),  # ← best single seed across the whole project
-    ("v47_s3",       0.8126, "#0E5C2F",     None),
+    ("v47_s3",       0.8187, "#0E5C2F",     None),  # corrected from 0.8126 on 2026-05-27
 ]
 # v48 placeholder (queued — Hinton T=2 temperature distillation)
 V48_PLACEHOLDER = ("v48", None, "tab:orange")
 
-PRIOR_LEADER = 0.7916  # was the public LB top before v46 took #1
-V19_BASELINE = 0.7455
+# Reference lines:
+#   V19_BASELINE       — our supervised floor
+#   PRIOR_LEADER_PREV  — was the public LB top before v46 took #1 (mid-May)
+#   CURRENT_LEADER     — current #1 on the public LB (Group 1, captured 2026-05-27)
+V19_BASELINE      = 0.7455
+PRIOR_LEADER_PREV = 0.7916
+CURRENT_LEADER    = 0.8448
 
 HERE = Path(__file__).resolve().parent              # overleaf-report/figure-sources/
 PROJECT_ROOT = HERE.parent.parent                    # A3/
@@ -67,8 +72,10 @@ for x, y, c, lab in zip(xs, ys, colors, labels):
 # Reference lines
 ax.axhline(V19_BASELINE, color="tab:blue", linestyle=":", linewidth=1.2, alpha=0.5,
            label=f"v19 baseline = {V19_BASELINE:.4f}")
-ax.axhline(PRIOR_LEADER, color="black", linestyle="--", linewidth=1.0, alpha=0.5,
-           label=f"prior LB leader = {PRIOR_LEADER:.4f} (pre-v46)")
+ax.axhline(PRIOR_LEADER_PREV, color="black", linestyle=":", linewidth=1.0, alpha=0.35,
+           label=f"prior LB leader = {PRIOR_LEADER_PREV:.4f} (pre-v46)")
+ax.axhline(CURRENT_LEADER, color="tab:red", linestyle="--", linewidth=1.2, alpha=0.55,
+           label=f"current LB #1 = {CURRENT_LEADER:.4f} (post-2026-05-27)")
 
 # Headline annotation on v47_s2 (best single seed, +0.090 over v19)
 v47s2_x = labels.index("v47_s2")
@@ -81,10 +88,10 @@ ax.annotate("v47_s2 = 0.8355\nbest seed, +0.090 vs v19",
             arrowprops=dict(arrowstyle="->", color="#0E5C2F",
                             lw=1.4, connectionstyle="arc3,rad=-0.2"))
 
-# Secondary annotation on v47 ensemble (#1 on public LB)
+# Secondary annotation on v47 ensemble (sits below best seed by 0.009)
 v47_x = labels.index("v47")
 v47_y = RUNS[v47_x][1]
-ax.annotate("v47 ensemble = 0.8264\n#1 on LB, +0.013 vs next-best",
+ax.annotate("v47 ensemble = 0.8264\n(below v47_s2 by 0.009)",
             xy=(v47_x, v47_y),
             xytext=(v47_x - 4.0, 0.787),
             fontsize=9, fontweight="bold", color="tab:green",
@@ -92,10 +99,11 @@ ax.annotate("v47 ensemble = 0.8264\n#1 on LB, +0.013 vs next-best",
             arrowprops=dict(arrowstyle="->", color="tab:green",
                             lw=1.2, connectionstyle="arc3,rad=0.25"))
 
-# Vertical bracket showing v47 seed range (0.0229, ~3x v46's 0.0072)
+# Vertical bracket showing v47 seed range (~2.3x v46's 0.0072)
 v47_seed_x = labels.index("v47_s2")
 seed_top = 0.8355
-seed_bot = 0.8126
+seed_bot = 0.8150  # v47_s1 is the lowest after the 2026-05-27 correction
+v47_range = seed_top - seed_bot
 ax.plot([v47_seed_x + 1.4, v47_seed_x + 1.4], [seed_bot, seed_top],
         color="#0E5C2F", lw=1.2, alpha=0.75)
 ax.plot([v47_seed_x + 1.3, v47_seed_x + 1.5], [seed_top, seed_top],
@@ -103,7 +111,7 @@ ax.plot([v47_seed_x + 1.3, v47_seed_x + 1.5], [seed_top, seed_top],
 ax.plot([v47_seed_x + 1.3, v47_seed_x + 1.5], [seed_bot, seed_bot],
         color="#0E5C2F", lw=1.2, alpha=0.75)
 ax.text(v47_seed_x + 1.7, (seed_top + seed_bot) / 2,
-        "v47 seed\nrange = 0.0229\n(~3× v46's 0.0072)",
+        f"v47 seed\nrange = {v47_range:.4f}\n(~{v47_range/0.0072:.1f}× v46's 0.0072)",
         fontsize=8, color="#0E5C2F", ha="left", va="center")
 
 # Smaller annotations on key inflections
@@ -155,8 +163,8 @@ ax.spines["top"].set_visible(False)
 ax.spines["right"].set_visible(False)
 
 # Title
-ax.set_title("Public LB progression across 30 logged iterations  ·  v19 → v47_s2 = +0.090 (best seed) / v47 ens = +0.081",
-             fontsize=13, fontweight="bold", pad=12, loc="left")
+ax.set_title("Public LB progression  ·  v19 → v47_s2 = +0.090 (best seed) / v47 ens = +0.081  ·  currently #3 of 11 (2026-05-27)",
+             fontsize=12, fontweight="bold", pad=12, loc="left")
 
 # Custom legend (color categories)
 legend_handles = [
