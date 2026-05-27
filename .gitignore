@@ -283,6 +283,10 @@ zizlJQk2
 !results/v47/learning_curves.png
 !results/v47/runs/
 !results/v47/runs/history*.json
+# CPU-only ensemble recombinations (no training, derived from v44/v46/v47 CSVs above).
+# Tiny (~10 MB total) and paper-relevant — track for reproducibility.
+!results/cpu_ensembles/
+!results/cpu_ensembles/*.csv
 
 # Inside the re-included results/vN/ dirs, still exclude the heavy / junk artifacts
 # the global *.pt and runs/ rules don't reach (full Kaggle .ipynb dumps with
