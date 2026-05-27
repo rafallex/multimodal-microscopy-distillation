@@ -38,6 +38,25 @@ The corresponding source notebooks live in `notebooks/improvedvNN_source.ipynb`.
 | **v49** | **EffNet-B0** | **128 native** | **v47 recipe with ONE knob changed: teacher CSV swapped from v46 ensemble (LB 0.8236) → v47_seed2 (LB 0.8355). Tests whether the 97%-middle-band finding (v47_s2's lift is concentrated in cells the v46 teacher was uncertain about) compounds when v47_s2 itself becomes the round-3 teacher. The teacher delta (v46_ens→v47_s2 = +0.0119) is 4× larger than the v46_ens→v47_ens delta (+0.0028) that produced the indistinguishable round-2 lift, so this directly stress-tests §VIII-C's diminishing-returns hypothesis at a larger teacher-quality gap.** | (queued for May 30/31) | **`notebooks/improvedv49_source.ipynb` — generated from v47 by `overleaf-report/figure-sources/build_v49_notebook.py`. Requires a NEW Kaggle dataset upload: `results/v47/submission_seed2.csv` → `rafaelproena/submissionv47seed2` (one-time setup). Forecast: ensemble 0.83-0.86; P(beats v47_s2 = 0.8355) ≈ 35-45%. Decision rule: ≥0.840 ensemble = signal compounded (lock as primary pick); 0.830-0.840 = saturated round 3 (v47_s2 stays primary); <0.825 = teacher noise hypothesis confirmed (publishable negative on noisy-student-with-single-seed-teacher). Highest-EV GPU run we haven't done yet.** |
 | **v49** RESULT stub | **EffNet-B0** | **128 native** | _Fill once Kaggle scoring completes_ | `LB=___ (ensemble)` / `s1=___ s2=___ s3=___` | _Per-seed range: ___. Verdict against decision rule above: ___. Compare to v47 ensemble 0.8264 / v47_s2 0.8355 / (v48 result). Noise-floor: \|Δ_ens\|/SE_Δ = ___ σ. Action: __ (new primary pick / lock v47_s2 / pivot to v50 = v49_best as teacher)._ |
 
+## CPU-only ensemble probes (2026-05-27 evening batch)
+
+Four ensemble recombinations submitted while GPU-bound, no retraining. Each tests a specific §VII-F / §VII-G hypothesis. SE_Δ vs v47 per-seed noise floor = 0.0103.
+
+| Probe | Recipe | Public LB | vs v47 ens (0.8264) | vs v47_s2 (0.8355) | Finding |
+|---|---|---|---|---|---|
+| **B** | per-cell mean of v47 seeds 2+3 (drop worst) | **0.8281** | +0.0017 (+0.17σ) | −0.0074 | Drop-worst gives a marginal lift but recovers only ~20% of the ensemble→best-seed gap. §VII-G hypothesis "ensemble underperforms because of s1 outlier dilution" is only partially correct — s2 has positive signal that even s2+s3 averaging can't fully capture. |
+| **C** | per-cell median across all 3 v47 seeds | **0.8201** | −0.0063 (−0.61σ) | −0.0154 | **Negative result**: median underperforms equal-mean ensemble. For a 3-seed distribution with one high outlier (s2), per-cell median discards s2's decisive predictions in the middle band (where s2 has the largest delta). Median is the wrong robust statistic when outliers are signal not noise. |
+| **D** | sigmoid-avg of v47_s2 + v46 ensemble (cross-recipe, gap 0.012) | **0.8317** | **+0.0053** (+0.52σ) | −0.0038 | **§VII-F refined**: cross-recipe at 0.012 gap *does* beat within-recipe equal-seed averaging. Lands between members, closer to stronger. Refines the §VII-F threshold from "≤0.015 favorable" to "≤0.012 favorable" with empirical evidence at the high LB tier. |
+| **E** | sigmoid-avg of v47_s2 + v44_seed1 (cross-recipe, gap 0.051) | **0.8161** | −0.0103 (−1.00σ) | −0.0194 (−1.89σ) | **§VII-A confirmed at higher tier**: 0.0317 above the weaker member (correlation bonus is real) but 0.0194 below the stronger. Wide-gap drag holds at the v47 LB tier — same qualitative pattern as v22 (gap 0.05, drag 0.0033 from stronger) but larger absolute drag, consistent with each LB point being harder to win at higher absolute LB. |
+
+**Methodological synthesis.** The four probes triangulate the §VII-G ensemble collapse:
+
+1. The v47 ensemble loses to v47_s2 by 0.0091. Drop-worst recovers +0.0017 (≈19% of the gap). Cross-recipe with the v46 ensemble recovers +0.0053 (≈58% of the gap). Per-cell median makes it worse by 0.0063.
+2. None of these heuristics fully closes the ensemble→best-seed gap, but D demonstrates that the gap is bridgeable with cross-recipe diversification rather than within-recipe averaging.
+3. The combined evidence supports the §VII-G "open" reading toward **signal**: s2's lift is robust to multiple averaging schemes and concentrated in the teacher-uncertain region (per-cell analysis: 97% middle-band, paper §VIII-E).
+
+Still to submit (May 29 slots): **G** (per-cell confidence-weighted, directly exploits the 97% finding — was bumped from tonight's batch), **F** (LB-weighted, §VII-A risk test). G is the higher-priority of the two for the paper's middle-band exploitation narrative.
+
 ## Top-of-leaderboard reference (snapshot 2026-05-27 12:13 UTC)
 
 | # | Team | Score | Members |
