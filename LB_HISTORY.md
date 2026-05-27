@@ -59,13 +59,15 @@ Still to submit (May 29 slots): **G** (per-cell confidence-weighted, directly ex
 
 ## Top-of-leaderboard reference (snapshot 2026-05-27 12:13 UTC)
 
-| # | Team | Score | Members |
+| # | Team | Score | Submission used |
 |---|---|---|---|
-| 1 | Group 1 | 0.8448 | edvardschmidt, leokemetli, svanteandersson |
-| 2 | Group10 | 0.8445 | albinpbergman, hugohansson123, olleflygar, saimazubair, tildemackintosh |
-| **3** | **Group 15 (us)** | **0.8355** | rafaelproena (v47_seed2) |
-| 4 | Groups 14 | 0.8125 | hoyumikaellau, nicolechaoo |
-| 5 | Group 6 | 0.8007 | elsasundh, emelief, fahimrayhan, mdsabbirppp |
+| 1 | Group 1 | 0.8448 | — |
+| 2 | Group10 | 0.8445 | — |
+| **3** | **Group 15 (us)** | **0.8355** | v47_seed2 |
+| 4 | Groups 14 | 0.8125 | — |
+| 5 | Group 6 | 0.8007 | — |
+
+(Other teams' member usernames intentionally omitted — Kaggle anonymises by group name; individual handles are not republished here.)
 
 We were briefly #1 between v46 and v47, and held it through v47 (the comment thread above for v47 reflects that snapshot). Between 2026-05-26 and 2026-05-27 Group 1 (0.7916 → 0.8448) and Group10 (new entrant → 0.8445) overtook us. Our placement at 0.8355 comes from **v47_seed2**, not the v47 ensemble; the ensemble at 0.8264 would place 4th, which is empirical evidence for the within-recipe ensemble collapse documented in the paper §VII-G. Gap to current #1 = 0.0093.
 
