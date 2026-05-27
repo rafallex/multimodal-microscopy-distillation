@@ -304,7 +304,7 @@ function ruleCallout(slide, x, y, w, h, text) {
     x: 6.50, y: stripY + 0.22, w: 3.20, h: 0.70,
     fontFace: "Georgia", fontSize: 36, bold: true, color: AMBER, margin: 0,
   });
-  s.addText("v47  ·  #1 on LB  ·  +0.013 lead", {
+  s.addText("v47_s2 = 0.8355  ·  #3 on LB (2026-05-27)", {
     x: 6.50, y: stripY + 0.95, w: 3.20, h: 0.25,
     fontFace: "Calibri", fontSize: 9.5, italic: true, color: CREAM, margin: 0,
   });
@@ -357,8 +357,8 @@ function ruleCallout(slide, x, y, w, h, text) {
   s.addNotes(
     "Hello — I'm Rafael. Today I'll walk you through the Multimodal Cancer Cell " +
     "Classification Challenge: 30 logged Kaggle versions, five acts of experimentation, " +
-    "+0.081 LB lift over the supervised baseline. We currently hold #1 on the public " +
-    "leaderboard at 0.8264, with a +0.013 lead over next-best.\n\n" +
+    "+0.081 LB lift over the supervised baseline on the ensemble, +0.090 on the best single seed. " +
+    "v47_seed2 at 0.8355 currently holds #3 on the public leaderboard.\n\n" +
     "But this talk is not primarily about the score. The instructor said grading is " +
     "based on methodology and presentation, not the leaderboard itself. So I'll spend " +
     "most of the time on what didn't work and why — six diagnosed failures shaped the " +

@@ -70,7 +70,7 @@ The Lian et al. 2024 paper (same multimodal microscopy problem class, published 
 
 **Setup.** v47 trains 3 independent seeds of the iterative-noisy-student recipe and sigmoid-averages their TTA predictions. Each seed sees the same teacher (v46 ensemble, LB 0.8236) but with independent data shuffling, SWA epoch averaging, and random augmentation streams. This is the same within-recipe averaging pattern that worked for v46.
 
-**Result.** Per-seed public LB: seed 1 = 0.8150, seed 2 = **0.8355**, seed 3 = 0.8126 (range 0.0229). The 3-seed ensemble landed at 0.8264 — **below the best single seed by 0.0091**. By contrast, v46's per-seed range was 0.0072 and the v46 ensemble (0.8236) beat each individual seed.
+**Result.** Per-seed public LB: seed 1 = 0.8150, seed 2 = **0.8355**, seed 3 = 0.8187 (range 0.0205). The 3-seed ensemble landed at 0.8264 — **below the best single seed by 0.0091**. By contrast, v46's per-seed range was 0.0072 and the v46 ensemble (0.8236) beat each individual seed. The ensemble shortfall is also visible on the public LB: v47_s2 holds #3 (Group 15) at 0.8355 while the v47 ensemble at 0.8264 would place #4.
 
 **Diagnosis.** Two-way story:
 
@@ -92,4 +92,4 @@ The Lian et al. 2024 paper (same multimodal microscopy problem class, published 
 | v45_probe | Cross-recipe ensemble fails at 0.025 LB gap (still > ~0.015) | Yes (rule tightened; stopped attempting cross-recipe ensembles) |
 | v47 | Within-recipe ensemble net-negative under outlier seed (dispersion widened in round 2) | Open — submit ensemble *and* best seed as separate final candidates |
 
-Seven discrete failure modes diagnosed; seven discrete lessons fed forward into the version that took #1 on the public leaderboard. The negative results are not separate from the methodology — they *are* the methodology.
+Seven discrete failure modes diagnosed; seven discrete lessons fed forward into the version that briefly took #1 on the public leaderboard (v46/v47, currently #3 after two teams overtook us 2026-05-26 → 2026-05-27). The negative results are not separate from the methodology — they *are* the methodology.

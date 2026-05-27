@@ -32,19 +32,20 @@ The corresponding source notebooks live in `notebooks/improvedvNN_source.ipynb`.
 | **v46** | **EffNet-B0** | **128 native** | **v44 stripped (no FL aug, WD 1e-4) + SOFT pseudo-labels from v44_seed1 (the lucky teacher): all 59k test cells, raw probs as BCE targets (Hinton 2015 distillation), pseudo loss weighted 0.5** | **0.8236** | **`notebooks/improvedv46_source.ipynb` — ★ NEW BEST + #1 ON LB ★. +0.039 over v44 seed1, +0.042 over v44 ensemble. Distillation crushed expectations (I forecast +0.005 to +0.015). All 3 seeds reached tr_auc ≈ 0.993 (vs v44's 0.989). Now 0.010 ahead of Group 1 @ 0.8136. Need +0.0264 more to reach 0.85** |
 | v46_seed1 | EffNet-B0 | 128 native | single-seed extract from v46 (submission_seed1.csv) | 0.8157 | v46 seed1 alone scored 0.0079 below the v46 ensemble |
 | v46_seed2 | EffNet-B0 | 128 native | single-seed extract from v46 (submission_seed2.csv) | 0.8229 | v46 seed2 alone scored 0.0007 below the v46 ensemble. **Different pattern from v44**: in v46 the ensemble beat both observed seeds, meaning within-recipe averaging genuinely added signal here (consistent with the tighter tr_auc convergence ≈ 0.993 across seeds vs v44's 0.989 spread) |
-| **v47** | **EffNet-B0** | **128 native** | **Same recipe as v46, but teacher swapped: SOFT pseudo from v46 ensemble (LB 0.8236) instead of v44_seed1. Iterative noisy student round 2 (Xie 2020). Single-variable test of stronger teacher → stronger student in round 2** | **0.8264** | **`notebooks/improvedv47_source.ipynb` — ★ NEW BEST + STILL #1 ON LB ★. +0.0028 over v46. Diminishing returns confirmed: round 1 (v44→v46) gained +0.039, round 2 (v46→v47) gained +0.003. Per-seed public LB widened: 0.8126 / 0.8150 / **0.8355** (range 0.0229, ~3× wider than v46's 0.0072). The ensemble at 0.8264 sat **below v47_seed2's 0.8355 by 0.0091** — within-recipe averaging hedged against a strong outlier seed. Earlier "tr_auc tightened" framing (0.9937/0.9929/0.9932) was on training AUC, not LB; on the metric we report, dispersion expanded. Decision: do NOT do a vanilla round 3; the right next experiment is Hinton temperature distillation (v48)** |
+| **v47** | **EffNet-B0** | **128 native** | **Same recipe as v46, but teacher swapped: SOFT pseudo from v46 ensemble (LB 0.8236) instead of v44_seed1. Iterative noisy student round 2 (Xie 2020). Single-variable test of stronger teacher → stronger student in round 2** | **0.8264** | **`notebooks/improvedv47_source.ipynb` — ★ +0.0028 over v46 on the ensemble, +0.0119 on the best single seed. Per-seed public LB: 0.8150 / 0.8187 / **0.8355** (range 0.0205, ~2.8× wider than v46's 0.0072). The ensemble at 0.8264 sat **below v47_seed2's 0.8355 by 0.0091** — within-recipe averaging hedged against a strong outlier seed. Earlier "tr_auc tightened" framing (0.9937/0.9929/0.9932) was on training AUC, not LB; on the metric we report, dispersion expanded. **Noise-floor analysis: v46→v47 ensemble lift is 0.31σ (indistinguishable from zero); v46→v47_s2 best-seed lift is 1.33σ (marginal).** Decision: do NOT do a vanilla round 3; the right next experiment is Hinton temperature distillation (v48)** |
 | **v48** | **EffNet-B0** | **128 native** | **v47 recipe with ONE knob changed: Hinton 2015 temperature distillation at T=2.0. Teacher is v46 (UNCHANGED — same as v47). Softens v46 teacher targets by sigmoid(logit(q)/T) at load, softens student logits by z/T at train, scales pseudo loss by T². Pure single-knob test of whether the "soft" in v46/v47's soft-pseudo BCE was actually firing** | (queued) | **`notebooks/improvedv48_source.ipynb` — requires `submissionv46` Kaggle dataset (same as v47, no new upload needed). Quota reset 2026-05-29. Decision rule: ≥0.829 = T=2 is the missing piece (consider v49 = T=2 + v47 teacher); 0.826-0.829 = T=2 helps marginally; ≈v47 ±0.002 = T=1 already captured Hinton's signal (publishable flat); <0.825 = T=2 destroys signal at this teacher quality (publishable negative). All four outcomes give the report a defensible finding.** |
 
-## Top-of-leaderboard reference (post-v47)
+## Top-of-leaderboard reference (snapshot 2026-05-27 12:13 UTC)
 
-| # | Team | Score |
-|---|---|---|
-| **1** | **Group 15 (us)** | **0.8264** |
-| 2 | Group 1 | 0.8136 |
-| 3 | NicoleChao | 0.8125 |
-| 4 | Group 2 | 0.7916 |
+| # | Team | Score | Members |
+|---|---|---|---|
+| 1 | Group 1 | 0.8448 | edvardschmidt, leokemetli, svanteandersson |
+| 2 | Group10 | 0.8445 | albinpbergman, hugohansson123, olleflygar, saimazubair, tildemackintosh |
+| **3** | **Group 15 (us)** | **0.8355** | rafaelproena (v47_seed2) |
+| 4 | Groups 14 | 0.8125 | hoyumikaellau, nicolechaoo |
+| 5 | Group 6 | 0.8007 | elsasundh, emelief, fahimrayhan, mdsabbirppp |
 
-We extended our #1 lead with v47 (iterative noisy student round 2): +0.0128 ahead of next-best, up from +0.010 at v46. Teacher target reportedly 0.85 — we need +0.0236 more.
+We were briefly #1 between v46 and v47, and held it through v47 (the comment thread above for v47 reflects that snapshot). Between 2026-05-26 and 2026-05-27 Group 1 (0.7916 → 0.8448) and Group10 (new entrant → 0.8445) overtook us. Our placement at 0.8355 comes from **v47_seed2**, not the v47 ensemble; the ensemble at 0.8264 would place 4th, which is empirical evidence for the within-recipe ensemble collapse documented in the paper §VII-G. Gap to current #1 = 0.0093.
 
 ## Lessons by experiment
 
@@ -68,16 +69,21 @@ We extended our #1 lead with v47 (iterative noisy student round 2): +0.0128 ahea
 
 ## Final-submission selection strategy
 
-Kaggle lets you pick 2 submissions for private LB. Updated plan after v47 extended our lead at #1:
+Kaggle lets you pick 2 submissions for private LB. Updated plan as of 2026-05-27 (we are currently #3, two teams overtook us 2026-05-26 → 2026-05-27):
 
-1. **v47 (LB 0.8264)** — new best, primary pick. Iterative noisy-student round 2: 3 seeds × SWA, soft pseudo from v46 ensemble, 40-way TTA. Comfortable +0.013 ahead of next-best public submission.
-2. **v41 (LB 0.7563)** — safety net. Pick reasoning: (a) v41 does NOT use pseudo-labels at all — fully different mechanism, so it hedges against the chance that the v46/v47 distillation chain overfits to v46's specific calibration of the public split, and (b) it's the highest-LB result we have whose recipe doesn't lineage-share with v44/v46/v47.
+The §VII-G analysis in the paper presents three plausible strategies. The new public-LB reality (v47_s2 is what's holding our #3 placement; v47 ensemble would place #4) is direct evidence that within-recipe averaging has cost us LB on this split. That argues for the **aggressive** strategy over the **robust** one:
 
-Why NOT pick v46 as the safety net even though it's our second-highest LB at 0.8236: v46 is the teacher v47 distills from. They share recipe lineage almost completely (only difference: teacher source CSV). A correlated pair offers no diversification on private LB. v41 is the lowest-correlation pick available among submitted recipes.
+1. **Aggressive:** v47_seed2 (LB 0.8355) + v41 (LB 0.7563 as a different-mechanism safety net). Bets that seed 2's training dynamics generalize.
+2. **Robust:** v47 ensemble (LB 0.8264) + v41. Preserves the within-recipe averaging discipline of v46 but gives up 0.009 public LB.
+3. **Diversified within-pseudo:** v47_seed2 + v47 ensemble. No supervised-only safety net.
 
-A v47 + v41 sigmoid-average submission is **NOT** worth a slot test — the members are 0.070 LB apart, far outside the 0.02 cross-recipe ensembling threshold we established empirically via v22 and v45_probe (M2).
+Why NOT pick v46 as a safety net: v46 is the teacher v47 distills from. They share recipe lineage almost completely (only difference: teacher source CSV). A correlated pair offers no diversification on private LB. v41 is the lowest-correlation pick available among submitted recipes.
 
-Gap to next-best LB (Group 1 at 0.8136): **+0.0128** with v47 — well outside seed/threshold noise. We hold a comfortable #1 lead even before final-private-LB shake-out. v48 (Hinton T=2) is queued for the May 29 quota reset; if it gains we extend further, if it's flat or worse v47 remains the primary pick.
+A v47 + v41 sigmoid-average submission is **NOT** worth a slot test — the members are 0.070+ LB apart, far outside the 0.015 cross-recipe ensembling threshold we established empirically via v22 and v45_probe (M2).
+
+**Noise-floor caveat.** A noise-floor analysis (paper Table III) places the v46→v47 ensemble lift (+0.003) at 0.31σ relative to the v47 per-seed SE — indistinguishable from zero. The v46→v47_s2 best-seed lift (+0.012) is at marginal (1.33σ). The +0.039 v44→v46 soft-pseudo gain is the only robust delta in the entire iteration chain (4.75σ).
+
+v48 (Hinton T=2) is queued for the May 29 Kaggle quota reset. If it gains we regain the lead; if it's flat or worse, v47_s2 remains the primary pick under the aggressive strategy.
 
 ## What's NOT tracked here
 
