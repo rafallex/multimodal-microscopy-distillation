@@ -201,7 +201,7 @@ add_text(s, Inches(0.8), Inches(1.35), Inches(8.5), Inches(1.5),
 
 # Subtitle
 add_text(s, Inches(0.8), Inches(3.05), Inches(8.5), Inches(0.5),
-         "From SSL collapse to #1 on the leaderboard — 30 versions, 5 acts, +0.081 LB",
+         "From SSL collapse to the #1 spot (peaked) — 30 versions, 5 acts, +0.090 LB",
          font="Georgia", size=18, italic=True, color=CREAM,
          align=PP_ALIGN.LEFT)
 
@@ -250,7 +250,7 @@ add_bullets(s, Inches(0.4), Inches(1.5), Inches(5.0), Inches(3.5), [
     ("Inputs: paired BF + FL microscopy, 128×128 grayscale",),
     ("Train: 12 patients with leave-one-patient-out CV",),
     ("Test: unknown patients → OOD generalization is the dominant failure mode",),
-    ("Current LB position: we hold #1 at 0.8264 (+0.013 above next-best)",),
+    ("Best result: 0.8355 (best single seed) — peaked #1, currently #3 at submission",),
 ], size=14)
 
 # Right column: stat cards
@@ -923,9 +923,10 @@ set_notes(s, (
     "not just the confident ones. Soft target = teacher's raw probability. +0.039 LB. We "
     "took #1 on the public LB at 0.8236 (subsequently overtaken; now #3 with v47_seed2 at 0.8355).\n\n"
     "v47 closed the loop: Xie 2020-style iterative noisy student round 2. Same recipe as v46 "
-    "but with v46's ensemble as the new teacher. +0.003 LB — small, but enough to extend "
-    "our LB lead to +0.013 over next-best. The per-seed tr_auc spread also tightened (0.989-0.993 "
-    "in v46 → 0.993-0.994 in v47), so round 2 acts as a variance reducer as well.\n\n"
+    "but with v46's ensemble as the new teacher. +0.003 LB on the ensemble, +0.012 on the best "
+    "single seed (0.8355). The honest read: the round-2 ensemble gain is below the seed noise "
+    "floor (0.27σ), and the per-seed LB dispersion actually WIDENED ~3× (not a variance reducer) "
+    "— the per-seed spread, not the mean, is the real finding.\n\n"
     "The key methodological insight (bottom banner): the +0.067 LB lift from pseudo+distillation "
     "dwarfed the +0.011 from textbook regularization. On 12 patients, the dataset-size lever "
     "is bigger than the model-quality lever."
