@@ -7,7 +7,7 @@
 
 Binary malignant/benign classification of paired **bright-field (BF) + fluorescence (FL)** oral-cancer microscopy cells, on a deliberately hard regime: **12 training patients**, ~114k labeled cells, and a **patient-disjoint** test set of 59k cells. The interesting part isn't the architecture — it's that on this small-sample regime, **growing the effective labeled set via test-set distillation beats architectural and regularization changes by an order of magnitude**, and that careful failure analysis drove every gain.
 
-Across 30 logged Kaggle iterations the public-LB AUC moved **0.7455 → 0.8355** (+0.090 best single seed). The submission peaked at **#1 on the public leaderboard** before two teams overtook it in the final days; it currently sits **#3** in an active competition (closes 2026-06-03).
+Across 30 logged Kaggle iterations the public-leaderboard AUC climbed **0.7455 → 0.8355** (+0.090 on the best single seed). The submission **peaked at #1 on the public leaderboard**; final placement is decided by the held-out private split.
 
 ![Public-LB progression across 30 logged iterations](presentation/figures/lb_progression.png)
 
@@ -38,7 +38,7 @@ The decisive lift came from a **semi-supervised pipeline** that uses the unlabel
 | **v44** | Hard pseudo-labels: keep ~9,400 confident test cells (p<0.05 / p>0.95) | Lee 2013 | **+0.025** over v41 |
 | **v46** | Soft-target distillation: keep **all** 59,040 test cells, raw teacher probability as the BCE target | Hinton 2015 | **+0.042** — largest single gain (4.13σ) |
 | **v47** | Iterative noisy student round 2: swap the teacher to the v46 ensemble | Xie 2020 | +0.003 ensemble (0.27σ, **at saturation**) |
-| **v48 / v49** | Hinton temperature (T=2) and best-seed-as-teacher single-knob tests | — | queued (GPU) |
+| **v48+** | Backbone & fusion diversity (EfficientNet-B2/B3, ResNet-50, ConvNeXt, early-fusion) distilled from the best seed, for a cross-architecture ensemble | — | in progress |
 
 The headline methodological claim: with 12 patients the model is **data-bound, not capacity-bound**. The four-regularizer textbook stack (label smoothing + dropout + RandomResizedCrop + multiscale TTA) bought +0.011; "add the test set as soft pseudo-labels" bought +0.042.
 
