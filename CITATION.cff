@@ -1,0 +1,25 @@
+cff-version: 1.2.0
+message: "If you reference this work, please cite it as below."
+title: "Semi-Supervised Distillation for Small-Sample Multimodal Cancer-Cell Classification"
+abstract: >-
+  An empirical study of pseudo-labeling and knowledge distillation for binary
+  malignant/benign classification of paired bright-field + fluorescence microscopy
+  cells on a small-sample, patient-disjoint benchmark. Soft-target distillation over
+  the unlabeled test set is shown to dominate architectural and regularization changes;
+  seven failure modes are diagnosed, and headline gains are scored against an
+  empirically-measured seed-noise floor.
+type: software
+authors:
+  - given-names: Rafael
+    family-names: "Tavares Proença"
+repository-code: "https://github.com/rafallex/multimodal-microscopy-distillation"
+license: MIT
+keywords:
+  - knowledge distillation
+  - semi-supervised learning
+  - pseudo-labeling
+  - noisy student
+  - multimodal microscopy
+  - medical image classification
+  - EfficientNet
+  - multiple-instance learning

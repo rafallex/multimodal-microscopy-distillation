@@ -4,6 +4,17 @@ Internal note — **delete this file as the last step before flipping the repo t
 Tracks what must be true before `rafallex/multimodal-microscopy-distillation` goes from
 private → public. Audited 2026-05-29.
 
+## ⚠️ READ FIRST — do not just click "Make public"
+The repo's *files* are clean, but **old git commits still contain 27 classmates' Kaggle
+usernames** (see the scrub section). If you flip to public without scrubbing history,
+that data becomes public. So the one-line rule:
+
+> **When the course is over, message Claude: "scrub history and publish."**
+> Claude runs the history scrub, verifies it's clean, force-pushes, and tells you when it's
+> safe to click Settings → Make public. Everything else in this file is cosmetic.
+
+If you'd rather do it yourself, follow the scrub procedure below step by step.
+
 ## ✅ Already clean (verified)
 - **No secrets / API keys / tokens** in tracked files (`.gitignore:220` is just an *ignore rule* for `.streamlit/secrets.toml`, not a secret).
 - **No hard-coded personal paths** (`C:\Users\Rafallex\...`) in tracked files.
@@ -55,10 +66,19 @@ git -c grep.lineNumber=false grep -iI "<paste-one-handle-here>" $(git rev-list -
 > re-derived from commit `7444718` at that time, so you don't have to transcribe them.
 
 ## 🟡 Optional polish (nice-to-have, not blockers)
+- **Final LB update** — once the private leaderboard is announced, drop the final
+  standing into the README's opening (it's currently phrased to age gracefully, so this
+  is optional, not required).
 - `notebooks/legacy/` — early exploratory notebooks (v2–v16). Outputs are stripped; keep
   them (shows the real iteration journey) or `git rm` them for a tighter portfolio.
-- Add a `CITATION.cff` so the paper/repo is citable.
+- ~~Add a `CITATION.cff`~~ — done.
 - Tag the paper-submission commit (e.g. `git tag v1.0-paper`).
+- **Commit attribution (your call):** most commits carry a `Co-Authored-By: Claude`
+  trailer (honest — Claude helped with repo organization, the paper, and analysis
+  scripts; the ML experiments and decisions were yours). AI-assisted work is mainstream
+  and keeping it is the straightforward, honest choice. If you'd prefer the history to
+  read as solely yours, the trailers can be dropped during the same `git-filter-repo`
+  pass as the username scrub — tell Claude and it's one extra flag.
 
 ## Final flip
 1. Confirm gated preconditions ✔, run the history scrub ✔, verify clean ✔.
