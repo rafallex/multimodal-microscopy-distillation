@@ -172,6 +172,9 @@ def build(ver, out_name, *, backbone, lever, seeds, batch, use_effnet,
     if use_effnet and backbone != "efficientnet_b0":
         src4 = src4.replace('timm.create_model("efficientnet_b0"',
                             f'timm.create_model("{backbone}"'); n += 1
+        # keep the printed backbone label honest (else it still says EfficientNet-B0)
+        src4 = src4.replace("'EfficientNet-B0' if USE_EFFICIENTNET else 'ResNet-18'",
+                            f"'{backbone_name}' if USE_EFFICIENTNET else 'ResNet-18'"); n += 1
     if not use_effnet:
         # _make_resnet18_branch -> resnet50 (conv1 + fc.in_features handled dynamically)
         src4 = src4.replace("net = models.resnet18(weights=weights)",
@@ -180,11 +183,16 @@ def build(ver, out_name, *, backbone, lever, seeds, batch, use_effnet,
                             "'EfficientNet-B0' if USE_EFFICIENTNET else 'ResNet-50'")
     nb["cells"][4]["source"] = src4.splitlines(keepends=True)
 
-    # ---- cell 7: fix misleading log string ----
+    # ---- cell 7: fix misleading log string + saved backbone metadata ----
     src7 = "".join(nb["cells"][7]["source"])
     src7 = src7.replace(
         'print(f"  soft pseudo loss weight = {PSEUDO_LOSS_WEIGHT}  (Hinton 2015 distillation, teacher = v46)")',
         f'print(f"  soft pseudo loss weight = {{PSEUDO_LOSS_WEIGHT}}  (teacher = v47_seed2, backbone {backbone_name})")')
+    # the saved checkpoint metadata also hard-codes the template backbone — correct it
+    if use_effnet and backbone != "efficientnet_b0":
+        src7 = src7.replace('"backbone": "efficientnet_b0"', f'"backbone": "{backbone}"'); n += 1
+    if not use_effnet:
+        src7 = src7.replace('else "resnet18"', 'else "resnet50"'); n += 1
     nb["cells"][7]["source"] = src7.splitlines(keepends=True)
 
     out = ROOT / "notebooks" / out_name
