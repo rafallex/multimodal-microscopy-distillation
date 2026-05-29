@@ -414,8 +414,9 @@ function ruleCallout(slide, x, y, w, h, text) {
     "is a per-patient grouping. Second: the test set has strict patient-disjoint OOD. That " +
     "second constraint dominates everything that follows.\n\n" +
     "The instructor was explicit on May 14: grading is on methodology and presentation, " +
-    "not on the leaderboard score. The +0.013 lead is reassuring, but it's not what's being " +
-    "evaluated. The negative results and the diagnostic reasoning behind v46/v47 are."
+    "not on the leaderboard score. Peaking at #1 (and sitting top-3 at submission) is " +
+    "reassuring, but it's not what's being evaluated. The negative results and the " +
+    "diagnostic reasoning behind v46/v47 are."
   );
 }
 
@@ -556,9 +557,10 @@ function ruleCallout(slide, x, y, w, h, text) {
     "Act 5A: v42-v44, semi-supervised pivot. v42 SSL collapsed; v44 added Lee 2013 hard " +
     "pseudo-labels for +0.025. \n\n" +
     "Act 5B: v46-v47, soft distillation. v46 used Hinton 2015 soft pseudo for +0.039 and " +
-    "took #1. v47 iterated with v46 as the new teacher (Xie 2020 noisy student round 2) for " +
-    "another +0.003 to 0.8264 — small in absolute terms, but enough to extend our #1 lead " +
-    "to +0.013 over next-best."
+    "took #1. v47 iterated with v46 as the new teacher (Xie 2020 noisy student round 2): " +
+    "+0.003 on the ensemble (0.8264) but +0.012 on the best single seed (0.8355). We peaked " +
+    "#1 here; the noise-floor analysis shows the round-2 ensemble gain is statistically zero, " +
+    "and the per-seed dispersion is the real story."
   );
 }
 
@@ -914,9 +916,9 @@ function ruleCallout(slide, x, y, w, h, text) {
     s.addImage({
       path: FIG_LB,
       x: 0.30, y: 1.50, w: 9.40, h: 3.40,
-      altText: "Public LB progression chart across 30 logged Kaggle submissions, v19 baseline 0.7455 → v47 NEW BEST 0.8264. v48 placeholder (queued) at the right edge.",
+      altText: "Public LB progression across 30 logged Kaggle submissions: v19 baseline 0.7455 → v47_s2 best single seed 0.8355 (peaked #1, currently #3). Dashed red line marks the current leader at 0.8448; v48+ backbone-diversity runs queued at the right edge.",
     });
-    s.addText("Fig. 4  Public LB across 30 logged submissions. Green = breakthrough · blue = useful gain · red = regression · grey = neutral. v48 placeholder (orange) is queued.",
+    s.addText("Fig. 4  Public LB across 30 logged submissions. Green = breakthrough · blue = useful gain · red = regression · grey = neutral. Dashed red = current leader; v48+ (orange) = queued backbone-diversity runs.",
       {
         x: 0.30, y: 4.95, w: 9.40, h: 0.35,
         fontFace: "Calibri", fontSize: 9, italic: true, color: MUTED, margin: 0,
@@ -934,9 +936,9 @@ function ruleCallout(slide, x, y, w, h, text) {
     "- v44 at 0.7812 is the hard-pseudo breakthrough.\n" +
     "- v45_probe at 0.7729 confirms cross-recipe ensembles fail at 0.025 LB gaps.\n" +
     "- v46 at 0.8236 is the distillation breakthrough.\n" +
-    "- v47 at 0.8264 extends our lead via iterative noisy student round 2 (Xie 2020).\n" +
-    "- v48 (orange '?') is queued — Hinton T=2 temperature distillation, single-knob test.\n\n" +
-    "The +0.081 LB lift from v19 to v47 is the headline."
+    "- v47 (iterative noisy student round 2, Xie 2020): 0.8264 ensemble, 0.8355 best single seed. We peaked #1 here; two teams later overtook us, so we now sit #3.\n" +
+    "- v48+ (orange) is queued — a backbone-diversity fleet (EfficientNet-B2/B3, ResNet-50, ConvNeXt, early-fusion) distilled from the best seed, for a cross-architecture ensemble.\n\n" +
+    "The +0.090 LB lift from v19 (0.7455) to v47's best single seed (0.8355) is the headline."
   );
 }
 
