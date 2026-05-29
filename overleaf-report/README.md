@@ -79,7 +79,7 @@ Then re-upload the changed PDFs to Overleaf (drag-replace works).
 
 ## Manuscript provenance
 
-Content draws from the project's master outline (`../REPORT_OUTLINE.md`)
+Content draws from the project's master outline (`notes/REPORT_OUTLINE.md`)
 and the long-form markdown drafts (`notes/06_results.md`,
 `notes/07_negative_results.md`), updated for the v47 per-seed finding
 (seed 2 at LB 0.8355; the within-recipe ensemble net-negative under an

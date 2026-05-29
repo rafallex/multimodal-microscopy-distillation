@@ -1,0 +1,25 @@
+# ── Reproduce the paper figures, decks, and analyses locally (CPU-only) ─────
+# These pins match the environment that produced the committed figures/CSVs.
+numpy==2.4.4
+pandas==3.0.2
+matplotlib==3.10.9
+pypdf==6.12.1            # PDF text extraction for compile verification
+python-pptx==1.0.2       # presentation/build_deck.py
+
+# ── Train a version end-to-end (GPU) ───────────────────────────────────────
+# The notebooks under notebooks/ run on Kaggle's free T4 x2 tier, which ships
+# torch/torchvision/timm/scikit-learn/Pillow preinstalled. Versions below are
+# lower bounds known to work; on Kaggle you do not install these yourself.
+torch>=2.0
+torchvision>=0.15
+timm>=0.9.0              # efficientnet_b0.ra_in1k backbone
+scikit-learn>=1.3        # ROC-AUC, train/val splits
+Pillow>=10.0             # image loading
+
+# ── Notes ───────────────────────────────────────────────────────────────────
+# Local figure/deck reproduction needs only the first block:
+#     pip install numpy pandas matplotlib pypdf python-pptx
+#     python overleaf-report/figure-sources/build_lb_progression.py
+#     python overleaf-report/figure-sources/build_noise_floor_analysis.py
+#
+# Full model training is done on Kaggle Notebooks (see README "Reproducing a run").
