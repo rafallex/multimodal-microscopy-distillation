@@ -37,26 +37,34 @@ def _make_featmap_branch(pretrained=True):
 
 
 class CoAttnFusion(nn.Module):
-    """Each modality attends to the other (cross-attention), then mean-pool tokens."""
+    """CAFNet-style cross-attention, HARDENED for mixed precision: fp32 attention +
+    pre-norm + ReZero gate (alpha init 0 -> attention starts as a no-op and ramps in).
+    Prevents the fp16 attention-softmax overflow that NaNed v57 v1 (clean epoch 0,
+    NaN at epoch 1 once the OneCycle LR peaked)."""
     def __init__(self, in_dim, dim=512, heads=8, p=0.1):
         super().__init__()
         self.proj_bf = nn.Conv2d(in_dim, dim, 1)
         self.proj_fl = nn.Conv2d(in_dim, dim, 1)
-        self.a_bf = nn.MultiheadAttention(dim, heads, dropout=p, batch_first=True)
-        self.a_fl = nn.MultiheadAttention(dim, heads, dropout=p, batch_first=True)
         self.n_bf = nn.LayerNorm(dim)
         self.n_fl = nn.LayerNorm(dim)
+        self.a_bf = nn.MultiheadAttention(dim, heads, dropout=p, batch_first=True)
+        self.a_fl = nn.MultiheadAttention(dim, heads, dropout=p, batch_first=True)
+        self.alpha_bf = nn.Parameter(torch.zeros(1))           # ReZero gates
+        self.alpha_fl = nn.Parameter(torch.zeros(1))
         self.out_dim = dim
 
     def forward(self, mbf, mfl):
-        mbf, mfl = self.proj_bf(mbf), self.proj_fl(mfl)      # [B,dim,H,W]
-        tbf = mbf.flatten(2).transpose(1, 2)                 # [B,HW,dim]
-        tfl = mfl.flatten(2).transpose(1, 2)
-        obf, _ = self.a_bf(tbf, tfl, tfl)                    # BF queries FL
-        ofl, _ = self.a_fl(tfl, tbf, tbf)                    # FL queries BF
-        tbf = self.n_bf(tbf + obf)
-        tfl = self.n_fl(tfl + ofl)
-        return tbf.mean(1), tfl.mean(1)                      # [B,dim] each
+        tbf = self.proj_bf(mbf).flatten(2).transpose(1, 2)     # [B,HW,dim]
+        tfl = self.proj_fl(mfl).flatten(2).transpose(1, 2)
+        # attention in fp32 regardless of AMP -- fp16 softmax overflow is the NaN source
+        with torch.autocast(device_type=tbf.device.type, enabled=False):
+            tbf, tfl = tbf.float(), tfl.float()
+            qbf, qfl = self.n_bf(tbf), self.n_fl(tfl)          # pre-norm
+            obf, _ = self.a_bf(qbf, qfl, qfl)                  # BF queries FL
+            ofl, _ = self.a_fl(qfl, qbf, qbf)                  # FL queries BF
+            tbf = tbf + self.alpha_bf * obf                    # ReZero residual
+            tfl = tfl + self.alpha_fl * ofl
+        return tbf.mean(1), tfl.mean(1)                        # [B,dim] each
 
 
 class MultimodalClassifier(nn.Module):
