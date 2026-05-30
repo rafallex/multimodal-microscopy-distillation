@@ -73,7 +73,7 @@ function sectionHeader(slide, num, title, page) {
     fontFace: "Calibri", fontSize: 10.5, bold: true,
     color: TEAL, charSpacing: 5, margin: 0,
   });
-  slide.addText(`${String(page).padStart(2, "0")} / 12`, {
+  slide.addText(`${String(page).padStart(2, "0")} / 13`, {
     x: 8.30, y: 0.22, w: 1.40, h: 0.30,
     fontFace: "Calibri", fontSize: 10, color: MUTED,
     align: "right", margin: 0,
@@ -1055,7 +1055,57 @@ function ruleCallout(slide, x, y, w, h, text) {
 }
 
 // =========================================================================
-// === SLIDE 12: §10 — TAKE-HOME ===
+// === SLIDE 12: §10 — WHERE THIS POINTS (forward R&D) ===
+// =========================================================================
+{
+  const s = pres.addSlide();
+  s.background = { color: CREAM };
+  sectionHeader(s, 10, "Where this points", 12);
+  slideTitle(s, "The next gain is decorrelation, not more EfficientNet");
+
+  statCard(s, 0.30, 1.70, 3.00, 1.30, "0.41",
+    "feature-GBM rank-corr vs the best CNN (the EffNet fleet is > 0.94)", TEAL,
+    { bigSize: 38, smallSize: 9 });
+  statCard(s, 3.50, 1.70, 3.00, 1.30, "0.82",
+    "its leave-patients-out AUC — on par with the CNN", NAVY,
+    { bigSize: 38, smallSize: 9 });
+  statCard(s, 6.70, 1.70, 3.00, 1.30, "0.79",
+    "ResNet-50 LB — the within-CNN diversity bet underdelivered", CRIMSON,
+    { bigSize: 38, smallSize: 9 });
+
+  bulletList(s, 0.30, 3.30, 9.40, 1.55, [
+    { head: "The ceiling is correlation.",
+      body: "Every strong model is EfficientNet-B0 (rank-corr > 0.94); even a distilled ResNet-50 came out 0.90-correlated and weak (0.79). Symmetric averaging can't beat the best seed." },
+    { head: "The orthogonal member.",
+      body: "A LightGBM on 87 hand-crafted morphology / texture / cross-modal features: rank-corr 0.41 — the first genuinely decorrelated model. FL carries more single-modality signal than BF." },
+    { head: "The SOTA fusion.",
+      body: "Intermediate co-attention (CAFNet; Lian et al. 2024, this dataset's source paper) on the proven EfficientNet-B0 backbone — implemented and AMP-hardened." },
+  ], { accent: TEAL, size: 10.5 });
+
+  calloutQuote(s, 0.30, 5.02, 9.40, 0.28, "Status",
+    "All three implemented and validated on held-out patients; leaderboard evaluation in progress.",
+    { quoteSize: 9.5, accent: TEAL });
+
+  footer(s, 10);
+  s.addNotes(
+    "Where the analysis points next — the honest forward story past v47.\n\n" +
+    "Core finding: every strong model I have is an EfficientNet-B0 variant, so they're all " +
+    ">0.94 rank-correlated. That's exactly why symmetric averaging never beats the best single seed. " +
+    "I tried a ResNet-50 under the same soft-pseudo recipe — it came out weak (0.79 LB) and MORE " +
+    "correlated (0.90), not less. Diversity within the CNN family is bounded.\n\n" +
+    "So the real lever is a model from a different representation entirely: a gradient-boosted tree on " +
+    "87 hand-crafted features — intensity, Otsu morphology, GLCM/LBP texture, and a cross-modal BF-FL " +
+    "correlation feature. Leave-patients-out it hits 0.82 AUC — on par with the CNN — but its rank-" +
+    "correlation with the best CNN is only 0.41, less than half of anything else. That is the ideal " +
+    "ensemble ingredient, and it shows FL carries more signal than BF (0.76 vs 0.72 alone).\n\n" +
+    "Finally the architecture the source paper reports as state of the art — intermediate co-attention " +
+    "fusion, CAFNet — applied to EfficientNet (not their ResNet, which is weak here), hardened for " +
+    "mixed precision. All implemented and locally validated; leaderboard numbers pending."
+  );
+}
+
+// =========================================================================
+// === SLIDE 13: §11 — TAKE-HOME ===
 // =========================================================================
 {
   const s = pres.addSlide();
@@ -1067,13 +1117,13 @@ function ruleCallout(slide, x, y, w, h, text) {
     fill: { color: TEAL }, line: { color: TEAL, width: 0 },
   });
   // Page indicator
-  s.addText("12 / 12", {
+  s.addText("13 / 13", {
     x: 8.30, y: 0.22, w: 1.40, h: 0.30,
     fontFace: "Calibri", fontSize: 10, color: MUTED,
     align: "right", margin: 0,
   });
 
-  s.addText("§10  ·  TAKE-HOME", {
+  s.addText("§11  ·  TAKE-HOME", {
     x: 0.80, y: 0.30, w: 5.0, h: 0.30,
     fontFace: "Calibri", fontSize: 10.5, bold: true,
     color: TEAL, charSpacing: 5, margin: 0,
@@ -1116,7 +1166,7 @@ function ruleCallout(slide, x, y, w, h, text) {
   });
 
   // Footer
-  s.addText("Code & LB history  ·  github.com/rafallex/A3-ADL", {
+  s.addText("Code & LB history  ·  github.com/rafallex/multimodal-microscopy-distillation", {
     x: 0.80, y: 5.10, w: 6.5, h: 0.30,
     fontFace: "Calibri", fontSize: 10.5, italic: true, color: MUTED, margin: 0,
   });
@@ -1142,7 +1192,7 @@ function ruleCallout(slide, x, y, w, h, text) {
     "Five. Negative results are the methodology. The v46 and v47 winning recipes are direct " +
     "responses to six diagnosed failures: v22, v27, v37, v38, v42, v43, and v45_probe. Reading the " +
     "failures faithfully is what produced the win.\n\n" +
-    "Thanks. Full code and version-by-version LB history at github.com/rafallex/A3-ADL. Questions?"
+    "Thanks. Full code and version-by-version LB history at github.com/rafallex/multimodal-microscopy-distillation. Questions?"
   );
 }
 
