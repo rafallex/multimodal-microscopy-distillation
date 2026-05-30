@@ -1060,47 +1060,49 @@ function ruleCallout(slide, x, y, w, h, text) {
 {
   const s = pres.addSlide();
   s.background = { color: CREAM };
-  sectionHeader(s, 10, "Where this points", 12);
-  slideTitle(s, "The next gain is decorrelation, not more EfficientNet");
+  sectionHeader(s, 10, "Ensembling failed", 12);
+  slideTitle(s, "Every ensemble I tried lost to the best single model");
 
-  statCard(s, 0.30, 1.70, 3.00, 1.30, "0.41",
-    "feature-GBM rank-corr vs the best CNN (the EffNet fleet is > 0.94)", TEAL,
-    { bigSize: 38, smallSize: 9 });
-  statCard(s, 3.50, 1.70, 3.00, 1.30, "0.82",
-    "its leave-patients-out AUC — on par with the CNN", NAVY,
-    { bigSize: 38, smallSize: 9 });
-  statCard(s, 6.70, 1.70, 3.00, 1.30, "0.79",
-    "ResNet-50 LB — the within-CNN diversity bet underdelivered", CRIMSON,
-    { bigSize: 38, smallSize: 9 });
+  statCard(s, 0.30, 1.70, 3.00, 1.30, "0.8264",
+    "3-seed average — BELOW the 0.8355 best single seed", CRIMSON,
+    { bigSize: 30, smallSize: 9.5 });
+  statCard(s, 3.50, 1.70, 3.00, 1.30, "0.7074",
+    "orthogonal feature-GBM blend — CV said 0.82, the LB said this", CRIMSON,
+    { bigSize: 30, smallSize: 9.5 });
+  statCard(s, 6.70, 1.70, 3.00, 1.30, "0.7422",
+    "cross-recipe average (v22) — below v19 (0.7455) alone", CRIMSON,
+    { bigSize: 30, smallSize: 9.5 });
 
   bulletList(s, 0.30, 3.30, 9.40, 1.55, [
-    { head: "The ceiling is correlation.",
-      body: "Every strong model is EfficientNet-B0 (rank-corr > 0.94); even a distilled ResNet-50 came out 0.90-correlated and weak (0.79). Symmetric averaging can't beat the best seed." },
-    { head: "The orthogonal member.",
-      body: "A LightGBM on 87 hand-crafted morphology / texture / cross-modal features: rank-corr 0.41 — the first genuinely decorrelated model. FL carries more single-modality signal than BF." },
-    { head: "The SOTA fusion.",
-      body: "Intermediate co-attention (CAFNet; Lian et al. 2024, this dataset's source paper) on the proven EfficientNet-B0 backbone — implemented and AMP-hardened." },
-  ], { accent: TEAL, size: 10.5 });
+    { head: "Within-recipe: averaging regresses.",
+      body: "The per-seed LB spans 0.023 on N=12. The 3-seed mean lands below the lucky best seed every time — the variance is signal-destroying, not noise to average out." },
+    { head: "Cross-model: the stronger member is always pulled down.",
+      body: "Symmetric averaging drags toward the weaker member, and on this data the quality gap is always wide (v22, v45_probe, and the GBM blend all regressed)." },
+    { head: "Even an orthogonal model couldn't save it.",
+      body: "A decorrelated feature-GBM (rank-corr 0.41) looked perfect on paper — but its CV (0.82) did not transfer (LB ~0.60). CV-vs-LB struck the ensemble too." },
+  ], { accent: CRIMSON, size: 10.5 });
 
-  calloutQuote(s, 0.30, 5.02, 9.40, 0.28, "Status",
-    "All three implemented and validated on held-out patients; leaderboard evaluation in progress.",
-    { quoteSize: 9.5, accent: TEAL });
+  calloutQuote(s, 0.30, 5.02, 9.40, 0.28, "Take-home",
+    "On N=12, variance dominates — any averaging regresses below the best single draw. The submission is one well-chosen seed, never a blend.",
+    { quoteSize: 9.5, accent: CRIMSON });
 
   footer(s, 10);
   s.addNotes(
-    "Where the analysis points next — the honest forward story past v47.\n\n" +
-    "Core finding: every strong model I have is an EfficientNet-B0 variant, so they're all " +
-    ">0.94 rank-correlated. That's exactly why symmetric averaging never beats the best single seed. " +
-    "I tried a ResNet-50 under the same soft-pseudo recipe — it came out weak (0.79 LB) and MORE " +
-    "correlated (0.90), not less. Diversity within the CNN family is bounded.\n\n" +
-    "So the real lever is a model from a different representation entirely: a gradient-boosted tree on " +
-    "87 hand-crafted features — intensity, Otsu morphology, GLCM/LBP texture, and a cross-modal BF-FL " +
-    "correlation feature. Leave-patients-out it hits 0.82 AUC — on par with the CNN — but its rank-" +
-    "correlation with the best CNN is only 0.41, less than half of anything else. That is the ideal " +
-    "ensemble ingredient, and it shows FL carries more signal than BF (0.76 vs 0.72 alone).\n\n" +
-    "Finally the architecture the source paper reports as state of the art — intermediate co-attention " +
-    "fusion, CAFNet — applied to EfficientNet (not their ResNet, which is weak here), hardened for " +
-    "mixed precision. All implemented and locally validated; leaderboard numbers pending."
+    "This is the slide I most want you to remember: on this problem, ENSEMBLING NEVER WORKED. " +
+    "Not once. I tried every flavour and every single one regressed below my best single model.\n\n" +
+    "Within-recipe seed averaging: my three v47 seeds average to 0.8264, but the best single seed is " +
+    "0.8355. The per-seed leaderboard spread is 0.023 on twelve patients — so wide that averaging " +
+    "doesn't cancel noise, it just drags the lucky draw back down to the mean.\n\n" +
+    "Cross-recipe averaging: v22 averaged v19 and v21 and landed at 0.7422, below v19's 0.7455 alone. " +
+    "v45_probe confirmed it. Symmetric averaging always pulls toward the weaker member, and the quality " +
+    "gap between any two of my models is wide enough that it hurts.\n\n" +
+    "And the one that should have worked: a gradient-boosted tree on hand-crafted features, genuinely " +
+    "decorrelated from the CNN at rank-correlation 0.41 — textbook ideal ensemble ingredient. Its " +
+    "leave-patients-out CV was 0.82. Blended 50/50 with my best model it scored 0.7074. Its CV simply " +
+    "did not transfer to unseen patients — the exact CV-versus-LB trap that defines this whole project, " +
+    "now sprung on the ensemble itself.\n\n" +
+    "The conclusion is clean: with twelve patients, variance dominates everything, and any averaging " +
+    "regresses below the best single draw. My final submission is one well-chosen single model — never a blend."
   );
 }
 
