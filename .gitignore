@@ -307,3 +307,6 @@ presentation/slides_png/
 
 # Node
 node_modules/
+
+# local feature cache (large, regenerable)
+_l4_cache/
