@@ -25,6 +25,7 @@ MODEL_CELL = r'''# === v58: EfficientNet-B0 dual branch + INTERMEDIATE CO-ATTENT
 # (same contract as v50: MIL aux reuses these logits). Hardened for AMP.
 
 def _make_effnet_featmap_branch(pretrained=True):
+    import timm
     net = timm.create_model("efficientnet_b0", pretrained=pretrained,
                             num_classes=0, global_pool="")     # global_pool="" -> feature MAP
     old = net.conv_stem
