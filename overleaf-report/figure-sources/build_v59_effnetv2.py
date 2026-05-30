@@ -17,9 +17,13 @@ OUT = ROOT / "notebooks" / "improvedv59_source.ipynb"
 
 nb = json.loads(SRC.read_text(encoding="utf-8"))
 n = 0
+skipped = []
 
 
 def edit(loc, old, new, required=True):
+    """Replace `old` with `new` in the first code cell containing both `loc` and `old`.
+    Optional edits (required=False) that miss are recorded and reported, so stale
+    strings can't slip through silently (PR #16 review)."""
     global n
     for c in nb["cells"]:
         if c["cell_type"] != "code":
@@ -30,20 +34,43 @@ def edit(loc, old, new, required=True):
             n += 1
             return True
     if required:
-        raise SystemExit(f"[FAIL] not found: {old!r}")
+        raise SystemExit(f"[FAIL] required edit not found: {old!r}")
+    skipped.append(old)
     return False
 
 
-# 1) backbone swap: EfficientNet-B0 -> EfficientNetV2-S (the only architecture change)
+# --- the only architecture change: backbone B0 -> EfficientNetV2-S ---
 edit("timm.create_model", 'timm.create_model("efficientnet_b0"', 'timm.create_model("tf_efficientnetv2_s"')
-# 2) honest labels (print + saved metadata)
+
+# --- rename the now-misleading helper (def + call) and fix the class docstring ---
+edit("_make_effnet_b0_branch", "_make_effnet_b0_branch", "_make_effnet_branch")
+edit("dual EffNet-B0 branches",
+     "v19/v41 architecture: dual EffNet-B0 branches + late concat fusion head.",
+     "v59: dual EfficientNetV2-S branches + late concat fusion head.")
+
+# --- honest run-log labels (cell 2 header/config + cell 7 banner/teacher print) ---
+edit("=== v50: EfficientNet-B0",
+     "# === v50: EfficientNet-B0 + soft pseudo from v47_seed2 (LB 0.8355) ===",
+     "# === v59: EfficientNetV2-S + soft pseudo from v47_seed2 (proven recipe, backbone swap) ===")
+edit("# EfficientNet-B0; head auto-sizes",
+     "# EfficientNet-B0; head auto-sizes", "# EfficientNetV2-S; head auto-sizes")
+edit("Config (v50", "Config (v50 - EfficientNet-B0 + soft pseudo from v47_seed2):",
+     "Config (v59 - EfficientNetV2-S + soft pseudo from v47_seed2):")
+edit("Training seed=", "=== v47: Training seed=", "=== v59: Training seed=")
+edit("backbone EfficientNet-B0", "backbone EfficientNet-B0)", "backbone EfficientNetV2-S)")
 edit("Backbone:", "'EfficientNet-B0' if USE_EFFICIENTNET else 'ResNet-18'",
      "'EfficientNetV2-S' if USE_EFFICIENTNET else 'ResNet-18'", required=False)
+
+# --- saved checkpoint metadata ---
 edit('"backbone":', '"backbone": "efficientnet_b0"', '"backbone": "tf_efficientnetv2_s"', required=False)
-# 3) seeds + batch (V2-S ~20M/branch -> drop batch for T4)
-edit("SEEDS", "SEEDS               = [401, 402, 403, 404]", "SEEDS               = [1, 2]", required=False)
-edit("BATCH_SIZE", "BATCH_SIZE  = 128", "BATCH_SIZE  = 64", required=False)
-# 4) L1 ensemble teacher (seed-2 fallback)
+
+# --- seeds + batch (value, then the trailing comment) ---
+edit("SEEDS", "SEEDS               = [401, 402, 403, 404]", "SEEDS               = [1, 2]")
+edit("BATCH_SIZE", "BATCH_SIZE  = 128", "BATCH_SIZE  = 64")
+edit("sized for EfficientNet-B0 memory", "# v50: sized for EfficientNet-B0 memory on T4",
+     "# v59: sized for EfficientNetV2-S (~42M params) on T4", required=False)
+
+# --- L1 ensemble teacher (seed-2 fallback) ---
 edit('_PSEUDO_LABEL_CANDIDATES',
      '_PSEUDO_LABEL_CANDIDATES = [\n    "/kaggle/input/datasets/rafaelproena/submissionv47seed2/submission_seed2.csv",',
      '_PSEUDO_LABEL_CANDIDATES = [\n'
@@ -69,8 +96,13 @@ for c in nb["cells"]:
     c["source"] = "".join(c["source"]).splitlines(keepends=True)
 
 OUT.write_text(json.dumps(nb, ensure_ascii=False, indent=1), encoding="utf-8")
-print(f"applied {n} edits -> {OUT.name}")
+print(f"applied {n} edits ({len(skipped)} optional skipped) -> {OUT.name}")
+if skipped:
+    print("  SKIPPED optional edits (stale strings may remain):")
+    for s in skipped:
+        print("   -", s[:70])
 
+# --- validate: compiles, and NO stale backbone label survives anywhere ---
 re_nb = json.loads(OUT.read_text(encoding="utf-8"))
 for i, c in enumerate(re_nb["cells"]):
     if c["cell_type"] == "code":
@@ -78,8 +110,13 @@ for i, c in enumerate(re_nb["cells"]):
         pysrc = "\n".join(ln for ln in src.split("\n") if not ln.lstrip().startswith(("!", "%")))
         compile(pysrc, f"cell{i}", "exec")
 joined = "\n".join("".join(c["source"]) for c in re_nb["cells"])
-assert 'tf_efficientnetv2_s' in joined
-assert 'efficientnet_b0' not in joined.replace("_make_effnet_b0_branch", "")  # only the fn name may remain
-assert "SEEDS               = [1, 2]" in joined and "BATCH_SIZE  = 64" in joined
-assert "teacher_v47seeds_mean.csv" in joined
-print("VALID: backbone=tf_efficientnetv2_s, seeds[1,2], batch 64, L1 teacher, compiles")
+# stale-label checks apply to CODE only (the markdown intentionally says "B0 -> V2-S")
+code = "\n".join("".join(c["source"]) for c in re_nb["cells"] if c["cell_type"] == "code")
+assert "tf_efficientnetv2_s" in code
+assert "efficientnet_b0" not in code, "stale lowercase backbone token in code"
+assert "EfficientNet-B0" not in code, "stale display backbone label in code"
+assert "_make_effnet_b0_branch" not in code, "misleading helper name in code"
+assert code.count("class MultimodalClassifier") == 1
+assert "SEEDS               = [1, 2]" in code and "BATCH_SIZE  = 64" in code
+assert "teacher_v47seeds_mean.csv" in code
+print("VALID: tf_efficientnetv2_s, no stale B0 labels/names, seeds[1,2], batch 64, L1 teacher")
