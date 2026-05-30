@@ -1142,8 +1142,8 @@ function ruleCallout(slide, x, y, w, h, text) {
       body: "v43 added four tweaks at once → −0.012 LB with no attribution. One or two related variables per experiment." },
     { head: "Seed variance is huge.",
       body: "Same recipe, different seed: 0.03 LB shift (v19 vs v23). Single-seed A/B claims under 0.03 are noise." },
-    { head: "On small-N, dataset size > regularisation.",
-      body: "Four textbook regularisers gained +0.011. Soft pseudo + noisy-student round 2 gained +0.042 LB. The dataset-size lever was 3.8× bigger." },
+    { head: "On small-N, data is the lever — not architecture.",
+      body: "Four regularisers gained +0.011; soft-pseudo distillation gained +0.042. Even the SOTA co-attention fusion ≈ plain late fusion (0.97 corr, both 0.83). Architecture never moved it; only the test-set data did." },
     { head: "Negative results are the methodology.",
       body: "The v46/v47 winning recipe traces directly to six diagnosed failures. Reading the failures faithfully is what produced the win." },
   ];
