@@ -73,7 +73,7 @@ function sectionHeader(slide, num, title, page) {
     fontFace: "Calibri", fontSize: 10.5, bold: true,
     color: TEAL, charSpacing: 5, margin: 0,
   });
-  slide.addText(`${String(page).padStart(2, "0")} / 13`, {
+  slide.addText(`${String(page).padStart(2, "0")} / 14`, {
     x: 8.30, y: 0.22, w: 1.40, h: 0.30,
     fontFace: "Calibri", fontSize: 10, color: MUTED,
     align: "right", margin: 0,
@@ -300,11 +300,11 @@ function ruleCallout(slide, x, y, w, h, text) {
     fontFace: "Calibri", fontSize: 9.5, bold: true,
     color: TEAL, charSpacing: 4, margin: 0,
   });
-  s.addText("0.8264", {
+  s.addText("0.8392", {
     x: 6.50, y: stripY + 0.22, w: 3.20, h: 0.70,
     fontFace: "Georgia", fontSize: 36, bold: true, color: AMBER, margin: 0,
   });
-  s.addText("v47_s2 = 0.8355  ·  #3 on LB (2026-05-27)", {
+  s.addText("v58 co-attention seed2  ·  #3 on LB", {
     x: 6.50, y: stripY + 0.95, w: 3.20, h: 0.25,
     fontFace: "Calibri", fontSize: 9.5, italic: true, color: CREAM, margin: 0,
   });
@@ -315,7 +315,7 @@ function ruleCallout(slide, x, y, w, h, text) {
     fontFace: "Calibri", fontSize: 9, bold: true,
     color: TEAL, charSpacing: 3, margin: 0,
   });
-  s.addText("+0.081", {
+  s.addText("+0.094", {
     x: 6.50, y: 4.50, w: 1.55, h: 0.45,
     fontFace: "Georgia", fontSize: 20, bold: true, color: WHITE, margin: 0,
   });
@@ -356,9 +356,10 @@ function ruleCallout(slide, x, y, w, h, text) {
 
   s.addNotes(
     "Hello — I'm Rafael. Today I'll walk you through the Multimodal Cancer Cell " +
-    "Classification Challenge: 30 logged Kaggle versions, five acts of experimentation, " +
-    "+0.081 LB lift over the supervised baseline on the ensemble, +0.090 on the best single seed. " +
-    "v47_seed2 at 0.8355 currently holds #3 on the public leaderboard.\n\n" +
+    "Classification Challenge: 30+ logged Kaggle versions, five acts of experimentation, and " +
+    "a final architecture push. +0.094 LB lift over the supervised baseline to my best single " +
+    "model: v58's intermediate co-attention fusion (seed2) at 0.8392 -- the new best, holding " +
+    "#3 on the public leaderboard.\n\n" +
     "But this talk is not primarily about the score. The instructor said grading is " +
     "based on methodology and presentation, not the leaderboard itself. So I'll spend " +
     "most of the time on what didn't work and why — six diagnosed failures shaped the " +
@@ -938,7 +939,8 @@ function ruleCallout(slide, x, y, w, h, text) {
     "- v46 at 0.8236 is the distillation breakthrough.\n" +
     "- v47 (iterative noisy student round 2, Xie 2020): 0.8264 ensemble, 0.8355 best single seed. We peaked #1 here; two teams later overtook us, so we now sit #3.\n" +
     "- v48+ (orange) is queued — a backbone-diversity fleet (EfficientNet-B2/B3, ResNet-50, ConvNeXt, early-fusion) distilled from the best seed, for a cross-architecture ensemble.\n\n" +
-    "The +0.090 LB lift from v19 (0.7455) to v47's best single seed (0.8355) is the headline."
+    "The +0.090 LB lift from v19 (0.7455) to v47's best single seed (0.8355) was the headline here -- " +
+    "and the next slide shows the final push past it: v58's intermediate co-attention to a new best, 0.8392."
   );
 }
 
@@ -1107,7 +1109,57 @@ function ruleCallout(slide, x, y, w, h, text) {
 }
 
 // =========================================================================
-// === SLIDE 13: §11 — TAKE-HOME ===
+// === SLIDE 13: §11 — THE FINAL PUSH (co-attention + learning curves) ===
+// =========================================================================
+{
+  const s = pres.addSlide();
+  s.background = { color: CREAM };
+  sectionHeader(s, 11, "The final push", 13);
+  slideTitle(s, "Co-attention broke the plateau — a new best, 0.8392");
+
+  // Learning curves (left) — the teacher explicitly asked for these
+  const FIG_LC = path.join(__dirname, "learning_curves_v58.png");
+  if (fs.existsSync(FIG_LC)) {
+    s.addImage({
+      path: FIG_LC,
+      x: 0.30, y: 1.62, w: 5.25, h: 3.05,
+      sizing: { type: "contain", w: 5.25, h: 3.05 },
+      altText: "Training curves for the v58 co-attention model: per-cell train AUC climbs smoothly from ~0.83 to ~0.99 over 12 epochs for both seeds, and loss decreases monotonically with no divergence (fp32 attention + ReZero gate kept it stable).",
+    });
+    s.addText("Fig. 5  v58 co-attention learning curves — train AUC + loss, 2 seeds, 12 epochs. Clean, no instability.",
+      { x: 0.30, y: 4.74, w: 5.25, h: 0.42, fontFace: "Calibri", fontSize: 9, italic: true, color: MUTED, margin: 0 });
+  }
+
+  // Architecture sweep (right): what worked vs what didn't
+  statCard(s, 5.80, 1.70, 3.90, 0.90, "0.8392  ✓",
+    "intermediate CO-ATTENTION (CAFNet-style) — new best, beats v47's 0.8355", TEAL,
+    { bigSize: 21, smallSize: 9 });
+  statCard(s, 5.80, 2.70, 3.90, 0.90, "0.7823  ✗",
+    "higher resolution (192 px) — regressed", CRIMSON,
+    { bigSize: 21, smallSize: 9 });
+  statCard(s, 5.80, 3.70, 3.90, 0.90, "0.7376  ✗",
+    "more capacity (EfficientNetV2-S) — regressed", CRIMSON,
+    { bigSize: 21, smallSize: 9 });
+  s.addText("Of every architecture tried, only fusion design moved the needle — the model is data-bound. Capacity and resolution both hurt.",
+    { x: 5.80, y: 4.74, w: 3.90, h: 0.55, fontFace: "Calibri", fontSize: 9.5, italic: true, color: SLATE, margin: 0 });
+
+  footer(s, 11);
+  s.addNotes(
+    "The final chapter, after the distillation breakthrough. I swept the remaining architectural " +
+    "levers as single EfficientNet models — no ensembles (those all failed; next slide).\n\n" +
+    "Two hurt: bumping capacity to EfficientNetV2-S dropped to 0.7376 (a bigger model overfits 12 " +
+    "patients), and raising input resolution to 192px dropped to 0.7823. Both reinforce the data-bound thesis.\n\n" +
+    "One helped: intermediate co-attention fusion — the CAFNet design from the source-dataset paper, " +
+    "applied to EfficientNet-B0. Its best seed reached 0.8392, a new best over v47's 0.8355, and it " +
+    "lifted the mean too. The learning curves (left) show clean training to ~0.99 train AUC with no " +
+    "instability — I had to harden the attention (fp32 + a zero-init ReZero gate) to stop an fp16 NaN.\n\n" +
+    "Take-home: fusion design is the one architectural lever that moved the needle here; capacity and " +
+    "resolution did not."
+  );
+}
+
+// =========================================================================
+// === SLIDE 14: §12 — TAKE-HOME ===
 // =========================================================================
 {
   const s = pres.addSlide();
@@ -1119,13 +1171,13 @@ function ruleCallout(slide, x, y, w, h, text) {
     fill: { color: TEAL }, line: { color: TEAL, width: 0 },
   });
   // Page indicator
-  s.addText("13 / 13", {
+  s.addText("14 / 14", {
     x: 8.30, y: 0.22, w: 1.40, h: 0.30,
     fontFace: "Calibri", fontSize: 10, color: MUTED,
     align: "right", margin: 0,
   });
 
-  s.addText("§11  ·  TAKE-HOME", {
+  s.addText("§12  ·  TAKE-HOME", {
     x: 0.80, y: 0.30, w: 5.0, h: 0.30,
     fontFace: "Calibri", fontSize: 10.5, bold: true,
     color: TEAL, charSpacing: 5, margin: 0,
@@ -1143,7 +1195,7 @@ function ruleCallout(slide, x, y, w, h, text) {
     { head: "Seed variance is huge.",
       body: "Same recipe, different seed: 0.03 LB shift (v19 vs v23). Single-seed A/B claims under 0.03 are noise." },
     { head: "On small-N, data is the lever — not architecture.",
-      body: "Four regularisers gained +0.011; soft-pseudo distillation gained +0.042. Even the SOTA co-attention fusion ≈ plain late fusion (0.97 corr, both 0.83). Architecture never moved it; only the test-set data did." },
+      body: "Four regularisers gained +0.011; soft-pseudo distillation gained +0.042. Even the SOTA co-attention fusion ≈ plain late fusion (0.97 corr, both 0.83). Only co-attention fusion nudged architecture (+0.004 to a new best 0.8392); data was ~10x bigger." },
     { head: "Negative results are the methodology.",
       body: "The v46/v47 winning recipe traces directly to six diagnosed failures. Reading the failures faithfully is what produced the win." },
   ];
