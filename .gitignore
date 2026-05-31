@@ -226,11 +226,10 @@ __marimo__/
 /data/*
 !/data/.gitkeep
 
-# A3-specific: dataset + local tool state (do not commit)
+# A3-specific: dataset (do not commit)
 multimodal-cancer-classification-challenge-2026/
 multimodal-cancer-classification-challenge-2026.zip
 *.zip
-.claude/
 
 # A3 presentation build artifacts — local QA render dirs (do not commit)
 presentation/_qa_render/
