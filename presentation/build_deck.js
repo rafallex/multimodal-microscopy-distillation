@@ -1,8 +1,7 @@
 /**
- * A3_cancer_challenge_claude.pptx — 12-slide deck built via pptxgenjs.
+ * A3_cancer_challenge.pptx — 14-slide deck built via pptxgenjs.
  *
- * Design: ports the visual language from the Claude-designed PDF
- * (`A3 — Multimodal Cancer Cell Classification.pdf`):
+ * Design: a custom "Microscopy Indigo" visual language:
  *   - Section numbering §1 ... §10 in the eyebrow on every content slide
  *   - Per-slide page indicator "NN / 12" at top-right
  *   - Footer with course id + section number on every page
@@ -17,7 +16,7 @@
  *       Fig. 4  lb_progression.png      (29 versions → v47 #1)
  *
  * Topic: Multimodal Cancer Cell Classification (Uppsala 1MD042 A3)
- * Current public LB: #1 at 0.8264 with v47 (iterative noisy student round 2).
+ * Best public LB: 0.8392 (v58 intermediate co-attention, single model); peaked #1.
  *
  * Palette: "Microscopy Indigo" (content-informed for medical imaging):
  *   NAVY    #1A3A52  deep slate-navy (dark bg, body text on cream)
@@ -1272,7 +1271,7 @@ function ruleCallout(slide, x, y, w, h, text) {
 // =========================================================================
 // === Save ===
 // =========================================================================
-const OUT = path.join(__dirname, "A3_cancer_challenge_claude.pptx");
+const OUT = path.join(__dirname, "A3_cancer_challenge.pptx");
 pres.writeFile({ fileName: OUT }).then(() => {
   console.log("Saved:", OUT);
 }).catch(err => {
