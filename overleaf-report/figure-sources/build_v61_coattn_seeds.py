@@ -42,7 +42,7 @@ def edit(loc, old, new, required=True):
 
 # --- 4 fresh co-attention seeds (the best-seed hunt) ---
 edit("SEEDS", "SEEDS               = [1, 2]                  # v50: LOTTERY backbone seeds",
-     "SEEDS               = [3, 4, 5, 6]            # v61: 4 fresh co-attention seeds (best-seed hunt)")
+     "SEEDS               = [3, 4]                  # v61: 2 fresh co-attention seeds (fits ~3.5h GPU budget)")
 # --- force the seed-2 teacher (what produced 0.8392): drop the ensemble-first lines ---
 edit("_PSEUDO_LABEL_CANDIDATES",
      '_PSEUDO_LABEL_CANDIDATES = [\n'
@@ -66,12 +66,12 @@ nb["cells"][0]["source"] = (
     "beat late fusion on both mean *and* best seed; capacity (EffNetV2-S, 0.74) and resolution\n"
     "(192px, 0.78) both hurt. So v61 keeps v58's **exact winning recipe** - dual EfficientNet-B0\n"
     "+ intermediate co-attention + soft-pseudo distillation from **v47_seed2** (forced; that's\n"
-    "what produced 0.8392) - and only runs **4 fresh seeds [3,4,5,6]**.\n"
+    "what produced 0.8392) - and only runs **2 fresh seeds [3,4]** (your GPU quota is nearly out).\n"
     "\n"
     "Why more seeds: the per-seed LB spread is ~0.023 (v58: 0.8159 -> 0.8392), so more draws of\n"
     "the proven-best architecture is the highest-EV shot at a seed above 0.8392, toward #2's\n"
     "0.8491. **Attach `submissionv47seed2` (not the ensemble teacher).** Submit each\n"
-    "`submission_seed{3,4,5,6}.csv`; keep the single best. ~5-6h for 4 seeds.\n"
+    "`submission_seed{3,4}.csv`; keep the single best. ~3h -- fits your remaining ~3.5h GPU quota.\n"
 ).splitlines(keepends=True)
 
 for c in nb["cells"]:
@@ -89,7 +89,7 @@ for i, c in enumerate(re_nb["cells"]):
         pysrc = "\n".join(ln for ln in src.split("\n") if not ln.lstrip().startswith(("!", "%")))
         compile(pysrc, f"cell{i}", "exec")
 code = "\n".join("".join(c["source"]) for c in re_nb["cells"] if c["cell_type"] == "code")
-assert "SEEDS               = [3, 4, 5, 6]" in code
+assert "SEEDS               = [3, 4]" in code
 # seed2 teacher must come before the ensemble teacher (forced)
 i_seed2 = code.find("submissionv47seed2/submission_seed2.csv")
 i_ens = code.find("teacherv47ensemble/teacher_v47seeds_mean.csv")
