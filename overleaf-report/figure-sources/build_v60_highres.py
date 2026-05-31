@@ -67,6 +67,7 @@ edit('_PSEUDO_LABEL_CANDIDATES',
      '    "/kaggle/input/teacherv47ensemble/teacher_v47seeds_mean.csv",\n'
      '    "/kaggle/input/datasets/rafaelproena/submissionv47seed2/submission_seed2.csv",')
 edit('"teacher":', '"teacher": "v46_ensemble_lb0.8236"', '"teacher": "v47_3seed_ensemble_mean"', required=False)
+edit("PSEUDO_LABEL_CSV     =", "(v46 teacher / noisy-student ROUND 2)", "(soft pseudo-label teacher)", required=False)
 
 nb["cells"][0]["source"] = (
     "# Multimodal Cancer Challenge 2026 - v60: EfficientNet-B0 @ 192px (resolution lever)\n"
