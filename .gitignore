@@ -231,6 +231,13 @@ multimodal-cancer-classification-challenge-2026/
 multimodal-cancer-classification-challenge-2026.zip
 *.zip
 .claude/
+
+# A3 presentation build artifacts — local QA render dirs (do not commit)
+presentation/_qa_render/
+presentation/_qa2/
+presentation/_pdfqa/
+# (the A3_code.zip submission bundle is already covered by the *.zip rule above)
+
 # Use results/* (not results/) so that specific subdirectories below can be
 # re-included via ! exceptions. With `results/` the directory itself is excluded
 # and gitignore won't recurse into it, making re-includes impossible.
