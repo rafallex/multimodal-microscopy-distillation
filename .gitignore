@@ -226,7 +226,7 @@ __marimo__/
 /data/*
 !/data/.gitkeep
 
-# A3-specific: dataset + Claude local state (do not commit)
+# A3-specific: dataset + local tool state (do not commit)
 multimodal-cancer-classification-challenge-2026/
 multimodal-cancer-classification-challenge-2026.zip
 *.zip
