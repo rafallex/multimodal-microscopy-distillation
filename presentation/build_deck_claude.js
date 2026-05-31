@@ -222,6 +222,27 @@ function calloutQuote(slide, x, y, w, h, eyebrowText, quote, opts = {}) {
   });
 }
 
+/** Single-line callout strip (eyebrow + quote on ONE line) for tight bottom bands.
+ *  calloutQuote stacks eyebrow over quote and needs ~0.6"; this fits in ~0.34". */
+function calloutStrip(slide, x, y, w, eyebrowText, quote, opts = {}) {
+  const bg     = opts.bg || NAVY;
+  const fg     = opts.fg || CREAM;
+  const accent = opts.accent || AMBER;
+  const h      = opts.h || 0.36;
+  slide.addShape(pres.shapes.RECTANGLE, {
+    x, y, w, h, fill: { color: bg }, line: { color: bg, width: 0 },
+  });
+  slide.addShape(pres.shapes.RECTANGLE, {
+    x, y, w: 0.07, h, fill: { color: accent }, line: { color: accent, width: 0 },
+  });
+  slide.addText([
+    { text: eyebrowText.toUpperCase() + "    ",
+      options: { fontFace: "Calibri", fontSize: 9.5, bold: true, color: accent, charSpacing: 3 } },
+    { text: quote,
+      options: { fontFace: "Georgia", fontSize: opts.quoteSize || 11, italic: true, color: fg } },
+  ], { x: x + 0.24, y: y, w: w - 0.40, h: h, valign: "middle", margin: 0 });
+}
+
 /** RULE → callout for negative-results slide. */
 function ruleCallout(slide, x, y, w, h, text) {
   slide.addShape(pres.shapes.RECTANGLE, {
@@ -364,7 +385,7 @@ function ruleCallout(slide, x, y, w, h, text) {
     "based on methodology and presentation, not the leaderboard itself. So I'll spend " +
     "most of the time on what didn't work and why — six diagnosed failures shaped the " +
     "winning recipe directly.\n\n" +
-    "Pacing: 12 slides, ~50 seconds per slide, ~30 seconds buffer for questions."
+    "Pacing: 14 slides, ~45 seconds per slide, ~30 seconds buffer for questions."
   );
 }
 
@@ -375,7 +396,7 @@ function ruleCallout(slide, x, y, w, h, text) {
   const s = pres.addSlide();
   s.background = { color: CREAM };
   sectionHeader(s, 1, "The Challenge", 2);
-  slideTitle(s, "Binary cell classification on paired BF + FL microscopy");
+  slideTitle(s, "Binary cell classification on paired BF + FL");
   slideDek(s, "Two structural facts shape every method choice that follows.");
 
   // 4 stat blocks across the top
@@ -388,8 +409,8 @@ function ruleCallout(slide, x, y, w, h, text) {
   statCard(s, 5.10, 1.85, 2.30, 1.10, "38.8%",
            "POS RATE  ·  pos_weight ≈ 1.58", NAVY,
            { bigSize: 24, smallSize: 9.5 });
-  statCard(s, 7.50, 1.85, 2.20, 1.10, "0.8264",
-           "FINAL LB  ·  v47 noisy-student rd2", AMBER,
+  statCard(s, 7.50, 1.85, 2.20, 1.10, "0.8392",
+           "BEST LB  ·  v58 co-attention", AMBER,
            { bigSize: 24, smallSize: 9.5, stripColor: AMBER });
 
   // Bullets
@@ -541,10 +562,10 @@ function ruleCallout(slide, x, y, w, h, text) {
   });
 
   // Bottom callout
-  calloutQuote(s, 0.30, 4.50, 9.40, 0.55,
+  calloutStrip(s, 0.30, 4.55, 9.40,
     "Headline",
-    "+0.081 LB across 30 versions — half of it from one mechanism (soft pseudo / Hinton).",
-    { quoteSize: 11.5 });
+    "+0.094 LB total — the biggest single jump (+0.039) was soft-pseudo distillation (Hinton 2015).",
+    { h: 0.42, quoteSize: 11 });
 
   footer(s, 3);
   s.addNotes(
@@ -662,10 +683,10 @@ function ruleCallout(slide, x, y, w, h, text) {
   ], { size: 11, accent: EMERALD });
 
   // Take-home strip
-  calloutQuote(s, 0.30, 4.85, 9.40, 0.35,
+  calloutStrip(s, 0.30, 4.80, 9.40,
     "Take-home",
-    "The win wasn't a new architecture. It was treating the test distribution as the thing to model.",
-    { quoteSize: 10.5, accent: AMBER });
+    "The win wasn't a new architecture — it was treating the test distribution as the thing to model.",
+    { h: 0.40, quoteSize: 11 });
 
   footer(s, 5);
   s.addNotes(
@@ -818,7 +839,7 @@ function ruleCallout(slide, x, y, w, h, text) {
   const s = pres.addSlide();
   s.background = { color: CREAM };
   sectionHeader(s, 7, "Hard vs Soft Pseudo-labels", 9);
-  slideTitle(s, "Hard discards 84 % of test cells. Soft keeps everything.");
+  slideTitle(s, "Hard drops 84% of test cells; soft keeps all");
   slideDek(s, "Same teacher. Same predictions. Different way of using them.");
 
   // Comparison table (top-left)
@@ -917,9 +938,9 @@ function ruleCallout(slide, x, y, w, h, text) {
     s.addImage({
       path: FIG_LB,
       x: 0.30, y: 1.50, w: 9.40, h: 3.40,
-      altText: "Public LB progression across 30 logged Kaggle submissions: v19 baseline 0.7455 → v47_s2 best single seed 0.8355 (peaked #1, currently #3). Dashed red line marks the current leader at 0.8448; v48+ backbone-diversity runs queued at the right edge.",
+      altText: "Public LB progression across 30+ logged Kaggle submissions: v19 baseline 0.7455 → v47_s2 distillation seed 0.8355 → v58 intermediate co-attention 0.8392, the new best (peaked #1, currently #3). v59 (EfficientNetV2-S) and v60 (192px) regressed; the v61 2-seed average sits below the best seed. Dashed red line marks the current leader at 0.8448.",
     });
-    s.addText("Fig. 4  Public LB across 30 logged submissions. Green = breakthrough · blue = useful gain · red = regression · grey = neutral. Dashed red = current leader; v48+ (orange) = queued backbone-diversity runs.",
+    s.addText("Fig. 4  Public LB across 30+ logged submissions. Amber = co-attention (new best) · green = pseudo-label breakthrough · blue = useful gain · red = regression · grey = neutral. Dashed red = current leader.",
       {
         x: 0.30, y: 4.95, w: 9.40, h: 0.35,
         fontFace: "Calibri", fontSize: 9, italic: true, color: MUTED, margin: 0,
@@ -938,9 +959,9 @@ function ruleCallout(slide, x, y, w, h, text) {
     "- v45_probe at 0.7729 confirms cross-recipe ensembles fail at 0.025 LB gaps.\n" +
     "- v46 at 0.8236 is the distillation breakthrough.\n" +
     "- v47 (iterative noisy student round 2, Xie 2020): 0.8264 ensemble, 0.8355 best single seed. We peaked #1 here; two teams later overtook us, so we now sit #3.\n" +
-    "- v48+ (orange) is queued — a backbone-diversity fleet (EfficientNet-B2/B3, ResNet-50, ConvNeXt, early-fusion) distilled from the best seed, for a cross-architecture ensemble.\n\n" +
-    "The +0.090 LB lift from v19 (0.7455) to v47's best single seed (0.8355) was the headline here -- " +
-    "and the next slide shows the final push past it: v58's intermediate co-attention to a new best, 0.8392."
+    "- The right-edge cluster is the final single-model architecture sweep: v58 intermediate co-attention reached 0.8392 (the new best, amber); v59 (EfficientNetV2-S) and v60 (192px) both regressed; and v61's 2-seed co-attention average (0.8308) landed below the best seed -- ensembling failing yet again.\n\n" +
+    "The +0.094 LB lift from v19 (0.7455) to v58's co-attention best (0.8392) is the headline -- " +
+    "the next two slides cover why ensembling never helped, and the co-attention final push that set that best."
   );
 }
 
@@ -1033,11 +1054,8 @@ function ruleCallout(slide, x, y, w, h, text) {
     });
   });
 
-  // Bottom take-home strip
-  calloutQuote(s, 0.30, 5.05, 9.40, 0.30,
-    "Synthesis",
-    "Every failure has a one-line rule that propagated forward. v46 recipe is the cumulative response.",
-    { quoteSize: 10, accent: AMBER });
+  // (Synthesis line removed — the 6 cards + title carry it; bottom band was too tight.
+  //  The synthesis message lives in the speaker notes.)
 
   footer(s, 9);
   s.addNotes(
@@ -1076,25 +1094,26 @@ function ruleCallout(slide, x, y, w, h, text) {
     { bigSize: 30, smallSize: 9.5 });
 
   bulletList(s, 0.30, 3.30, 9.40, 1.55, [
-    { head: "Within-recipe: averaging regresses.",
-      body: "The per-seed LB spans 0.023 on N=12. The 3-seed mean lands below the lucky best seed every time — the variance is signal-destroying, not noise to average out." },
+    { head: "Within-recipe: averaging regresses — confirmed on two recipes.",
+      body: "v47's 3-seed mean (0.8264) fell below its best seed (0.8355); v61's 2-seed co-attention mean (0.8308) fell below its best seed (0.8392). Per-seed LB spans ~0.023 on N=12 — the variance is signal-destroying, not noise to average out." },
     { head: "Cross-model: the stronger member is always pulled down.",
       body: "Symmetric averaging drags toward the weaker member, and on this data the quality gap is always wide (v22, v45_probe, and the GBM blend all regressed)." },
     { head: "Even an orthogonal model couldn't save it.",
       body: "A decorrelated feature-GBM (rank-corr 0.41) looked perfect on paper — but its CV (0.82) did not transfer (LB ~0.60). CV-vs-LB struck the ensemble too." },
   ], { accent: CRIMSON, size: 10.5 });
 
-  calloutQuote(s, 0.30, 5.02, 9.40, 0.28, "Take-home",
-    "On N=12, variance dominates — any averaging regresses below the best single draw. The submission is one well-chosen seed, never a blend.",
-    { quoteSize: 9.5, accent: CRIMSON });
+  calloutStrip(s, 0.30, 4.92, 9.40, "Take-home",
+    "On N=12, variance dominates — any averaging regresses below the best single seed. Submit one, never a blend.",
+    { h: 0.32, quoteSize: 10, accent: CRIMSON });
 
   footer(s, 10);
   s.addNotes(
     "This is the slide I most want you to remember: on this problem, ENSEMBLING NEVER WORKED. " +
     "Not once. I tried every flavour and every single one regressed below my best single model.\n\n" +
     "Within-recipe seed averaging: my three v47 seeds average to 0.8264, but the best single seed is " +
-    "0.8355. The per-seed leaderboard spread is 0.023 on twelve patients — so wide that averaging " +
-    "doesn't cancel noise, it just drags the lucky draw back down to the mean.\n\n" +
+    "0.8355. I confirmed it a second time on the winning co-attention recipe — v61's two-seed average " +
+    "scored 0.8308, below its best seed 0.8392. The per-seed leaderboard spread is ~0.023 on twelve " +
+    "patients — so wide that averaging doesn't cancel noise, it just drags the lucky draw back down to the mean.\n\n" +
     "Cross-recipe averaging: v22 averaged v19 and v21 and landed at 0.7422, below v19's 0.7455 alone. " +
     "v45_probe confirmed it. Symmetric averaging always pulls toward the weaker member, and the quality " +
     "gap between any two of my models is wide enough that it hurts.\n\n" +
