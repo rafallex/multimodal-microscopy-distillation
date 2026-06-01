@@ -28,7 +28,7 @@ Notes for delivery:
 ---
 
 ### Slide 1 — Title (0:25)
-"Hi, I'm Rafael. This is my run at the Multimodal Cancer Cell Classification challenge — thirty-plus logged versions. My best single model is 0.8392, third on the public board. But the score isn't the story: almost every gain came from reading a *failure* correctly, so that's what I'll focus on."
+"Hi, I'm Rafael. This is my run at the Multimodal Cancer Cell Classification challenge — thirty-plus logged versions. My best single model is 0.8392. But the score isn't the story: almost every gain came from reading a *failure* correctly, so that's what I'll focus on."
 
 ### Slide 2 — §1 The Challenge (0:45)
 "The task is per-cell: is this oral cell from a cancer patient — from paired brightfield and fluorescence crops, 128 pixels, grayscale. Two facts shape everything. First, only **twelve** training patients, so labels are effectively patient-level and the real sample size is tiny. Second, the test patients are completely **disjoint** from training — out-of-distribution generalisation is the dominant failure mode. And the instructor was explicit: grading is on *what is done and how it's presented*, not the leaderboard. So that's how I built this talk."
@@ -37,7 +37,7 @@ Notes for delivery:
 "The backbone is deliberately boring — two EfficientNet-B0 branches, one per modality, late-concatenated, with an MLP head. The interesting parts are everywhere *except* the backbone. A per-patient multiple-instance loss stops the model memorising within-patient quirks. AdaBN and test-set stain normalisation explicitly model the test distribution — the fluorescence test set is twenty percent brighter than train. Plus eight-way test-time augmentation. The recurring lesson: here, the architecture is not the lever."
 
 ### Slide 4 — §3 The Arc (0:35)
-"The whole journey in five acts: baselines and self-supervision — which collapsed; the EfficientNet pivot that set a floor; a regulariser search; and then the semi-supervised breakthrough — pseudo-labels and distillation — that took me to number one. The single biggest jump, +0.039, came from one idea: soft pseudo-labels. Let me walk the turning points."
+"The whole journey in five acts: baselines and self-supervision — which collapsed; the EfficientNet pivot that set a floor; a regulariser search; and then the semi-supervised breakthrough — pseudo-labels and distillation. The single biggest jump, +0.039, came from one idea: soft pseudo-labels. Let me walk the turning points."
 
 ### Slide 5 — §4 The Ambition → SSL collapse (0:50)
 "Early on I tried cross-modal self-supervised pretraining. It gave the best cross-validation I'd ever seen — 0.866. I submitted expecting 0.75, and got **0.572** — basically random. The diagnosis took days: because every cell has exactly one patient, the contrastive task can be solved by encoding *patient identity* rather than cell content. The model found a shortcut. That's take-home number one: high CV does **not** mean high leaderboard — especially on patient-grouped, out-of-distribution data."

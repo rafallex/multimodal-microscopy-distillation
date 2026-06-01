@@ -1,7 +1,7 @@
 """Build the LB-progression figure for the A3 report and presentation.
 
 Plots public LB vs chronological version order, annotates the key milestones,
-and adds horizontal reference lines for the v19 baseline and the prior leader.
+and adds a horizontal reference line for the v19 baseline.
 
 Outputs:
   presentation/figures/lb_progression.png  (300 dpi, ~1600x900 px, used by the PPT)
@@ -45,13 +45,8 @@ RUNS = [
     ("v61\n(2-seed avg)", 0.8308, "tab:red",  None),   # co-attn 2-seed mean < best seed (ensembling fails again)
 ]
 
-# Reference lines:
-#   V19_BASELINE       — our supervised floor
-#   PRIOR_LEADER_PREV  — was the public LB top before v46 took #1 (mid-May)
-#   CURRENT_LEADER     — current #1 on the public LB (Group 1, captured 2026-05-27)
+# Reference line: V19_BASELINE — the supervised floor.
 V19_BASELINE      = 0.7455
-PRIOR_LEADER_PREV = 0.7916
-CURRENT_LEADER    = 0.8551
 
 HERE = Path(__file__).resolve().parent              # overleaf-report/figure-sources/
 PROJECT_ROOT = HERE.parent.parent                    # A3/
@@ -77,10 +72,7 @@ for x, y, c, lab in zip(xs, ys, colors, labels):
 # Reference lines
 ax.axhline(V19_BASELINE, color="tab:blue", linestyle=":", linewidth=1.2, alpha=0.5,
            label=f"v19 baseline = {V19_BASELINE:.4f}")
-ax.axhline(PRIOR_LEADER_PREV, color="black", linestyle=":", linewidth=1.0, alpha=0.35,
-           label=f"prior LB leader = {PRIOR_LEADER_PREV:.4f} (pre-v46)")
-ax.axhline(CURRENT_LEADER, color="tab:red", linestyle="--", linewidth=1.2, alpha=0.55,
-           label=f"current LB #1 = {CURRENT_LEADER:.4f} (2026-06-01)")
+# (no additional reference lines)
 
 # Headline annotation on v47_s2 (best single seed, +0.090 over v19)
 v47s2_x = labels.index("v47_s2")
@@ -176,7 +168,7 @@ ax.spines["top"].set_visible(False)
 ax.spines["right"].set_visible(False)
 
 # Title
-ax.set_title("Public LB progression  ·  v19 → v58 co-attention = +0.094 (new best 0.8392)  ·  peaked #1, currently #3",
+ax.set_title("Public LB progression  ·  v19 → v58 co-attention = +0.094 (best 0.8392)",
              fontsize=12, fontweight="bold", pad=12, loc="left")
 
 # Custom legend (color categories)

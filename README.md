@@ -5,7 +5,7 @@
 
 Per-cell malignant/benign classification of oral-cancer cells imaged in two paired modalities, brightfield (BF) and fluorescence (FL), at 128×128 grayscale. The dataset is small where it matters: 12 training patients, about 114,000 labeled cells, and a 59,000-cell test set whose patients never appear in training.
 
-With only 12 patients the model is data-bound, not capacity-bound. The gains here came from growing the effective training set with semi-supervised distillation and from diagnosing failures, not from bigger networks. Public-leaderboard AUC went from 0.7455 (the first solid supervised model) to 0.8392 (best single model), and the submission reached #1 on the public board at one point. The private split decides the final standing.
+With only 12 patients the model is data-bound, not capacity-bound. The gains here came from growing the effective training set with semi-supervised distillation and from diagnosing failures, not from bigger networks. Public-leaderboard AUC went from 0.7455 (the first solid supervised model) to 0.8392 (best single model). The private split decides the final score.
 
 ![Public LB progression](presentation/figures/lb_progression.png)
 
@@ -60,7 +60,7 @@ Training runs are Kaggle notebooks. Open a source notebook, attach the competiti
 
 ## Context
 
-Course project for Uppsala University 1MD042 (Advanced Deep Learning for Image Processing), spring 2026. The grade is based on method and presentation rather than leaderboard rank, which is why the failure analysis gets as much space as the results.
+Course project for Uppsala University 1MD042 (Advanced Deep Learning for Image Processing), spring 2026. The grade is based on method and presentation rather than leaderboard performance, which is why the failure analysis gets as much space as the results.
 
 ## License
 

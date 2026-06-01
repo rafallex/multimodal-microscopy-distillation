@@ -13,10 +13,10 @@
  *       Fig. 1  arch_diagram.png        (dual EffNet-B0 + MIL aux)
  *       Fig. 2  pseudo_pipeline.png     (hard / soft / round-2)
  *       Fig. 3  teacher_prob_histogram.png  (dark knowledge)
- *       Fig. 4  lb_progression.png      (29 versions → v47 #1)
+ *       Fig. 4  lb_progression.png      (29 logged versions)
  *
  * Topic: Multimodal Cancer Cell Classification (Uppsala 1MD042 A3)
- * Best public LB: 0.8392 (v58 intermediate co-attention, single model); peaked #1.
+ * Best public LB: 0.8392 (v58 intermediate co-attention, single model).
  *
  * Palette: "Microscopy Indigo" (content-informed for medical imaging):
  *   NAVY    #1A3A52  deep slate-navy (dark bg, body text on cream)
@@ -324,7 +324,7 @@ function ruleCallout(slide, x, y, w, h, text) {
     x: 6.50, y: stripY + 0.22, w: 3.20, h: 0.70,
     fontFace: "Georgia", fontSize: 36, bold: true, color: AMBER, margin: 0,
   });
-  s.addText("v58 co-attention seed2  ·  #3 on LB", {
+  s.addText("v58 co-attention seed2  ·  single model", {
     x: 6.50, y: stripY + 0.95, w: 3.20, h: 0.25,
     fontFace: "Calibri", fontSize: 9.5, italic: true, color: CREAM, margin: 0,
   });
@@ -378,8 +378,7 @@ function ruleCallout(slide, x, y, w, h, text) {
     "Hello — I'm Rafael. Today I'll walk you through the Multimodal Cancer Cell " +
     "Classification Challenge: 30+ logged Kaggle versions, five acts of experimentation, and " +
     "a final architecture push. +0.094 LB lift over the supervised baseline to my best single " +
-    "model: v58's intermediate co-attention fusion (seed2) at 0.8392 -- the new best, holding " +
-    "#3 on the public leaderboard.\n\n" +
+    "model: v58's intermediate co-attention fusion (seed2) at 0.8392 -- the new best.\n\n" +
     "But this talk is not primarily about the score. The instructor said grading is " +
     "based on methodology and presentation, not the leaderboard itself. So I'll spend " +
     "most of the time on what didn't work and why — six diagnosed failures shaped the " +
@@ -435,8 +434,8 @@ function ruleCallout(slide, x, y, w, h, text) {
     "is a per-patient grouping. Second: the test set has strict patient-disjoint OOD. That " +
     "second constraint dominates everything that follows.\n\n" +
     "The instructor was explicit on May 14: grading is on methodology and presentation, " +
-    "not on the leaderboard score. Peaking at #1 (and sitting top-3 at submission) is " +
-    "reassuring, but it's not what's being evaluated. The negative results and the " +
+    "not on the leaderboard score. The score is reassuring, but it's not what's being " +
+    "evaluated. The negative results and the " +
     "diagnostic reasoning behind v46/v47 are."
   );
 }
@@ -577,10 +576,10 @@ function ruleCallout(slide, x, y, w, h, text) {
     "Act 4: v20-v41, regularizer search. v41 stacked four L4 regularizers cleanly: +0.011.\n\n" +
     "Act 5A: v42-v44, semi-supervised pivot. v42 SSL collapsed; v44 added Lee 2013 hard " +
     "pseudo-labels for +0.025. \n\n" +
-    "Act 5B: v46-v47, soft distillation. v46 used Hinton 2015 soft pseudo for +0.039 and " +
-    "took #1. v47 iterated with v46 as the new teacher (Xie 2020 noisy student round 2): " +
-    "+0.003 on the ensemble (0.8264) but +0.012 on the best single seed (0.8355). We peaked " +
-    "#1 here; the noise-floor analysis shows the round-2 ensemble gain is statistically zero, " +
+    "Act 5B: v46-v47, soft distillation. v46 used Hinton 2015 soft pseudo for +0.039 -- the " +
+    "biggest single jump. v47 iterated with v46 as the new teacher (Xie 2020 noisy student round 2): " +
+    "+0.003 on the ensemble (0.8264) but +0.012 on the best single seed (0.8355). The " +
+    "noise-floor analysis shows the round-2 ensemble gain is statistically zero, " +
     "and the per-seed dispersion is the real story."
   );
 }
@@ -663,8 +662,8 @@ function ruleCallout(slide, x, y, w, h, text) {
   statCard(s, 3.55, 1.65, 3.10, 1.20, "+0.174",
            "VS V15 SSL collapse → floor",
            AMBER, { bigSize: 32 });
-  statCard(s, 6.80, 1.65, 2.90, 1.20, "−0.038",
-           "VS prior LB leader · 0.7832 at the time",
+  statCard(s, 6.80, 1.65, 2.90, 1.20, "19.7%",
+           "FL TEST brighter than train — why AdaBN + stain norm",
            NAVY, { bigSize: 32 });
 
   // Ingredients bullet list
@@ -937,9 +936,9 @@ function ruleCallout(slide, x, y, w, h, text) {
     s.addImage({
       path: FIG_LB,
       x: 0.30, y: 1.50, w: 9.40, h: 3.40,
-      altText: "Public LB progression across 30+ logged Kaggle submissions: v19 baseline 0.7455 → v47_s2 distillation seed 0.8355 → v58 intermediate co-attention 0.8392, the new best (peaked #1, currently #3). v59 (EfficientNetV2-S) and v60 (192px) regressed; the v61 2-seed average sits below the best seed. Dashed red line marks the current leader at 0.8448.",
+      altText: "Public LB progression across 30+ logged Kaggle submissions: v19 baseline 0.7455 → v47_s2 distillation seed 0.8355 → v58 intermediate co-attention 0.8392, the new best. v59 (EfficientNetV2-S) and v60 (192px) regressed; the v61 2-seed average sits below the best seed.",
     });
-    s.addText("Fig. 4  Public LB across 30+ logged submissions. Amber = co-attention (new best) · green = pseudo-label breakthrough · blue = useful gain · red = regression · grey = neutral. Dashed red = current leader.",
+    s.addText("Fig. 4  Public LB across 30+ logged submissions. Amber = co-attention (new best) · green = pseudo-label breakthrough · blue = useful gain · red = regression · grey = neutral.",
       {
         x: 0.30, y: 4.95, w: 9.40, h: 0.35,
         fontFace: "Calibri", fontSize: 9, italic: true, color: MUTED, margin: 0,
@@ -957,7 +956,7 @@ function ruleCallout(slide, x, y, w, h, text) {
     "- v44 at 0.7812 is the hard-pseudo breakthrough.\n" +
     "- v45_probe at 0.7729 confirms cross-recipe ensembles fail at 0.025 LB gaps.\n" +
     "- v46 at 0.8236 is the distillation breakthrough.\n" +
-    "- v47 (iterative noisy student round 2, Xie 2020): 0.8264 ensemble, 0.8355 best single seed. We peaked #1 here; two teams later overtook us, so we now sit #3.\n" +
+    "- v47 (iterative noisy student round 2, Xie 2020): 0.8264 ensemble, 0.8355 best single seed.\n" +
     "- The right-edge cluster is the final single-model architecture sweep: v58 intermediate co-attention reached 0.8392 (the new best, amber); v59 (EfficientNetV2-S) and v60 (192px) both regressed; and v61's 2-seed co-attention average (0.8308) landed below the best seed -- ensembling failing yet again.\n\n" +
     "The +0.094 LB lift from v19 (0.7455) to v58's co-attention best (0.8392) is the headline -- " +
     "the next two slides cover why ensembling never helped, and the co-attention final push that set that best."
