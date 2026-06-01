@@ -1080,7 +1080,7 @@ function ruleCallout(slide, x, y, w, h, text) {
   const s = pres.addSlide();
   s.background = { color: CREAM };
   sectionHeader(s, 10, "Ensembling failed", 12);
-  slideTitle(s, "Every ensemble I tried lost to the best single model");
+  slideTitle(s, "Ensembling never beat the best single model — beyond noise");
 
   statCard(s, 0.30, 1.70, 3.00, 1.30, "0.8264",
     "3-seed average — BELOW the 0.8355 best single seed", CRIMSON,
@@ -1093,22 +1093,22 @@ function ruleCallout(slide, x, y, w, h, text) {
     { bigSize: 30, smallSize: 9.5 });
 
   bulletList(s, 0.30, 3.30, 9.40, 1.55, [
-    { head: "Within-recipe: averaging regresses — confirmed on two recipes.",
-      body: "v47's 3-seed mean (0.8264) fell below its best seed (0.8355); v61's 2-seed co-attention mean (0.8308) fell below its best seed (0.8350). Per-seed LB spans ~0.023 on N=12 — the variance is signal-destroying, not noise to average out." },
-    { head: "Cross-model: the stronger member is always pulled down.",
-      body: "Symmetric averaging drags toward the weaker member, and on this data the quality gap is always wide (v22, v45_probe, and the GBM blend all regressed)." },
-    { head: "Even an orthogonal model couldn't save it.",
-      body: "A decorrelated feature-GBM (rank-corr 0.41) looked perfect on paper — but its CV (0.82) did not transfer (LB ~0.60). CV-vs-LB struck the ensemble too." },
+    { head: "Within-recipe averaging regresses.",
+      body: "v47's 3-seed mean (0.8264) fell below its best seed (0.8355); v61's 2-seed mean (0.8308) fell below its best (0.8350). Per-seed LB spans ~0.023 on N=12 — variance, not signal to average out." },
+    { head: "Cross-recipe and orthogonal blends regress too.",
+      body: "v22 (0.7422) fell below v19 (0.7455); a decorrelated feature-GBM blend scored 0.7074 — its leave-patients-out CV (0.82) did not transfer to unseen patients." },
+    { head: "The one exception is within noise.",
+      body: "A weighted blend of my two best, near-tied, different-recipe models (v58 + v47, 0.0037 apart) reached 0.8404 — but that is +0.0012 over the best single seed, about 0.1σ against the seed-noise floor. A statistical tie, not a lift." },
   ], { accent: CRIMSON, size: 10.5 });
 
   calloutStrip(s, 0.30, 4.92, 9.40, "Take-home",
-    "On N=12, variance dominates — any averaging regresses below the best single seed. Submit one, never a blend.",
+    "On N=12 no ensemble beats the best single model by more than noise. A careful blend ties it — so my two finals are one of each.",
     { h: 0.32, quoteSize: 10, accent: CRIMSON });
 
   footer(s, 10);
   s.addNotes(
-    "This is the slide I most want you to remember: on this problem, ENSEMBLING NEVER WORKED. " +
-    "Not once. I tried every flavour and every single one regressed below my best single model.\n\n" +
+    "This is a slide I want you to remember: on this problem, ensembling never gave a lift beyond noise. " +
+    "I tried a dozen flavours; all but one regressed below my best single model, and the one that edged it did so by about 0.1 sigma -- a tie.\n\n" +
     "Within-recipe seed averaging: my three v47 seeds average to 0.8264, but the best single seed is " +
     "0.8355. I confirmed it a second time on the winning co-attention recipe — v61's two-seed average " +
     "scored 0.8308, below its best seed 0.8350. The per-seed leaderboard spread is ~0.023 on twelve " +
@@ -1121,8 +1121,8 @@ function ruleCallout(slide, x, y, w, h, text) {
     "leave-patients-out CV was 0.82. Blended 50/50 with my best model it scored 0.7074. Its CV simply " +
     "did not transfer to unseen patients — the exact CV-versus-LB trap that defines this whole project, " +
     "now sprung on the ensemble itself.\n\n" +
-    "The conclusion is clean: with twelve patients, variance dominates everything, and any averaging " +
-    "regresses below the best single draw. My final submission is one well-chosen single model — never a blend."
+    "The conclusion: with twelve patients, variance dominates, and no averaging gives a lift beyond noise. " +
+    "The one within-rule blend -- my two best models, 0.0037 apart -- tied the best single at 0.8404, so my two final picks are that blend and the best single model."
   );
 }
 

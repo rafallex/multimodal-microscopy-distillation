@@ -97,11 +97,12 @@ We were briefly #1 between v46 and v47, and held it through v47 (the comment thr
 
 Kaggle lets you pick 2 submissions for private LB. Updated plan as of 2026-05-27 (we are currently #3, two teams overtook us 2026-05-26 → 2026-05-27):
 
-The §VII-G analysis in the paper presents three plausible strategies. The new public-LB reality (v47_s2 is what's holding our #3 placement; v47 ensemble would place #4) is direct evidence that within-recipe averaging has cost us LB on this split. That argues for the **aggressive** strategy over the **robust** one:
+Final picks (locked 2026-06-01):
 
-1. **Primary - v58_seed2 (LB 0.8392):** the intermediate-co-attention single model, the project best. Second selected submission: **v47_seed2 (LB 0.8355)**, a different-mechanism single model.
-2. **No blends:** every ensemble tried (v47 3-seed mean 0.8264, cross-recipe averages, the feature-GBM blend) scored below the best single model, so both final picks are single models.
-3. **Diversified within-pseudo:** v47_seed2 + v47 ensemble. No supervised-only safety net.
+1. **`v58s2_v47s2_80_20` (LB 0.8404)** — a weighted 80/20 blend of the two best, near-tied, different-recipe single models (v58 co-attention 0.8392 + v47 distillation 0.8355). Top public score and the most variance-reduced submission. The +0.0012 over the best single seed is ~0.1σ (a tie, not a real lift), but it is also the safest single submission to carry to private.
+2. **`v47seed2` (LB 0.8355)** — pure-distillation single model. Mechanism hedge: the blend leans 80% co-attention, so this protects the private split if distillation generalizes better to the unseen patients.
+
+Note on the within-recipe-averaging caution: it held for *wide-gap* and *same-recipe* blends (all 12+ regressed below their best member). The one blend within the gap-rule (members 0.0037 apart) tied the best single at 0.8404 — confirming the refined rule rather than contradicting it.
 
 Why NOT pick v46 as a safety net: v46 is the teacher v47 distills from. They share recipe lineage almost completely (only difference: teacher source CSV). A correlated pair offers no diversification on private LB. v41 is the lowest-correlation pick available among submitted recipes.
 
@@ -129,9 +130,9 @@ Between v19 and v41 we gained +0.011 LB from four textbook regularizers stacked 
 
 **v47 added a diminishing-returns nuance**: iterating noisy student to round 2 with an even stronger teacher (v46 → v47) added only +0.003 LB — about 14× smaller than the round-1 gain. The dataset-size lever's biggest payoff is **the first time** you flip from hard labels to soft, all-cells distillation; subsequent rounds compress quickly. This suggests the lever is mostly about *unlocking the calibration channel*, not about endlessly stacking more noisy supervision.
 
-### M2. Within-recipe ensembling works; cross-recipe ensembling fails for any practical LB gap
+### M2. Ensembling gives no lift beyond noise on N=12
 
-v44 and v46 internally average 3 seeds × SWA, the standard Izmailov-2018 within-recipe pattern. Both gained from it (v46 ensemble beat all observed individual seeds). We tested cross-recipe sigmoid averaging twice — v22 (v19+v21, 0.05 LB member gap) and v45_probe (v41+v44, 0.025 LB gap). Both regressed below the better member. The operational rule we adopted: **don't ensemble across recipes if the LB gap is wider than ~0.015**. The two failed attempts confirmed this rule at progressively tighter gaps.
+Within-recipe seed averaging was inconsistent: v46's 3-seed mean beat all its seeds, but v47's 3-seed mean (0.8264) fell below its best seed (0.8355) and v61's 2-seed mean (0.8308) fell below its best (0.8350) — once the per-seed spread widens, averaging just drags the lucky draw back to the mean. Cross-recipe sigmoid averaging at wide gaps failed twice — v22 (v19+v21, 0.05 gap) and v45_probe (v41+v44, 0.025 gap) both regressed below the better member — giving the operational rule: **don't average across recipes if the LB gap is wider than ~0.015**. The one blend that satisfied that rule (v58_s2 + v47_s2, gap 0.0037) reached 0.8404, edging the best single seed (0.8392) by +0.0012 — but that is ~0.1σ against the seed-noise floor, a statistical tie. Net: no ensemble gave a lift beyond noise; a careful within-gap blend can at best tie the best single model.
 
 ### M3. Patient identity is the dominant spurious correlation; treat it as adversarial
 

@@ -30,7 +30,7 @@ The failures were as useful as the wins:
 
 - **Self-supervised pretraining (v42)** collapsed to 0.59. With one patient per cell, a cross-modal contrastive task can be solved by recognizing the patient rather than the cell, which is the exact shortcut a patient-disjoint test set punishes.
 - **Stacking four changes at once (v43)** regressed and left no way to tell which change was responsible. After that I changed one or two related things per submission.
-- **Ensembling never helped.** Seed averaging, cross-recipe averaging, and a decorrelated feature-GBM blend all scored below the best single model. With 12 patients the seed spread is wide enough (about 0.02 AUC) that averaging pulls the best draw back toward the mean. The final submission is a single model.
+- **Ensembling gave no lift beyond noise.** A dozen blends — seed averaging, cross-recipe averaging, a decorrelated feature-GBM — all scored below the best single model. The lone exception was a weighted blend of the two best, near-tied, different-recipe models (0.0037 apart): it reached 0.8404 against the best single's 0.8392, but +0.0012 is about 0.1σ, a statistical tie. With 12 patients the seed spread (~0.02 AUC) is wide enough that averaging only pulls toward the mean, so a careful blend and the best single model are interchangeable.
 
 ## Method
 

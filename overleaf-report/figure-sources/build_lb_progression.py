@@ -51,7 +51,7 @@ RUNS = [
 #   CURRENT_LEADER     — current #1 on the public LB (Group 1, captured 2026-05-27)
 V19_BASELINE      = 0.7455
 PRIOR_LEADER_PREV = 0.7916
-CURRENT_LEADER    = 0.8448
+CURRENT_LEADER    = 0.8551
 
 HERE = Path(__file__).resolve().parent              # overleaf-report/figure-sources/
 PROJECT_ROOT = HERE.parent.parent                    # A3/
@@ -80,7 +80,7 @@ ax.axhline(V19_BASELINE, color="tab:blue", linestyle=":", linewidth=1.2, alpha=0
 ax.axhline(PRIOR_LEADER_PREV, color="black", linestyle=":", linewidth=1.0, alpha=0.35,
            label=f"prior LB leader = {PRIOR_LEADER_PREV:.4f} (pre-v46)")
 ax.axhline(CURRENT_LEADER, color="tab:red", linestyle="--", linewidth=1.2, alpha=0.55,
-           label=f"current LB #1 = {CURRENT_LEADER:.4f} (post-2026-05-27)")
+           label=f"current LB #1 = {CURRENT_LEADER:.4f} (2026-06-01)")
 
 # Headline annotation on v47_s2 (best single seed, +0.090 over v19)
 v47s2_x = labels.index("v47_s2")
