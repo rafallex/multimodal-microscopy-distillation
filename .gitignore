@@ -242,6 +242,9 @@ overleaf-report/README.md
 presentation/_qa_render/
 presentation/_qa2/
 presentation/_pdfqa/
+presentation/slides_png/
+presentation/_*.png
+presentation/_*.md
 # (the A3_code.zip submission bundle is already covered by the *.zip rule above)
 
 # Use results/* (not results/) so that specific subdirectories below can be
