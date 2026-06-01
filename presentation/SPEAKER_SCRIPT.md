@@ -1,11 +1,11 @@
-# 10-Minute Speaker Script — Multimodal Cancer Cell Classification (A3)
+# Speaker script (10 minutes)
 
-**Delivery notes**
-- Solo, first-person, ~9:40 total → ~20 s buffer inside the 10-minute cap.
-- Methodology-first (that's the grading basis); the score is supporting evidence, not the point.
-- If presenting as a **team**, hand off at act boundaries: slides **1–4 / 5–7 / 8–10 / 11–14**.
-- Slow down on slides **5, 8, 12** (the three "aha" moments). Move briskly through **3, 6, 10**.
-- Don't read the slides — they're the report. Say the *story*; let the numbers sit on screen.
+Notes for delivery:
+- First person, about 9 minutes 40 seconds, which leaves a little buffer under the 10-minute cap.
+- Lead with method. The grade is on method and presentation, so the score is supporting evidence, not the point.
+- For a team, hand off at the act boundaries: slides 1-4, 5-7, 8-10, 11-14.
+- Take your time on slides 5, 8, and 12 (the three turning points). Move quickly through 3, 6, and 10.
+- Don't read the slides aloud. Say the story and let the numbers sit on screen.
 
 | # | Slide | Budget |
 |---|---|---|
@@ -71,4 +71,4 @@
 
 ---
 
-*Tip: rehearse once with a timer. If you run long, the natural cuts are slides 7 and 10 (trim to one sentence each) — that buys ~40 seconds without losing the arc.*
+Rehearse once with a timer. If you run long, the easiest cuts are slides 7 and 10 (one sentence each), which buys about 40 seconds without losing the thread.

@@ -1,102 +1,67 @@
-# Semi-Supervised Distillation for Small-Sample Multimodal Cancer-Cell Classification
+# Multimodal cancer-cell classification
 
 ![Python](https://img.shields.io/badge/python-3.11-blue.svg)
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
-![Paper](https://img.shields.io/badge/paper-IEEE--format-b31b1b.svg)
-![Public LB](https://img.shields.io/badge/Kaggle%20public%20LB-peaked%20%231%20·%200.8392-success.svg)
 
-Binary malignant/benign classification of single oral-cancer cells, imaged in two paired modalities: bright-field (BF) and fluorescence (FL), 128×128 grayscale. The regime is small and hard — 12 training patients, about 114k labeled cells, and a test set of 59k cells from patients that never appear in training. With so few patients the model is data-bound rather than capacity-bound, so the gains came from growing the effective training set through test-set distillation and from analyzing failures, not from larger networks.
+Per-cell malignant/benign classification of oral-cancer cells imaged in two paired modalities, brightfield (BF) and fluorescence (FL), at 128×128 grayscale. The dataset is small where it matters: 12 training patients, about 114,000 labeled cells, and a 59,000-cell test set whose patients never appear in training.
 
-Across 30+ logged Kaggle iterations the public-leaderboard AUC climbed **0.7455 → 0.8392** (+0.094, best single model). The submission **peaked at #1 on the public leaderboard**; final placement is decided by the held-out private split.
+With only 12 patients the model is data-bound, not capacity-bound. The gains here came from growing the effective training set with semi-supervised distillation and from diagnosing failures, not from bigger networks. Public-leaderboard AUC went from 0.7455 (the first solid supervised model) to 0.8392 (best single model), and the submission reached #1 on the public board at one point. The private split decides the final standing.
 
-![Public-LB progression across 30 logged iterations](presentation/figures/lb_progression.png)
+![Public LB progression](presentation/figures/lb_progression.png)
 
----
+## Results
 
-## Summary
-
-- **A single change drove the biggest gain.** Replacing ~9,400 hard-thresholded pseudo-labels (Lee 2013) with all 59,040 *soft* teacher probabilities (Hinton 2015 "dark knowledge") gave **+0.042 LB** — the only delta in the whole project that clears a 4σ significance bar against the empirically-measured seed-noise floor.
-- **An honest noise-floor analysis.** Using 3 submitted seeds per recipe, each headline gain is scored as a multiple of the per-seed standard error. Result: the soft-pseudo gain is *robust* (4.1σ), the round-2 noisy-student gain is not distinguishable from zero (0.3σ).
-- **Seven diagnosed failure modes**, each with a mechanism (not just "it didn't work"): a contrastive-SSL run that learned the patient-identity shortcut, a 4-change stack that confounded its own ablation, a within-recipe ensemble that went net-negative under an outlier seed, and more.
-- **A per-cell finding generated *from* the data:** 97% of the disagreement between the best single seed and the ensemble is concentrated in the teacher's uncertain "middle band" — evidence the best-seed lift is signal, not leaderboard luck. This directly motivated the next experiment.
-- **Reproducible figure + analysis pipeline:** every figure and statistic in the paper regenerates from a script over committed prediction CSVs.
-
-Draft write-up: [`overleaf-report/main.tex`](overleaf-report/main.tex). Version-by-version log: [`LB_HISTORY.md`](LB_HISTORY.md).
-
----
-
-## The approach
-
-EfficientNet-B0 **dual-branch** (one encoder per modality) with late concat fusion, a per-patient **multiple-instance-learning auxiliary loss**, AdaBN + test-set stain normalization, 3-seed × SWA ensembling, and 40-way test-time augmentation.
-
-![Dual-branch architecture](presentation/figures/arch_diagram.png)
-
-The decisive lift came from a **semi-supervised pipeline** that uses the unlabeled test set itself as extra training signal:
-
-| Step | Idea | Reference | Public-LB effect |
+| Version | Change | Reference | Public LB |
 |---|---|---|---|
-| **v44** | Hard pseudo-labels: keep ~9,400 confident test cells (p<0.05 / p>0.95) | Lee 2013 | **+0.025** over v41 |
-| **v46** | Soft-target distillation: keep **all** 59,040 test cells, raw teacher probability as the BCE target | Hinton 2015 | **+0.042** — largest single gain (4.13σ) |
-| **v47** | Iterative noisy student round 2: swap the teacher to the v46 ensemble | Xie 2020 | +0.003 ensemble (0.27σ, **at saturation**) |
-| **v58** | Intermediate **co-attention** fusion (CAFNet-style) on a single EfficientNet-B0 | Lian 2024 | **+0.004 → new best 0.8392** |
+| v19 | Supervised baseline: dual EfficientNet-B0, per-patient MIL aux loss, AdaBN, test-set stain norm, TTA | — | 0.7455 |
+| v41 | Added label smoothing, dropout, RandomResizedCrop, multiscale TTA | — | 0.7563 |
+| v44 | Hard pseudo-labels: ~9,400 confident test cells added to training | Lee 2013 | 0.7812 |
+| v46 | Soft-target distillation: all 59,040 test cells, teacher probability as the target | Hinton 2015 | 0.8236 |
+| v47 | Second distillation round (teacher swapped to v46) | Xie 2020 | 0.8264 ens / 0.8355 best seed |
+| v58 | Intermediate co-attention fusion, single model | Lian 2024 | 0.8392 (best) |
 
-The headline methodological claim: with 12 patients the model is **data-bound, not capacity-bound**. The four-regularizer textbook stack (label smoothing + dropout + RandomResizedCrop + multiscale TTA) bought +0.011; "add the test set as soft pseudo-labels" bought +0.042. Architecture was the one lever that didn't help: more capacity (EfficientNetV2-S) and higher resolution (192 px) both *regressed*, and **every ensemble — seed-mean, cross-recipe, and an orthogonal feature-GBM blend — landed below the best single model**. Only intermediate co-attention fusion nudged the ceiling up, to 0.8392.
+The largest single step was hard-to-soft pseudo-labels at v46. Hard thresholding keeps only confident cells and throws away 84% of the test set; soft distillation keeps all 59k cells, each weighted by the teacher's probability. That change alone added about +0.042. A second distillation round (v47) added almost nothing on the mean. Later, intermediate co-attention fusion (v58) raised the best single model to 0.8392. Larger backbones (EfficientNetV2-S, 0.7376) and higher input resolution (192px, 0.7823) both made it worse, which is the data-bound point again.
 
----
+Each headline gain is scored against the seed-to-seed noise floor, measured from three seeds per recipe. The soft-pseudo gain sits about 4 standard errors above that floor; the second distillation round is about 0.3, so it is not distinguishable from noise. A per-cell check found that 97% of the disagreement between the best seed and the seed average falls in the teacher's uncertain middle band, which is evidence that the best-seed result is signal rather than a lucky split.
 
-## What's in the repo
+## What didn't work
 
-| Path | Description |
+The failures were as useful as the wins, so they get their own section in the write-up:
+
+- **Self-supervised pretraining (v42)** collapsed to 0.59. With one patient per cell, a cross-modal contrastive task can be solved by recognizing the patient rather than the cell, which is the exact shortcut a patient-disjoint test set punishes.
+- **Stacking four changes at once (v43)** regressed and left no way to tell which change was responsible. After that I changed one or two related things per submission.
+- **Ensembling never helped.** Seed averaging, cross-recipe averaging, and a decorrelated feature-GBM blend all scored below the best single model. With 12 patients the seed spread is wide enough (about 0.02 AUC) that averaging pulls the best draw back toward the mean. The final submission is a single model.
+
+## Method
+
+Two EfficientNet-B0 branches, one per modality, with late concat fusion and a small MLP head. The parts that matter sit outside the backbone: a per-patient multiple-instance auxiliary loss, AdaBN and test-set stain normalization to handle the train/test brightness gap, and 40-way test-time augmentation. Distillation versions add the teacher's predictions on the test set to the training targets.
+
+![Architecture](presentation/figures/arch_diagram.png)
+
+## Repository
+
+| Path | Contents |
 |---|---|
-| [`overleaf-report/`](overleaf-report/) | **IEEE conference paper** — `main.tex`, `refs.bib`, four figure PDFs, and the auto-generated noise-floor table. Drop-in Overleaf upload. `figure-sources/` holds the build scripts; `notes/` holds section drafts. |
-| [`LB_HISTORY.md`](LB_HISTORY.md) | Every Kaggle submission in order: exact recipe diff, public LB, one-line lesson, and the seven negative-result post-mortems. |
-| [`presentation/`](presentation/) | In-class slide deck (`.pptx`) + the figure PNGs embedded above. |
-| [`notebooks/`](notebooks/) | One self-contained source notebook per iteration (`improvedvNN_source.ipynb`), runnable end-to-end on a Kaggle T4 ×2. |
-| [`results/`](results/) | Per-version submission CSVs (incl. per-seed extracts) + `cpu_ensembles/` recombination probes. Committed for reproducibility; raw training artifacts are gitignored. |
+| `notebooks/` | One source notebook per version (`improvedvNN_source.ipynb`), runnable end to end on Kaggle (T4 ×2). |
+| `presentation/` | Slide deck (`A3_cancer_challenge.pptx` / `.pdf`) and the figures shown above. |
+| `overleaf-report/` | Draft write-up plus the scripts that generate every figure and table. |
+| `LB_HISTORY.md` | Every submission in order: the change, the public LB, and the one-line lesson. |
+| `results/` | Per-version submission CSVs. Training checkpoints are gitignored. |
 
----
-
-## Reproducing the figures and analysis (CPU-only, no GPU)
+## Reproducing the analysis (CPU only)
 
 ```bash
-pip install numpy pandas matplotlib pypdf python-pptx
-
-# Regenerate the LB-progression chart (writes PNG for the deck + PDF for the paper)
-python overleaf-report/figure-sources/build_lb_progression.py
-
-# Re-run the noise-floor significance analysis (writes the LaTeX table the paper \input's)
-python overleaf-report/figure-sources/build_noise_floor_analysis.py
-
-# Re-run the per-cell best-seed-vs-ensemble analysis (the "97% middle-band" finding)
-python overleaf-report/figure-sources/build_v47_seed_vs_ensemble_analysis.py
+pip install -r requirements.txt
+python overleaf-report/figure-sources/build_lb_progression.py        # LB progression chart
+python overleaf-report/figure-sources/build_noise_floor_analysis.py  # per-seed significance table
 ```
 
-## Reproducing a training run (GPU, on Kaggle)
+Training runs are Kaggle notebooks. Open a source notebook, attach the competition data (and a teacher-prediction dataset for the distillation versions), and run all. A distillation version takes about 5–6 hours on one T4 ×2 session.
 
-1. Open a source notebook (e.g. `notebooks/improvedv47_source.ipynb`) on Kaggle.
-2. Attach the inputs listed in the notebook's header cell: the competition dataset, plus a teacher-prediction dataset for distillation runs (e.g. `submissionv46` for v47).
-3. **Save Version → Save & Run All.** The notebook handles caching, training, SWA, AdaBN, 40-way TTA, and writes ensemble + per-seed submission CSVs.
+## Context
 
-Budget: one Kaggle T4 ×2 commit run, ~5–6 h per distillation version. No HPC used.
-
-See [`requirements.txt`](requirements.txt) for the full dependency split.
-
----
-
-## A few of the diagnosed failure modes
-
-These are documented in full in the paper (§VII) and `LB_HISTORY.md`; a sample of the kind of analysis:
-
-- **Contrastive SSL learned the patient shortcut (v42).** A CoMIR-style cross-modal InfoNCE pretrain collapsed to LB 0.59 with train-AUC 0.96. With one patient per cell, paired (BF, FL) of the same cell always share a patient — so the contrastive task is solvable by encoding *patient identity*, exactly the spurious signal a patient-disjoint test set punishes.
-- **Stacking unvalidated changes confounds the ablation (v43).** Four simultaneous tweaks regressed −0.012 and made it impossible to attribute. The fix (v46, which selectively reverted two of them) recovered +0.079. Lesson encoded: one or two related changes per submitted version.
-- **Within-recipe ensembling is not unconditionally safe (v47).** The 3-seed ensemble landed *below* its own best seed by 0.009, because round-2 noisy student widened seed dispersion ~3× and produced an outlier. Whether that outlier is signal or split-luck is left as an explicit open question — and the per-cell analysis leans toward signal.
-
----
-
-## Course context
-
-Produced as Assignment 3 of **Uppsala University 1MD042 — Advanced Deep Learning for Image Processing** (Spring 2026). Grading weights methodology and presentation over leaderboard rank, which is why the negative-results analysis and the noise-floor framing are front-and-center rather than the score.
+Course project for Uppsala University 1MD042 (Advanced Deep Learning for Image Processing), spring 2026. The grade is based on method and presentation rather than leaderboard rank, which is why the failure analysis gets as much space as the results.
 
 ## License
 
-MIT — see [`LICENSE`](LICENSE). The reference-paper PDFs and the competition dataset are **not** included (the latter is gitignored); see [`REFERENCES.md`](REFERENCES.md) for citations.
+MIT, see [`LICENSE`](LICENSE). The reference papers and the competition dataset are not included; see [`REFERENCES.md`](REFERENCES.md) for citations.
