@@ -5,7 +5,7 @@
 ![Paper](https://img.shields.io/badge/paper-IEEE--format-b31b1b.svg)
 ![Public LB](https://img.shields.io/badge/Kaggle%20public%20LB-peaked%20%231%20·%200.8392-success.svg)
 
-Binary malignant/benign classification of paired **bright-field (BF) + fluorescence (FL)** oral-cancer microscopy cells, on a deliberately hard regime: **12 training patients**, ~114k labeled cells, and a **patient-disjoint** test set of 59k cells. The interesting part isn't the architecture — it's that on this small-sample regime, **growing the effective labeled set via test-set distillation beats architectural and regularization changes by an order of magnitude**, and that careful failure analysis drove every gain.
+Binary malignant/benign classification of single oral-cancer cells, imaged in two paired modalities: bright-field (BF) and fluorescence (FL), 128×128 grayscale. The regime is small and hard — 12 training patients, about 114k labeled cells, and a test set of 59k cells from patients that never appear in training. With so few patients the model is data-bound rather than capacity-bound, so the gains came from growing the effective training set through test-set distillation and from analyzing failures, not from larger networks.
 
 Across 30+ logged Kaggle iterations the public-leaderboard AUC climbed **0.7455 → 0.8392** (+0.094, best single model). The submission **peaked at #1 on the public leaderboard**; final placement is decided by the held-out private split.
 
@@ -13,15 +13,15 @@ Across 30+ logged Kaggle iterations the public-leaderboard AUC climbed **0.7455 
 
 ---
 
-## TL;DR — what makes this worth reading
+## Summary
 
 - **A single change drove the biggest gain.** Replacing ~9,400 hard-thresholded pseudo-labels (Lee 2013) with all 59,040 *soft* teacher probabilities (Hinton 2015 "dark knowledge") gave **+0.042 LB** — the only delta in the whole project that clears a 4σ significance bar against the empirically-measured seed-noise floor.
-- **An honest noise-floor analysis.** Using 3 submitted seeds per recipe, each headline gain is scored as a multiple of the per-seed standard error. Result: the soft-pseudo gain is *robust* (4.13σ), the round-2 noisy-student gain is *indistinguishable from zero* (0.27σ). Most competition writeups never check this.
+- **An honest noise-floor analysis.** Using 3 submitted seeds per recipe, each headline gain is scored as a multiple of the per-seed standard error. Result: the soft-pseudo gain is *robust* (4.1σ), the round-2 noisy-student gain is not distinguishable from zero (0.3σ).
 - **Seven diagnosed failure modes**, each with a mechanism (not just "it didn't work"): a contrastive-SSL run that learned the patient-identity shortcut, a 4-change stack that confounded its own ablation, a within-recipe ensemble that went net-negative under an outlier seed, and more.
 - **A per-cell finding generated *from* the data:** 97% of the disagreement between the best single seed and the ensemble is concentrated in the teacher's uncertain "middle band" — evidence the best-seed lift is signal, not leaderboard luck. This directly motivated the next experiment.
 - **Reproducible figure + analysis pipeline:** every figure and statistic in the paper regenerates from a script over committed prediction CSVs.
 
-Full writeup: **[`overleaf-report/main.tex`](overleaf-report/main.tex)** (IEEE conference format). Version-by-version log: **[`LB_HISTORY.md`](LB_HISTORY.md)**.
+Draft write-up: [`overleaf-report/main.tex`](overleaf-report/main.tex). Version-by-version log: [`LB_HISTORY.md`](LB_HISTORY.md).
 
 ---
 

@@ -1094,7 +1094,7 @@ function ruleCallout(slide, x, y, w, h, text) {
 
   bulletList(s, 0.30, 3.30, 9.40, 1.55, [
     { head: "Within-recipe: averaging regresses — confirmed on two recipes.",
-      body: "v47's 3-seed mean (0.8264) fell below its best seed (0.8355); v61's 2-seed co-attention mean (0.8308) fell below its best seed (0.8392). Per-seed LB spans ~0.023 on N=12 — the variance is signal-destroying, not noise to average out." },
+      body: "v47's 3-seed mean (0.8264) fell below its best seed (0.8355); v61's 2-seed co-attention mean (0.8308) fell below its best seed (0.8350). Per-seed LB spans ~0.023 on N=12 — the variance is signal-destroying, not noise to average out." },
     { head: "Cross-model: the stronger member is always pulled down.",
       body: "Symmetric averaging drags toward the weaker member, and on this data the quality gap is always wide (v22, v45_probe, and the GBM blend all regressed)." },
     { head: "Even an orthogonal model couldn't save it.",
@@ -1111,7 +1111,7 @@ function ruleCallout(slide, x, y, w, h, text) {
     "Not once. I tried every flavour and every single one regressed below my best single model.\n\n" +
     "Within-recipe seed averaging: my three v47 seeds average to 0.8264, but the best single seed is " +
     "0.8355. I confirmed it a second time on the winning co-attention recipe — v61's two-seed average " +
-    "scored 0.8308, below its best seed 0.8392. The per-seed leaderboard spread is ~0.023 on twelve " +
+    "scored 0.8308, below its best seed 0.8350. The per-seed leaderboard spread is ~0.023 on twelve " +
     "patients — so wide that averaging doesn't cancel noise, it just drags the lucky draw back down to the mean.\n\n" +
     "Cross-recipe averaging: v22 averaged v19 and v21 and landed at 0.7422, below v19's 0.7455 alone. " +
     "v45_probe confirmed it. Symmetric averaging always pulls toward the weaker member, and the quality " +
