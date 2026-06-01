@@ -97,10 +97,12 @@ We were briefly #1 between v46 and v47, and held it through v47 (the comment thr
 
 Kaggle lets you pick 2 submissions for private LB. Updated plan as of 2026-05-27 (we are currently #3, two teams overtook us 2026-05-26 → 2026-05-27):
 
-Final picks (locked 2026-06-01):
+Final picks (locked 2026-06-01) — chosen for robustness over a lucky seed:
 
-1. **`v58s2_v47s2_80_20` (LB 0.8404)** — a weighted 80/20 blend of the two best, near-tied, different-recipe single models (v58 co-attention 0.8392 + v47 distillation 0.8355). Top public score and the most variance-reduced submission. The +0.0012 over the best single seed is ~0.1σ (a tie, not a real lift), but it is also the safest single submission to carry to private.
-2. **`v47seed2` (LB 0.8355)** — pure-distillation single model. Mechanism hedge: the blend leans 80% co-attention, so this protects the private split if distillation generalizes better to the unseen patients.
+1. **`submission.csv` (v58, LB 0.8314)** — the 2-seed co-attention mean (averages the lucky seed2 and the unlucky seed1, so it depends on no single draw).
+2. **`submission.csv` (v47, LB 0.8264)** — the 3-seed distillation ensemble. Different mechanism from v58, also variance-reduced.
+
+Both picks are multi-seed averages, mechanism-diverse, and depend on no single lucky seed. This deliberately passes over the higher *public* scores — the best single seed (v58_s2, 0.8392) and the within-rule blend (0.8404, +0.0012 over it, ~0.1σ) — in favour of robustness to the private patient split, consistent with this project's seed-variance finding. Averaging gives no public-LB lift on N=12, but it does cut variance, which is what we want for a single locked private bet.
 
 Note on the within-recipe-averaging caution: it held for *wide-gap* and *same-recipe* blends (all 12+ regressed below their best member). The one blend within the gap-rule (members 0.0037 apart) tied the best single at 0.8404 — confirming the refined rule rather than contradicting it.
 

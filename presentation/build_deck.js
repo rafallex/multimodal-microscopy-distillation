@@ -1102,7 +1102,7 @@ function ruleCallout(slide, x, y, w, h, text) {
   ], { accent: CRIMSON, size: 10.5 });
 
   calloutStrip(s, 0.30, 4.92, 9.40, "Take-home",
-    "On N=12 no ensemble beats the best single model by more than noise. A careful blend ties it — so my two finals are one of each.",
+    "Averaging gave no lift here — only lower variance. So I locked two variance-reduced models, not the lucky single seed.",
     { h: 0.32, quoteSize: 10, accent: CRIMSON });
 
   footer(s, 10);
@@ -1121,8 +1121,8 @@ function ruleCallout(slide, x, y, w, h, text) {
     "leave-patients-out CV was 0.82. Blended 50/50 with my best model it scored 0.7074. Its CV simply " +
     "did not transfer to unseen patients — the exact CV-versus-LB trap that defines this whole project, " +
     "now sprung on the ensemble itself.\n\n" +
-    "The conclusion: with twelve patients, variance dominates, and no averaging gives a lift beyond noise. " +
-    "The one within-rule blend -- my two best models, 0.0037 apart -- tied the best single at 0.8404, so my two final picks are that blend and the best single model."
+    "The conclusion: with twelve patients, variance dominates, and no averaging gives a lift beyond noise -- the one within-rule blend only tied the best single (0.8404 vs 0.8392, ~0.1 sigma). " +
+    "For the final lock-in I chose robustness over the lucky draw: two variance-reduced models -- v58's 2-seed co-attention mean (0.8314) and v47's 3-seed distillation ensemble (0.8264) -- neither dependent on a single lucky seed."
   );
 }
 
