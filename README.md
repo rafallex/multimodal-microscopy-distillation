@@ -26,7 +26,7 @@ Each headline gain is scored against the seed-to-seed noise floor, measured from
 
 ## What didn't work
 
-The failures were as useful as the wins, so they get their own section in the write-up:
+The failures were as useful as the wins:
 
 - **Self-supervised pretraining (v42)** collapsed to 0.59. With one patient per cell, a cross-modal contrastive task can be solved by recognizing the patient rather than the cell, which is the exact shortcut a patient-disjoint test set punishes.
 - **Stacking four changes at once (v43)** regressed and left no way to tell which change was responsible. After that I changed one or two related things per submission.
@@ -44,7 +44,7 @@ Two EfficientNet-B0 branches, one per modality, with late concat fusion and a sm
 |---|---|
 | `notebooks/` | One source notebook per version (`improvedvNN_source.ipynb`), runnable end to end on Kaggle (T4 ×2). |
 | `presentation/` | Slide deck (`A3_cancer_challenge.pptx` / `.pdf`) and the figures shown above. |
-| `overleaf-report/` | Draft write-up plus the scripts that generate every figure and table. |
+| `overleaf-report/figure-sources/` | Scripts that build the figures and the noise-floor table from the prediction CSVs. |
 | `LB_HISTORY.md` | Every submission in order: the change, the public LB, and the one-line lesson. |
 | `results/` | Per-version submission CSVs. Training checkpoints are gitignored. |
 

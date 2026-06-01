@@ -231,6 +231,13 @@ multimodal-cancer-classification-challenge-2026/
 multimodal-cancer-classification-challenge-2026.zip
 *.zip
 
+# Draft paper - kept local, not part of the public repo (figure-sources/ stays tracked)
+overleaf-report/*.tex
+overleaf-report/*.bib
+overleaf-report/*.pdf
+overleaf-report/notes/
+overleaf-report/README.md
+
 # A3 presentation build artifacts — local QA render dirs (do not commit)
 presentation/_qa_render/
 presentation/_qa2/
