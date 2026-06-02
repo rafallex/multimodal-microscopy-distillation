@@ -16,7 +16,7 @@
  *       Fig. 4  lb_progression.png      (29 logged versions)
  *
  * Topic: Multimodal Cancer Cell Classification (Uppsala 1MD042 A3)
- * Best public LB: 0.8392 (v58 intermediate co-attention, single model).
+ * Best public LB: 0.8355 (v47 noisy-student distillation, best seed).
  *
  * Palette: "Microscopy Indigo" (content-informed for medical imaging):
  *   NAVY    #1A3A52  deep slate-navy (dark bg, body text on cream)
@@ -320,11 +320,11 @@ function ruleCallout(slide, x, y, w, h, text) {
     fontFace: "Calibri", fontSize: 9.5, bold: true,
     color: TEAL, charSpacing: 4, margin: 0,
   });
-  s.addText("0.8392", {
+  s.addText("0.8355", {
     x: 6.50, y: stripY + 0.22, w: 3.20, h: 0.70,
     fontFace: "Georgia", fontSize: 36, bold: true, color: AMBER, margin: 0,
   });
-  s.addText("v58 co-attention seed2  ·  single model", {
+  s.addText("v47 noisy-student distillation", {
     x: 6.50, y: stripY + 0.95, w: 3.20, h: 0.25,
     fontFace: "Calibri", fontSize: 9.5, italic: true, color: CREAM, margin: 0,
   });
@@ -335,7 +335,7 @@ function ruleCallout(slide, x, y, w, h, text) {
     fontFace: "Calibri", fontSize: 9, bold: true,
     color: TEAL, charSpacing: 3, margin: 0,
   });
-  s.addText("+0.094", {
+  s.addText("+0.090", {
     x: 6.50, y: 4.50, w: 1.55, h: 0.45,
     fontFace: "Georgia", fontSize: 20, bold: true, color: WHITE, margin: 0,
   });
@@ -376,9 +376,9 @@ function ruleCallout(slide, x, y, w, h, text) {
 
   s.addNotes(
     "Hello — I'm Rafael. Today I'll walk you through the Multimodal Cancer Cell " +
-    "Classification Challenge: 30+ logged Kaggle versions, five acts of experimentation, and " +
-    "a final architecture push. +0.094 LB lift over the supervised baseline to my best single " +
-    "model: v58's intermediate co-attention fusion (seed2) at 0.8392 -- the new best.\n\n" +
+    "Classification Challenge: 30+ logged Kaggle versions across five acts of experimentation. " +
+    "+0.090 LB lift over the supervised baseline, via pseudo-labels and Hinton-style distillation, " +
+    "to a best public LB of 0.8355.\n\n" +
     "But this talk is not primarily about the score. The instructor said grading is " +
     "based on methodology and presentation, not the leaderboard itself. So I'll spend " +
     "most of the time on what didn't work and why — six diagnosed failures shaped the " +
@@ -407,8 +407,8 @@ function ruleCallout(slide, x, y, w, h, text) {
   statCard(s, 5.10, 1.85, 2.30, 1.10, "38.8%",
            "POS RATE  ·  pos_weight ≈ 1.58", NAVY,
            { bigSize: 24, smallSize: 9.5 });
-  statCard(s, 7.50, 1.85, 2.20, 1.10, "0.8392",
-           "BEST LB  ·  v58 co-attention", AMBER,
+  statCard(s, 7.50, 1.85, 2.20, 1.10, "0.8355",
+           "BEST LB  ·  v47 distillation", AMBER,
            { bigSize: 24, smallSize: 9.5, stripColor: AMBER });
 
   // Bullets
@@ -562,7 +562,7 @@ function ruleCallout(slide, x, y, w, h, text) {
   // Bottom callout
   calloutStrip(s, 0.30, 4.55, 9.40,
     "Headline",
-    "+0.094 LB total — the biggest single jump (+0.039) was soft-pseudo distillation (Hinton 2015).",
+    "+0.081 LB total — the biggest single jump (+0.039) was soft-pseudo distillation (Hinton 2015).",
     { h: 0.42, quoteSize: 11 });
 
   footer(s, 3);
@@ -936,9 +936,9 @@ function ruleCallout(slide, x, y, w, h, text) {
     s.addImage({
       path: FIG_LB,
       x: 0.30, y: 1.50, w: 9.40, h: 3.40,
-      altText: "Public LB progression across 30+ logged Kaggle submissions: v19 baseline 0.7455 → v47_s2 distillation seed 0.8355 → v58 intermediate co-attention 0.8392, the new best. v59 (EfficientNetV2-S) and v60 (192px) regressed; the v61 2-seed average sits below the best seed.",
+      altText: "Public LB progression across 30+ logged Kaggle submissions: v19 baseline 0.7455 rising to v47 distillation (0.8264 ensemble / 0.8355 best seed). The biggest jumps come from hard then soft pseudo-labels (v44, v46).",
     });
-    s.addText("Fig. 4  Public LB across 30+ logged submissions. Amber = co-attention (new best) · green = pseudo-label breakthrough · blue = useful gain · red = regression · grey = neutral.",
+    s.addText("Fig. 4  Public LB across 30+ logged submissions. Green = pseudo-label breakthrough · blue = useful gain · red = regression · grey = neutral.",
       {
         x: 0.30, y: 4.95, w: 9.40, h: 0.35,
         fontFace: "Calibri", fontSize: 9, italic: true, color: MUTED, margin: 0,
@@ -957,9 +957,8 @@ function ruleCallout(slide, x, y, w, h, text) {
     "- v45_probe at 0.7729 confirms cross-recipe ensembles fail at 0.025 LB gaps.\n" +
     "- v46 at 0.8236 is the distillation breakthrough.\n" +
     "- v47 (iterative noisy student round 2, Xie 2020): 0.8264 ensemble, 0.8355 best single seed.\n" +
-    "- The right-edge cluster is the final single-model architecture sweep: v58 intermediate co-attention reached 0.8392 (the new best, amber); v59 (EfficientNetV2-S) and v60 (192px) both regressed; and v61's 2-seed co-attention average (0.8308) landed below the best seed -- ensembling failing yet again.\n\n" +
-    "The +0.094 LB lift from v19 (0.7455) to v58's co-attention best (0.8392) is the headline -- " +
-    "the next two slides cover why ensembling never helped, and the co-attention final push that set that best."
+    "The +0.090 LB lift from v19 (0.7455) to v47's best seed (0.8355), driven by the pseudo-label and distillation pipeline, is the headline. " +
+    "The next slide covers why ensembling never beat the best single seed on this data."
   );
 }
 
@@ -1079,7 +1078,7 @@ function ruleCallout(slide, x, y, w, h, text) {
   const s = pres.addSlide();
   s.background = { color: CREAM };
   sectionHeader(s, 10, "Ensembling failed", 12);
-  slideTitle(s, "Ensembling never beat the best single model — beyond noise");
+  slideTitle(s, "Ensembling never beat the best single seed");
 
   statCard(s, 0.30, 1.70, 3.00, 1.30, "0.8264",
     "3-seed average — BELOW the 0.8355 best single seed", CRIMSON,
@@ -1093,11 +1092,9 @@ function ruleCallout(slide, x, y, w, h, text) {
 
   bulletList(s, 0.30, 3.30, 9.40, 1.55, [
     { head: "Within-recipe averaging regresses.",
-      body: "v47's 3-seed mean (0.8264) fell below its best seed (0.8355); v61's 2-seed mean (0.8308) fell below its best (0.8350). Per-seed LB spans ~0.023 on N=12 — variance, not signal to average out." },
+      body: "v47's 3-seed mean (0.8264) fell below its best seed (0.8355). Per-seed LB spans ~0.023 on N=12 — variance, not signal to average out." },
     { head: "Cross-recipe and orthogonal blends regress too.",
       body: "v22 (0.7422) fell below v19 (0.7455); a decorrelated feature-GBM blend scored 0.7074 — its leave-patients-out CV (0.82) did not transfer to unseen patients." },
-    { head: "The one exception is within noise.",
-      body: "A weighted blend of my two best, near-tied, different-recipe models (v58 + v47, 0.0037 apart) reached 0.8404 — but that is +0.0012 over the best single seed, about 0.1σ against the seed-noise floor. A statistical tie, not a lift." },
   ], { accent: CRIMSON, size: 10.5 });
 
   calloutStrip(s, 0.30, 4.92, 9.40, "Take-home",
@@ -1107,71 +1104,68 @@ function ruleCallout(slide, x, y, w, h, text) {
   footer(s, 10);
   s.addNotes(
     "This is a slide I want you to remember: on this problem, ensembling never gave a lift beyond noise. " +
-    "I tried a dozen flavours; all but one regressed below my best single model, and the one that edged it did so by about 0.1 sigma -- a tie.\n\n" +
+    "Every ensemble I tried scored below my best single seed.\n\n" +
     "Within-recipe seed averaging: my three v47 seeds average to 0.8264, but the best single seed is " +
-    "0.8355. I confirmed it a second time on the winning co-attention recipe — v61's two-seed average " +
-    "scored 0.8308, below its best seed 0.8350. The per-seed leaderboard spread is ~0.023 on twelve " +
-    "patients — so wide that averaging doesn't cancel noise, it just drags the lucky draw back down to the mean.\n\n" +
+    "0.8355. The per-seed leaderboard spread is ~0.023 on twelve patients — so wide that averaging " +
+    "doesn't cancel noise, it just drags the lucky draw back down to the mean.\n\n" +
     "Cross-recipe averaging: v22 averaged v19 and v21 and landed at 0.7422, below v19's 0.7455 alone. " +
-    "v45_probe confirmed it. Symmetric averaging always pulls toward the weaker member, and the quality " +
+    "v45_probe confirmed it. Symmetric averaging pulls toward the weaker member, and the quality " +
     "gap between any two of my models is wide enough that it hurts.\n\n" +
     "And the one that should have worked: a gradient-boosted tree on hand-crafted features, genuinely " +
-    "decorrelated from the CNN at rank-correlation 0.41 — textbook ideal ensemble ingredient. Its " +
-    "leave-patients-out CV was 0.82. Blended 50/50 with my best model it scored 0.7074. Its CV simply " +
-    "did not transfer to unseen patients — the exact CV-versus-LB trap that defines this whole project, " +
-    "now sprung on the ensemble itself.\n\n" +
-    "The conclusion: with twelve patients, variance dominates, and no averaging gives a lift beyond noise -- the one within-rule blend only tied the best single (0.8404 vs 0.8392, ~0.1 sigma). " +
-    "For the final lock-in I chose robustness over the lucky draw: two variance-reduced models -- v58's 2-seed co-attention mean (0.8314) and v47's 3-seed distillation ensemble (0.8264) -- neither dependent on a single lucky seed."
+    "decorrelated from the CNN at rank-correlation 0.41 — a textbook ensemble ingredient. Its " +
+    "leave-patients-out CV was 0.82. Blended 50/50 with my best model it scored 0.7074 — its CV simply " +
+    "did not transfer to unseen patients, the exact CV-versus-LB trap that defines this whole project.\n\n" +
+    "So averaging never raised the score on twelve patients -- but it does cut seed variance. For a single " +
+    "hidden-split bet that robustness matters more than a lucky seed's fragile edge, so my final picks are " +
+    "variance-reduced ensembles, not the lucky single seed."
   );
 }
 
 // =========================================================================
-// === SLIDE 13: §11 — THE FINAL PUSH (co-attention + learning curves) ===
+// === SLIDE 13: §11 — TRAINING DYNAMICS (learning curves) ===
 // =========================================================================
 {
   const s = pres.addSlide();
   s.background = { color: CREAM };
-  sectionHeader(s, 11, "The final push", 13);
-  slideTitle(s, "Co-attention broke the plateau — a new best, 0.8392");
+  sectionHeader(s, 11, "Training dynamics", 13);
+  slideTitle(s, "Clean, stable training — no divergence on 12 patients");
 
   // Learning curves (left) — the teacher explicitly asked for these
-  const FIG_LC = path.join(__dirname, "learning_curves_v58.png");
+  const FIG_LC = path.join(__dirname, "learning_curves_v47.png");
   if (fs.existsSync(FIG_LC)) {
     s.addImage({
       path: FIG_LC,
       x: 0.30, y: 1.62, w: 5.25, h: 3.05,
       sizing: { type: "contain", w: 5.25, h: 3.05 },
-      altText: "Training curves for the v58 co-attention model: per-cell train AUC climbs smoothly from ~0.83 to ~0.99 over 12 epochs for both seeds, and loss decreases monotonically with no divergence (fp32 attention + ReZero gate kept it stable).",
+      altText: "Training curves for the v47 distillation model: per-cell train AUC climbs smoothly to about 0.99 over 12 epochs across seeds, and loss decreases monotonically with no divergence.",
     });
-    s.addText("Fig. 5  v58 co-attention learning curves — train AUC + loss, 2 seeds, 12 epochs. Clean, no instability.",
+    s.addText("Fig. 5  v47 learning curves — per-cell train AUC + loss across seeds, 12 epochs. SWA over the last epochs.",
       { x: 0.30, y: 4.74, w: 5.25, h: 0.42, fontFace: "Calibri", fontSize: 9, italic: true, color: MUTED, margin: 0 });
   }
 
-  // Architecture sweep (right): what worked vs what didn't
-  statCard(s, 5.80, 1.70, 3.90, 0.90, "0.8392  ✓",
-    "intermediate CO-ATTENTION (CAFNet-style) — new best, beats v47's 0.8355", TEAL,
-    { bigSize: 21, smallSize: 9 });
-  statCard(s, 5.80, 2.70, 3.90, 0.90, "0.7823  ✗",
-    "higher resolution (192 px) — regressed", CRIMSON,
-    { bigSize: 21, smallSize: 9 });
-  statCard(s, 5.80, 3.70, 3.90, 0.90, "0.7376  ✗",
-    "more capacity (EfficientNetV2-S) — regressed", CRIMSON,
-    { bigSize: 21, smallSize: 9 });
-  s.addText("Of every architecture tried, only fusion design moved the needle — the model is data-bound. Capacity and resolution both hurt.",
-    { x: 5.80, y: 4.74, w: 3.90, h: 0.55, fontFace: "Calibri", fontSize: 9.5, italic: true, color: SLATE, margin: 0 });
+  // Right column: what the curves show + the training recipe
+  s.addText("What the curves show", {
+    x: 5.80, y: 1.70, w: 3.90, h: 0.28,
+    fontFace: "Calibri", fontSize: 10.5, bold: true, color: TEAL, charSpacing: 3, margin: 0,
+  });
+  bulletList(s, 5.80, 2.02, 3.90, 2.95, [
+    { head: "Smooth convergence", body: "train AUC rises to ~0.99; loss falls monotonically, no divergence" },
+    { head: "12 epochs", body: "AdamW + OneCycleLR, batch 128, gradient clipping" },
+    { head: "SWA (Izmailov 2018)", body: "weights averaged over the last epochs + a manual BN refresh" },
+    { head: "Per-patient MIL aux", body: "regularises against within-patient memorisation" },
+    { head: "No held-out val", body: "N=12 is too small; the public LB is the external check" },
+  ], { size: 10, accent: TEAL });
 
   footer(s, 11);
   s.addNotes(
-    "The final chapter, after the distillation breakthrough. I swept the remaining architectural " +
-    "levers as single EfficientNet models — no ensembles (those all failed; next slide).\n\n" +
-    "Two hurt: bumping capacity to EfficientNetV2-S dropped to 0.7376 (a bigger model overfits 12 " +
-    "patients), and raising input resolution to 192px dropped to 0.7823. Both reinforce the data-bound thesis.\n\n" +
-    "One helped: intermediate co-attention fusion — the CAFNet design from the source-dataset paper, " +
-    "applied to EfficientNet-B0. Its best seed reached 0.8392, a new best over v47's 0.8355, and it " +
-    "lifted the mean too. The learning curves (left) show clean training to ~0.99 train AUC with no " +
-    "instability — I had to harden the attention (fp32 + a zero-init ReZero gate) to stop an fp16 NaN.\n\n" +
-    "Take-home: fusion design is the one architectural lever that moved the needle here; capacity and " +
-    "resolution did not."
+    "The teacher asked for learning curves, so here they are -- the v47 distillation run. The point is " +
+    "that training is clean and stable: per-cell train AUC climbs smoothly to about 0.99 and the loss " +
+    "falls monotonically, with no divergence, across seeds.\n\n" +
+    "The recipe: twelve epochs, AdamW with OneCycle, batch 128, gradient clipping; SWA over the last few " +
+    "epochs (Izmailov 2018) with a manual BN refresh for the two-input model; and the per-patient MIL " +
+    "auxiliary loss that regularises against memorising within-patient quirks.\n\n" +
+    "One thing to flag: there is no held-out validation set. With only twelve patients a held-out split " +
+    "is too noisy (v27 showed that), so the public leaderboard is the external check throughout."
   );
 }
 
@@ -1212,7 +1206,7 @@ function ruleCallout(slide, x, y, w, h, text) {
     { head: "Seed variance is huge.",
       body: "Same recipe, different seed: 0.03 LB shift (v19 vs v23). Single-seed A/B claims under 0.03 are noise." },
     { head: "On small-N, data is the lever — not architecture.",
-      body: "Four regularisers gained +0.011; soft-pseudo distillation gained +0.042. Even the SOTA co-attention fusion ≈ plain late fusion (0.97 corr, both 0.83). Only co-attention fusion nudged architecture (+0.004 to a new best 0.8392); data was ~10x bigger." },
+      body: "Four regularisers gained +0.011; soft-pseudo distillation gained +0.042 — about 4× more lift from growing the effective dataset than from any architecture or regulariser change." },
     { head: "Negative results are the methodology.",
       body: "The v46/v47 winning recipe traces directly to six diagnosed failures. Reading the failures faithfully is what produced the win." },
   ];
