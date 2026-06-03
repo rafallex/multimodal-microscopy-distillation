@@ -13,7 +13,7 @@ from pathlib import Path
 # (label, public LB, marker colour, delta-or-None, description)
 RUNS = [
     ("v19", 0.7455, "#1A3A52", None,     "supervised floor"),
-    ("v41", 0.7563, "#2563EB", "+0.011", "L4 regularisers"),
+    ("v41", 0.7563, "#2563EB", "+0.011", "regularisers"),
     ("v44", 0.7812, "#059669", "+0.025", "hard pseudo · Lee 2013"),
     ("v46", 0.8236, "#D97706", "+0.042", "soft distillation · Hinton 2015"),
 ]

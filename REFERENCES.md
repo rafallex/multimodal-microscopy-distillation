@@ -34,15 +34,6 @@ Canonical citations for the methods and ideas this project builds on. The corres
   Used in: v17 onward — EfficientNet-B0 dual-branch backbone (timm `efficientnet_b0.ra_in1k`).
   arXiv: [1905.11946](https://arxiv.org/abs/1905.11946)
 
-### Methods that did NOT transfer (negative-results citations)
-
-- **Lian, C., Liu, M., Zhang, J., and Shen, D. (2024).** Same-class multimodal microscopy paper that was the source of v37/v38 experiment ideas. CAFNet architecture, reported F1 = 0.83 on a 4-channel-emission setup.
-  Used in: v37 (Lian §5.2 modality-specific FL augmentation — regressed −0.036) and v38 (Lian Table 3 early fusion — regressed −0.031). See `overleaf-report/notes/07_negative_results.md` §7.3 for the post-mortem.
-
-- **Pielawski, N., Wetzer, E., Öfverstedt, J., Lu, J., Wählby, C., Lindblad, J., and Sladoje, N. (2020).** *CoMIR: Contrastive Multimodal Image Representation for Registration.* In *Advances in Neural Information Processing Systems (NeurIPS) 33*, pp. 18433–18444.
-  Used in: v15 / v16 / v42 — the CoMIR-style cross-modal InfoNCE pretrain that catastrophically collapsed to the patient-identity shortcut. See `overleaf-report/notes/07_negative_results.md` §7.4 for the post-mortem.
-  arXiv: [2006.06325](https://arxiv.org/abs/2006.06325)
-
 ## Local PDF files (not committed)
 
 The user may have copies of these PDFs at the repo root or in a personal `~/papers/` folder for reading; they are intentionally **not** committed to keep repo size small and to avoid redistributing copyrighted material. Filenames seen locally:
