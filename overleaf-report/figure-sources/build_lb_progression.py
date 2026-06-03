@@ -90,11 +90,7 @@ ax.annotate("v43 −0.012 regression\n(stacked L4 changes)",
             fontsize=9, color="tab:red", ha="left",
             arrowprops=dict(arrowstyle="->", color="tab:red", lw=0.9))
 
-ax.annotate("v42 SSL collapse\n(patient shortcut)",
-            xy=(labels.index("v42"), 0.5908),
-            xytext=(labels.index("v42") - 0.5, 0.555),
-            fontsize=9, color="tab:red", ha="left",
-            arrowprops=dict(arrowstyle="->", color="tab:red", lw=0.9))
+# v42 kept as a data point only — no annotation (SSL not discussed in the deck)
 
 # X axis
 ax.set_xticks(list(xs))
