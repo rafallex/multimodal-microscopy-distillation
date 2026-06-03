@@ -268,7 +268,7 @@ zizlJQk2
 
 # === Curated Kaggle run artifacts for reproducibility ===
 # Re-include small artifacts (CSVs, history JSONs, learning curves) from the
-# inflection-point versions only (v19, v41, v44, v46, v47). This lets the
+# inflection-point versions only (v19, v41, v44, v46). This lets the
 # figure-builder scripts (overleaf-report/figure-sources/build_*) run from a
 # fresh clone and makes the report's per-version numbers independently
 # verifiable.
@@ -294,15 +294,6 @@ zizlJQk2
 !results/v46/learning_curves.png
 !results/v46/runs/
 !results/v46/runs/history*.json
-!results/v47/
-!results/v47/submission*.csv
-!results/v47/learning_curves.png
-!results/v47/runs/
-!results/v47/runs/history*.json
-# CPU-only ensemble recombinations (no training, derived from v44/v46/v47 CSVs above).
-# Tiny (~10 MB total) and paper-relevant — track for reproducibility.
-!results/cpu_ensembles/
-!results/cpu_ensembles/*.csv
 
 # Inside the re-included results/vN/ dirs, still exclude the heavy / junk artifacts
 # the global *.pt and runs/ rules don't reach (full Kaggle .ipynb dumps with
@@ -327,13 +318,13 @@ node_modules/
 # local feature cache (large, regenerable)
 _l4_cache/
 
-# === Public repo scoped to v47: later work kept local-only ===
-# Post-v47 source notebooks (v48–v61) — development iterations beyond the
-# submitted v47 result. Kept on disk, untracked.
+# === Public repo scoped to the v46 deliverable: later work kept local-only ===
+# Later source notebooks (v48–v61) — iterations beyond the reported v46
+# result. Kept on disk, untracked.
 notebooks/improvedv4[89]_*.ipynb
 notebooks/improvedv5[0-9]_*.ipynb
 notebooks/improvedv6[01]_*.ipynb
-# Post-v47 experiment scaffolding + smoketests under figure-sources.
+# Later experiment scaffolding + smoketests under figure-sources.
 # (The two documented figure builders — build_lb_progression.py and
 #  build_noise_floor_analysis.py — start with build_l/build_n and stay tracked.)
 overleaf-report/figure-sources/build_v*.py

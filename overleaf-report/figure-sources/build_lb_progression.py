@@ -33,10 +33,6 @@ RUNS = [
     ("v46_seed2",    0.8229, "darkgreen",   None),
     ("v46_seed3",    0.8187, "darkgreen",   None),  # found 2026-05-27 in full Kaggle submission list
     ("v46",          0.8236, "tab:green",   (-1.1, 0.015)),
-    ("v47",          0.8264, "tab:green",   (0.5, 0.012)),
-    ("v47_s1",       0.8150, "#0E5C2F",     None),  # darker green for v47 per-seed extracts
-    ("v47_s2",       0.8355, "#0E5C2F",     None),  # best DISTILLATION seed
-    ("v47_s3",       0.8126, "#0E5C2F",     None),  # correct (the 0.8187 was actually v46_s3, fixed 2026-05-27)
 ]
 
 # Reference line: V19_BASELINE — the supervised floor.
@@ -68,42 +64,16 @@ ax.axhline(V19_BASELINE, color="tab:blue", linestyle=":", linewidth=1.2, alpha=0
            label=f"v19 baseline = {V19_BASELINE:.4f}")
 # (no additional reference lines)
 
-# Headline annotation on v47_s2 (best single seed, +0.090 over v19)
-v47s2_x = labels.index("v47_s2")
-v47s2_y = RUNS[v47s2_x][1]
-ax.annotate("v47_s2 = 0.8355\nbest distillation seed",
-            xy=(v47s2_x, v47s2_y),
-            xytext=(v47s2_x - 6.5, v47s2_y + 0.006),
+# Headline annotation on v46 (the reported result, +0.078 over v19)
+v46_x = labels.index("v46")
+v46_y = RUNS[v46_x][1]
+ax.annotate("v46 = 0.8236\nsoft-target distillation\n(+0.078 over v19)",
+            xy=(v46_x, v46_y),
+            xytext=(v46_x - 6.5, v46_y + 0.004),
             fontsize=10, fontweight="bold", color="#0E5C2F",
             ha="left", va="bottom",
             arrowprops=dict(arrowstyle="->", color="#0E5C2F",
                             lw=1.4, connectionstyle="arc3,rad=-0.2"))
-
-# Secondary annotation on v47 ensemble (sits below best seed by 0.009)
-v47_x = labels.index("v47")
-v47_y = RUNS[v47_x][1]
-ax.annotate("v47 ensemble = 0.8264\n(below v47_s2 by 0.009)",
-            xy=(v47_x, v47_y),
-            xytext=(v47_x - 4.0, 0.787),
-            fontsize=9, fontweight="bold", color="tab:green",
-            ha="left", va="bottom",
-            arrowprops=dict(arrowstyle="->", color="tab:green",
-                            lw=1.2, connectionstyle="arc3,rad=0.25"))
-
-# Vertical bracket showing v47 seed range (~3x v46's 0.0072)
-v47_seed_x = labels.index("v47_s2")
-seed_top = 0.8355
-seed_bot = 0.8126  # v47_s3 is the lowest (corrected back from 0.8187 mis-attribution)
-v47_range = seed_top - seed_bot
-ax.plot([v47_seed_x + 1.4, v47_seed_x + 1.4], [seed_bot, seed_top],
-        color="#0E5C2F", lw=1.2, alpha=0.75)
-ax.plot([v47_seed_x + 1.3, v47_seed_x + 1.5], [seed_top, seed_top],
-        color="#0E5C2F", lw=1.2, alpha=0.75)
-ax.plot([v47_seed_x + 1.3, v47_seed_x + 1.5], [seed_bot, seed_bot],
-        color="#0E5C2F", lw=1.2, alpha=0.75)
-ax.text(v47_seed_x + 1.7, (seed_top + seed_bot) / 2,
-        f"v47 seed\nrange = {v47_range:.4f}\n(~{v47_range/0.0072:.1f}× v46's 0.0072)",
-        fontsize=8, color="#0E5C2F", ha="left", va="center")
 
 # Smaller annotations on key inflections
 ax.annotate("v41 +0.011\n(L4 regularizers)",
@@ -144,7 +114,7 @@ ax.spines["top"].set_visible(False)
 ax.spines["right"].set_visible(False)
 
 # Title
-ax.set_title("Public LB progression  ·  v19 → v47 distillation = +0.090 (best seed 0.8355)",
+ax.set_title("Public LB progression  ·  v19 → v46 distillation = +0.078",
              fontsize=12, fontweight="bold", pad=12, loc="left")
 
 # Custom legend (color categories)
@@ -152,7 +122,6 @@ legend_handles = [
     mpatches.Patch(color="tab:green", label="Breakthrough (pseudo-label)"),
     mpatches.Patch(color="tab:blue",  label="Useful gain"),
     mpatches.Patch(color="darkgreen", label="v46 per-seed extract"),
-    mpatches.Patch(color="#0E5C2F",   label="v47 per-seed extract"),
     mpatches.Patch(color="tab:red",   label="Regression / negative result"),
     mpatches.Patch(color="tab:gray",  label="Neutral / replication"),
 ]

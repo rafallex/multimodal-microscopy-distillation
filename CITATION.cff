@@ -18,7 +18,6 @@ keywords:
   - knowledge distillation
   - semi-supervised learning
   - pseudo-labeling
-  - noisy student
   - multimodal microscopy
   - medical image classification
   - EfficientNet

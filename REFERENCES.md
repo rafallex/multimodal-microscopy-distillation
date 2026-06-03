@@ -18,10 +18,6 @@ Canonical citations for the methods and ideas this project builds on. The corres
   Used in: v44 (hard-pseudo at threshold 0.05 / 0.95).
   Official PDF: [pseudo_label_final.pdf](http://deeplearning.net/wp-content/uploads/2013/03/pseudo_label_final.pdf) (also linked from `LB_HISTORY.md` § v44 row).
 
-- **Xie, Q., Luong, M.-T., Hovy, E., and Le, Q. V. (2020).** *Self-training with Noisy Student improves ImageNet classification.* In *Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR)*, pp. 10684–10695.
-  Used in: v47 (iterative noisy student, round 2 of the teacher → student loop). v46 trained from v44_seed1, v47 trained from v46.
-  arXiv: [1911.04252](https://arxiv.org/abs/1911.04252)
-
 ### Test-time and ensemble methods
 
 - **Izmailov, P., Podoprikhin, D., Garipov, T., Vetrov, D., and Wilson, A. G. (2018).** *Averaging Weights Leads to Wider Optima and Better Generalization.* In *Proceedings of the 34th Conference on Uncertainty in Artificial Intelligence (UAI)*.
@@ -54,7 +50,6 @@ The user may have copies of these PDFs at the repo root or in a personal `~/pape
 | Local filename | Paper |
 |----------------|-------|
 | `Distilling the Knowledge in a Neural Network.pdf` | Hinton, Vinyals & Dean 2015 |
-| `Self-training with Noisy Student improves ImageNet classification.pdf` | Xie et al. 2020 |
 | `compression.kdd06.pdf` | Bucilă, Caruana & Niculescu-Mizil 2006 |
 | `pseudo_label_final.pdf` | Lee 2013 |
 

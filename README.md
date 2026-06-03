@@ -5,7 +5,7 @@
 
 Per-cell malignant/benign classification of oral-cancer cells imaged in two paired modalities, brightfield (BF) and fluorescence (FL), at 128×128 grayscale. The dataset is small where it matters: 12 training patients, about 114,000 labeled cells, and a 59,000-cell test set whose patients never appear in training.
 
-With only 12 patients the model is data-bound, not capacity-bound. The gains here came from growing the effective training set with semi-supervised distillation and from diagnosing failures, not from bigger networks. Public-leaderboard AUC went from 0.7455 (the first solid supervised model) to 0.8264 (a second round of soft-label distillation). The private split decides the final score.
+With only 12 patients the model is data-bound, not capacity-bound. The gains here came from growing the effective training set with semi-supervised distillation and from diagnosing failures, not from bigger networks. Public-leaderboard AUC went from 0.7455 (the first solid supervised model) to 0.8236 (soft-target distillation, Hinton 2015). The private split decides the final score.
 
 ![Public LB progression](presentation/figures/lb_progression.png)
 
@@ -17,11 +17,10 @@ With only 12 patients the model is data-bound, not capacity-bound. The gains her
 | v41 | Added label smoothing, dropout, RandomResizedCrop, multiscale TTA | — | 0.7563 |
 | v44 | Hard pseudo-labels: ~9,400 confident test cells added to training | Lee 2013 | 0.7812 |
 | v46 | Soft-target distillation: all 59,040 test cells, teacher probability as the target | Hinton 2015 | 0.8236 |
-| v47 | Second distillation round (teacher swapped to v46) | Xie 2020 | 0.8264 |
 
-The largest single step was hard-to-soft pseudo-labels at v46. Hard thresholding keeps only confident cells and throws away 84% of the test set; soft distillation keeps all 59k cells, each weighted by the teacher's probability. That change alone added about +0.042. A second distillation round (v47) added almost nothing on the mean, so the v47 distillation submission (0.8264) is the result I report. Every gain traced to growing the effective training set, not to bigger networks — the data-bound point again, on 12 patients.
+The largest single step was hard-to-soft pseudo-labels at v46. Hard thresholding keeps only confident cells and throws away 84% of the test set; soft distillation keeps all 59k cells, each weighted by the teacher's probability. That change alone added about +0.042 — the biggest jump in the project, and the result I report (0.8236). Every gain traced to growing the effective training set, not to bigger networks — the data-bound point again, on 12 patients.
 
-Each headline gain is scored against the seed-to-seed noise floor, measured from three seeds per recipe. The soft-pseudo gain sits about 4 standard errors above that floor; the second distillation round is about 0.3, so it is not distinguishable from noise. A per-cell check found that 97% of the disagreement between the best seed and the seed average falls in the teacher's uncertain middle band, which is evidence that the best-seed result is signal rather than a lucky split.
+Each headline gain is scored against the seed-to-seed noise floor, measured from three seeds per recipe. The soft-pseudo distillation gain (v44→v46) sits about 4 standard errors above that floor — the one clearly significant jump in the project, well clear of the seed noise that swamps the smaller regularizer and ensembling steps.
 
 ## What didn't work
 
@@ -29,7 +28,7 @@ The failures were as useful as the wins:
 
 - **Self-supervised pretraining (v42)** collapsed to 0.59. With one patient per cell, a cross-modal contrastive task can be solved by recognizing the patient rather than the cell, which is the exact shortcut a patient-disjoint test set punishes.
 - **Stacking four changes at once (v43)** regressed and left no way to tell which change was responsible. After that I changed one or two related things per submission.
-- **Ensembling gave no lift beyond noise.** A dozen blends — seed averaging, cross-recipe averaging, a decorrelated feature-GBM — all scored at or below the best single model. With 12 patients the seed spread (~0.02 AUC) is wide enough that averaging only pulls toward the mean: it cuts variance without adding signal. That is why the result I report is the variance-reduced distillation ensemble (0.8264) rather than a single lucky seed.
+- **Ensembling gave no lift across recipes.** Wide-gap blends — cross-recipe averaging and a decorrelated feature-GBM — all scored at or below their stronger member (v22 and v45_probe both regressed). Within-recipe seed averaging was the pattern that held: v46's 3-seed mean (0.8236) edged all three of its individual seeds, so the reported result is that variance-reduced ensemble rather than a single lucky seed.
 
 ## Method
 
@@ -43,7 +42,7 @@ Two EfficientNet-B0 branches, one per modality, with late concat fusion and a sm
 |---|---|
 | `notebooks/` | One source notebook per version (`improvedvNN_source.ipynb`), runnable end to end on Kaggle (T4 ×2). |
 | `presentation/` | The figures shown above (LB progression and architecture diagrams). |
-| `overleaf-report/figure-sources/` | Scripts that build the figures and the noise-floor table from the prediction CSVs. |
+| `overleaf-report/figure-sources/` | Scripts that build the figures shown above from the prediction CSVs. |
 | `LB_HISTORY.md` | Every submission in order: the change, the public LB, and the one-line lesson. |
 | `results/` | Per-version submission CSVs. Training checkpoints are gitignored. |
 
@@ -51,8 +50,7 @@ Two EfficientNet-B0 branches, one per modality, with late concat fusion and a sm
 
 ```bash
 pip install -r requirements.txt
-python overleaf-report/figure-sources/build_lb_progression.py        # LB progression chart
-python overleaf-report/figure-sources/build_noise_floor_analysis.py  # per-seed significance table
+python overleaf-report/figure-sources/build_lb_progression.py  # LB progression chart
 ```
 
 Training runs are Kaggle notebooks. Open a source notebook, attach the competition data (and a teacher-prediction dataset for the distillation versions), and run all. A distillation version takes about 5–6 hours on one T4 ×2 session.
