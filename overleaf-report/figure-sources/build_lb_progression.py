@@ -27,11 +27,7 @@ RUNS = [
     ("v42",          0.5908, "tab:red",     (0.3, -0.02)),
     ("v43",          0.7444, "tab:red",     (0.0, -0.025)),
     ("v44",          0.7812, "tab:green",   (-0.2, 0.012)),
-    ("v44_seed1",    0.7844, "tab:green",   None),
     ("v45_probe",    0.7729, "tab:red",     None),
-    ("v46_seed1",    0.8157, "darkgreen",   None),
-    ("v46_seed2",    0.8229, "darkgreen",   None),
-    ("v46_seed3",    0.8187, "darkgreen",   None),  # found 2026-05-27 in full Kaggle submission list
     ("v46",          0.8236, "tab:green",   (-1.1, 0.015)),
 ]
 
@@ -121,7 +117,6 @@ ax.set_title("Public LB progression  ·  v19 → v46 distillation = +0.078",
 legend_handles = [
     mpatches.Patch(color="tab:green", label="Breakthrough (pseudo-label)"),
     mpatches.Patch(color="tab:blue",  label="Useful gain"),
-    mpatches.Patch(color="darkgreen", label="v46 per-seed extract"),
     mpatches.Patch(color="tab:red",   label="Regression / negative result"),
     mpatches.Patch(color="tab:gray",  label="Neutral / replication"),
 ]
