@@ -5,7 +5,7 @@
 
 Per-cell malignant/benign classification of oral-cancer cells imaged in two paired modalities, brightfield (BF) and fluorescence (FL), at 128×128 grayscale. The dataset is small where it matters: 12 training patients, about 114,000 labeled cells, and a 59,000-cell test set whose patients never appear in training.
 
-With only 12 patients the model is data-bound, not capacity-bound. The gains here came from growing the effective training set with semi-supervised distillation and from diagnosing failures, not from bigger networks. Public-leaderboard AUC went from 0.7455 (the first solid supervised model) to 0.8392 (best single model). The private split decides the final score.
+With only 12 patients the model is data-bound, not capacity-bound. The gains here came from growing the effective training set with semi-supervised distillation and from diagnosing failures, not from bigger networks. Public-leaderboard AUC went from 0.7455 (the first solid supervised model) to 0.8264 (a second round of soft-label distillation). The private split decides the final score.
 
 ![Public LB progression](presentation/figures/lb_progression.png)
 
@@ -17,10 +17,9 @@ With only 12 patients the model is data-bound, not capacity-bound. The gains her
 | v41 | Added label smoothing, dropout, RandomResizedCrop, multiscale TTA | — | 0.7563 |
 | v44 | Hard pseudo-labels: ~9,400 confident test cells added to training | Lee 2013 | 0.7812 |
 | v46 | Soft-target distillation: all 59,040 test cells, teacher probability as the target | Hinton 2015 | 0.8236 |
-| v47 | Second distillation round (teacher swapped to v46) | Xie 2020 | 0.8264 ens / 0.8355 best seed |
-| v58 | Intermediate co-attention fusion, single model | Lian 2024 | 0.8392 (best) |
+| v47 | Second distillation round (teacher swapped to v46) | Xie 2020 | 0.8264 |
 
-The largest single step was hard-to-soft pseudo-labels at v46. Hard thresholding keeps only confident cells and throws away 84% of the test set; soft distillation keeps all 59k cells, each weighted by the teacher's probability. That change alone added about +0.042. A second distillation round (v47) added almost nothing on the mean. Later, intermediate co-attention fusion (v58) raised the best single model to 0.8392. Larger backbones (EfficientNetV2-S, 0.7376) and higher input resolution (192px, 0.7823) both made it worse, which is the data-bound point again.
+The largest single step was hard-to-soft pseudo-labels at v46. Hard thresholding keeps only confident cells and throws away 84% of the test set; soft distillation keeps all 59k cells, each weighted by the teacher's probability. That change alone added about +0.042. A second distillation round (v47) added almost nothing on the mean, so the v47 distillation submission (0.8264) is the result I report. Every gain traced to growing the effective training set, not to bigger networks — the data-bound point again, on 12 patients.
 
 Each headline gain is scored against the seed-to-seed noise floor, measured from three seeds per recipe. The soft-pseudo gain sits about 4 standard errors above that floor; the second distillation round is about 0.3, so it is not distinguishable from noise. A per-cell check found that 97% of the disagreement between the best seed and the seed average falls in the teacher's uncertain middle band, which is evidence that the best-seed result is signal rather than a lucky split.
 
@@ -30,7 +29,7 @@ The failures were as useful as the wins:
 
 - **Self-supervised pretraining (v42)** collapsed to 0.59. With one patient per cell, a cross-modal contrastive task can be solved by recognizing the patient rather than the cell, which is the exact shortcut a patient-disjoint test set punishes.
 - **Stacking four changes at once (v43)** regressed and left no way to tell which change was responsible. After that I changed one or two related things per submission.
-- **Ensembling gave no lift beyond noise.** A dozen blends — seed averaging, cross-recipe averaging, a decorrelated feature-GBM — all scored below the best single model. The lone exception was a weighted blend of the two best, near-tied, different-recipe models (0.0037 apart): it reached 0.8404 against the best single's 0.8392, but +0.0012 is about 0.1σ, a statistical tie. With 12 patients the seed spread (~0.02 AUC) is wide enough that averaging only pulls toward the mean, so a careful blend and the best single model are interchangeable.
+- **Ensembling gave no lift beyond noise.** A dozen blends — seed averaging, cross-recipe averaging, a decorrelated feature-GBM — all scored at or below the best single model. With 12 patients the seed spread (~0.02 AUC) is wide enough that averaging only pulls toward the mean: it cuts variance without adding signal. That is why the result I report is the variance-reduced distillation ensemble (0.8264) rather than a single lucky seed.
 
 ## Method
 

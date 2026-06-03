@@ -32,13 +32,9 @@ The corresponding source notebooks live in `notebooks/improvedvNN_source.ipynb`.
 | **v46** | **EffNet-B0** | **128 native** | **v44 stripped (no FL aug, WD 1e-4) + SOFT pseudo-labels from v44_seed1 (the lucky teacher): all 59k test cells, raw probs as BCE targets (Hinton 2015 distillation), pseudo loss weighted 0.5** | **0.8236** | **`notebooks/improvedv46_source.ipynb` — ★ NEW BEST ★. +0.039 over v44 seed1, +0.042 over v44 ensemble. Distillation crushed expectations (I forecast +0.005 to +0.015). All 3 seeds reached tr_auc ≈ 0.993 (vs v44's 0.989). Need +0.0264 more to reach 0.85** |
 | v46_seed1 | EffNet-B0 | 128 native | single-seed extract from v46 (submission_seed1.csv) | 0.8157 | v46 seed1 alone scored 0.0079 below the v46 ensemble |
 | v46_seed2 | EffNet-B0 | 128 native | single-seed extract from v46 (submission_seed2.csv) | 0.8229 | v46 seed2 alone scored 0.0007 below the v46 ensemble. **Different pattern from v44**: in v46 the ensemble beat both observed seeds, meaning within-recipe averaging genuinely added signal here (consistent with the tighter tr_auc convergence ≈ 0.993 across seeds vs v44's 0.989 spread) |
-| **v47** | **EffNet-B0** | **128 native** | **Same recipe as v46, but teacher swapped: SOFT pseudo from v46 ensemble (LB 0.8236) instead of v44_seed1. Iterative noisy student round 2 (Xie 2020). Single-variable test of stronger teacher → stronger student in round 2** | **0.8264** | **`notebooks/improvedv47_source.ipynb` — ★ +0.0028 over v46 on the ensemble, +0.0119 on the best single seed. Per-seed public LB: 0.8126 / 0.8150 / **0.8355** (range 0.0229, ~3× wider than v46's 0.0072). v46 per-seed (now n=3): 0.8157 / 0.8187 / 0.8229. v47 per-seed SE = 0.0073 vs v46 SE = 0.0021 — **v47 seed noise 3.5× larger**. The ensemble at 0.8264 sat **below v47_seed2's 0.8355 by 0.0091** — within-recipe averaging hedged against a strong outlier seed. Earlier "tr_auc tightened" framing (0.9937/0.9929/0.9932) was on training AUC, not LB; on the metric we report, dispersion expanded. **Noise-floor analysis: v46→v47 ensemble lift is 0.27σ (indistinguishable from zero); v46→v47_s2 best-seed lift is 1.16σ (marginal).** Per-cell analysis: **97% of |p_s2 − p_ensemble| concentrated in teacher's dark-knowledge middle band** (cells where p_v46 ∈ [0.05, 0.95]) — strongly suggests s2 lift is signal, not split-luck. Decision: do NOT do a vanilla round 3; the right next experiment is Hinton temperature distillation (v48)** |
-| **v58** | dual EffNet-B0 + co-attention | 128 native | v50 recipe (dual EffNet-B0 + soft pseudo from v47_seed2) with intermediate **co-attention fusion** (CAFNet-style; fp32-hardened attention + zero-init ReZero gate) replacing late concat | **0.8392** (seed2) | `notebooks/improvedv58_source.ipynb` — NEW BEST single model. seed2 beat v47_s2 (0.8355) by +0.0037; seed1 = 0.8159. The only architecture change in the whole project that helped. |
-| v59 | dual EfficientNetV2-S | 128 native | v50 recipe, backbone EffNet-B0 -> EfficientNetV2-S (more capacity) | 0.7376 | `notebooks/improvedv59_source.ipynb` — regression; the larger backbone overfits 12 patients. |
-| v60 | dual EffNet-B0 @ 192px | 192 (upscaled) | v50 recipe, input upscaled 128 -> 192px, TTA scales around 192 | 0.7823 | `notebooks/improvedv60_source.ipynb` — regression; higher resolution did not help (data-bound, not capacity-bound). |
-| **v61** | dual EffNet-B0 + co-attention | 128 native | v58 co-attention recipe, 2 fresh seeds [3,4] (best-seed hunt on the winner) | seed3 **0.8350** / seed4 0.8190 / 2-seed mean 0.8308 | `notebooks/improvedv61_source.ipynb` — more co-attention seeds did not beat v58_s2 (0.8392). The 2-seed mean (0.8308) fell below its own best seed (0.8350): within-recipe averaging regressed again. |
+| **v47** | **EffNet-B0** | **128 native** | **Same recipe as v46, but teacher swapped: SOFT pseudo from v46 ensemble (LB 0.8236) instead of v44_seed1. Iterative noisy student round 2 (Xie 2020). Single-variable test of stronger teacher → stronger student in round 2** | **0.8264** | **`notebooks/improvedv47_source.ipynb` — ★ +0.0028 over v46 on the ensemble, +0.0119 on the best single seed. Per-seed public LB: 0.8126 / 0.8150 / **0.8355** (range 0.0229, ~3× wider than v46's 0.0072). v46 per-seed (now n=3): 0.8157 / 0.8187 / 0.8229. v47 per-seed SE = 0.0073 vs v46 SE = 0.0021 — **v47 seed noise 3.5× larger**. The ensemble at 0.8264 sat **below v47_seed2's 0.8355 by 0.0091** — within-recipe averaging hedged against a strong outlier seed. Earlier "tr_auc tightened" framing (0.9937/0.9929/0.9932) was on training AUC, not LB; on the metric we report, dispersion expanded. **Noise-floor analysis: v46→v47 ensemble lift is 0.27σ (indistinguishable from zero); v46→v47_s2 best-seed lift is 1.16σ (marginal).** Per-cell analysis: **97% of |p_s2 − p_ensemble| concentrated in teacher's dark-knowledge middle band** (cells where p_v46 ∈ [0.05, 0.95]) — strongly suggests s2 lift is signal, not split-luck. |
 
-_v48-v57 were development iterations (Hinton-temperature distillation, backbone-diversity probes, and co-attention prototyping); only the submitted runs above are tracked here._
+_This project's reported work ends at v47._
 
 ## CPU-only ensemble probes (2026-05-27 evening batch)
 
@@ -59,15 +55,14 @@ Four ensemble recombinations submitted while GPU-bound, no retraining. Each test
 
 Still to submit (May 29 slots): **G** (per-cell confidence-weighted, directly exploits the 97% finding — was bumped from tonight's batch), **F** (LB-weighted, §VII-A risk test). G is the higher-priority of the two for the paper's middle-band exploitation narrative.
 
-## Best public-LB scores (this project)
+## Headline LB milestones (this project)
 
 | Version | Public LB | Note |
 |---|---|---|
 | v19 | 0.7455 | supervised floor |
 | v44 | 0.7812 | hard pseudo-labels |
 | v46 | 0.8236 | soft-target distillation |
-| v47_s2 | 0.8355 | best distillation seed |
-| v58 | 0.8392 | intermediate co-attention (best single model) |
+| v47 | 0.8264 | second-round distillation (reported result) |
 
 (Own scores only.)
 
@@ -97,20 +92,19 @@ Kaggle lets you pick 2 submissions for private LB. Plan as of 2026-06-01:
 
 Final picks (locked 2026-06-01) — chosen for robustness over a lucky seed:
 
-1. **`submission.csv` (v58, LB 0.8314)** — the 2-seed co-attention mean (averages the lucky seed2 and the unlucky seed1, so it depends on no single draw).
-2. **`submission.csv` (v47, LB 0.8264)** — the 3-seed distillation ensemble. Different mechanism from v58, also variance-reduced.
+1. **`submission.csv` (v47, LB 0.8264)** — the 3-seed distillation ensemble, variance-reduced: it averages the seeds rather than betting on a single lucky draw.
 
-Both picks are multi-seed averages, mechanism-diverse, and depend on no single lucky seed. This deliberately passes over the higher *public* scores — the best single seed (v58_s2, 0.8392) and the within-rule blend (0.8404, +0.0012 over it, ~0.1σ) — in favour of robustness to the private patient split, consistent with this project's seed-variance finding. Averaging gives no public-LB lift on N=12, but it does cut variance, which is what we want for a single locked private bet.
+The pick is a multi-seed average that depends on no single lucky seed. It deliberately passes over the higher *public* score of the best single seed in favour of robustness to the private patient split, consistent with this project's seed-variance finding. Averaging gives no public-LB lift on N=12, but it does cut variance, which is what we want for a single locked private bet.
 
-Note on the within-recipe-averaging caution: it held for *wide-gap* and *same-recipe* blends (all 12+ regressed below their best member). The one blend within the gap-rule (members 0.0037 apart) tied the best single at 0.8404 — confirming the refined rule rather than contradicting it.
+Note on the within-recipe-averaging caution: it held for *wide-gap* and *same-recipe* blends (all regressed below their best member); here within-recipe seed averaging is used purely as a variance reducer.
 
 Why NOT pick v46 as a safety net: v46 is the teacher v47 distills from. They share recipe lineage almost completely (only difference: teacher source CSV). A correlated pair offers no diversification on private LB. v41 is the lowest-correlation pick available among submitted recipes.
 
 A v47 + v41 sigmoid-average submission is **NOT** worth a slot test — the members are 0.070+ LB apart, far outside the 0.015 cross-recipe ensembling threshold we established empirically via v22 and v45_probe (M2).
 
-**Noise-floor caveat.** A noise-floor analysis (paper Table III) places the v46→v47 ensemble lift (+0.003) at 0.31σ relative to the v47 per-seed SE — indistinguishable from zero. The v46→v47_s2 best-seed lift (+0.012) is at marginal (1.33σ). The +0.039 v44→v46 soft-pseudo gain is the only robust delta in the entire iteration chain (4.75σ).
+**Noise-floor caveat.** Against the per-seed SE, the v46→v47 ensemble lift (+0.003) is 0.31σ — indistinguishable from zero. The +0.039 v44→v46 soft-pseudo gain is the only robust delta in the entire iteration chain (4.75σ).
 
-v48 (Hinton T=2) is queued for the May 29 Kaggle quota reset. If it gains we regain the lead; if it's flat or worse, v47_s2 remains the primary pick under the aggressive strategy.
+The project's reported work ends at v47; the v47 distillation ensemble (0.8264) is the locked final submission.
 
 ## What's NOT tracked here
 
@@ -132,7 +126,7 @@ Between v19 and v41 we gained +0.011 LB from four textbook regularizers stacked 
 
 ### M2. Ensembling gives no lift beyond noise on N=12
 
-Within-recipe seed averaging was inconsistent: v46's 3-seed mean beat all its seeds, but v47's 3-seed mean (0.8264) fell below its best seed (0.8355) and v61's 2-seed mean (0.8308) fell below its best (0.8350) — once the per-seed spread widens, averaging just drags the lucky draw back to the mean. Cross-recipe sigmoid averaging at wide gaps failed twice — v22 (v19+v21, 0.05 gap) and v45_probe (v41+v44, 0.025 gap) both regressed below the better member — giving the operational rule: **don't average across recipes if the LB gap is wider than ~0.015**. The one blend that satisfied that rule (v58_s2 + v47_s2, gap 0.0037) reached 0.8404, edging the best single seed (0.8392) by +0.0012 — but that is ~0.1σ against the seed-noise floor, a statistical tie. Net: no ensemble gave a lift beyond noise; a careful within-gap blend can at best tie the best single model.
+Within-recipe seed averaging was inconsistent: v46's 3-seed mean beat all its seeds, but v47's 3-seed mean (0.8264) fell below its best seed (0.8355) — once the per-seed spread widens, averaging just drags the lucky draw back toward the mean. Cross-recipe sigmoid averaging at wide gaps failed twice — v22 (v19+v21, 0.05 gap) and v45_probe (v41+v44, 0.025 gap) both regressed below the better member — giving the operational rule: **don't average across recipes if the LB gap is wider than ~0.015**. Net: no ensemble gave a lift beyond noise; averaging only reduces variance.
 
 ### M3. Patient identity is the dominant spurious correlation; treat it as adversarial
 

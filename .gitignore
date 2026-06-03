@@ -326,3 +326,22 @@ node_modules/
 
 # local feature cache (large, regenerable)
 _l4_cache/
+
+# === Public repo scoped to v47: later work kept local-only ===
+# Post-v47 source notebooks (v48–v61) — development iterations beyond the
+# submitted v47 result. Kept on disk, untracked.
+notebooks/improvedv4[89]_*.ipynb
+notebooks/improvedv5[0-9]_*.ipynb
+notebooks/improvedv6[01]_*.ipynb
+# Post-v47 experiment scaffolding + smoketests under figure-sources.
+# (The two documented figure builders — build_lb_progression.py and
+#  build_noise_floor_analysis.py — start with build_l/build_n and stay tracked.)
+overleaf-report/figure-sources/build_v*.py
+overleaf-report/figure-sources/build_ensemble*.py
+overleaf-report/figure-sources/build_cross_arch_ensemble.py
+overleaf-report/figure-sources/build_backbone_notebooks.py
+overleaf-report/figure-sources/build_extra_notebooks.py
+overleaf-report/figure-sources/build_harvest_notebooks.py
+overleaf-report/figure-sources/*smoketest*.py
+# Old build_deck.js speaker script (superseded; kept local)
+presentation/SPEAKER_SCRIPT.md

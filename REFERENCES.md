@@ -11,7 +11,7 @@ Canonical citations for the methods and ideas this project builds on. The corres
   DOI: [10.1145/1150402.1150464](https://doi.org/10.1145/1150402.1150464)
 
 - **Hinton, G., Vinyals, O., and Dean, J. (2015).** *Distilling the Knowledge in a Neural Network.* arXiv preprint **arXiv:1503.02531**. Originally presented at the NIPS 2014 Deep Learning Workshop.
-  Used in: v46 (soft pseudo / dark knowledge), v48 (temperature distillation at T=2).
+  Used in: v46 (soft pseudo / dark knowledge).
   arXiv: [1503.02531](https://arxiv.org/abs/1503.02531)
 
 - **Lee, D.-H. (2013).** *Pseudo-Label: The Simple and Efficient Semi-Supervised Learning Method for Deep Neural Networks.* In *ICML Workshop on Challenges in Representation Learning*.
