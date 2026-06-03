@@ -345,3 +345,10 @@ overleaf-report/figure-sources/build_harvest_notebooks.py
 overleaf-report/figure-sources/*smoketest*.py
 # Old build_deck.js speaker script (superseded; kept local)
 presentation/SPEAKER_SCRIPT.md
+
+# Local housekeeping — superseded experiments + the draft paper, kept off GitHub
+/old/
+/after course completion/
+
+# Slide deck kept local (presented and submitted via Studium, not tracked here)
+presentation/A3_cancer_challenge.pptx
