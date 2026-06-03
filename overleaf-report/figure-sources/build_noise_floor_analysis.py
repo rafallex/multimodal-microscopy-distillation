@@ -166,6 +166,7 @@ for r in pair_stats:
           f"{r['sign_flip_rate']*100:>6.2f}% {r['delta_over_se']:>+8.2f} {r['verdict']:>18}")
 
 # === Write machine-readable CSV ===
+OUT_CSV.parent.mkdir(parents=True, exist_ok=True)
 pd.DataFrame(pair_stats).to_csv(OUT_CSV, index=False, float_format="%.4f")
 print(f"\nSaved {OUT_CSV}")
 
