@@ -41,7 +41,7 @@ Two EfficientNet-B0 branches, one per modality, with late concat fusion and a sm
 | Path | Contents |
 |---|---|
 | `notebooks/` | One source notebook per version (`improvedvNN_source.ipynb`), runnable end to end on Kaggle (T4 ×2). |
-| `presentation/` | Slide-deck generator (`build_deck.js`, pptxgenjs) and the figures shown above. |
+| `presentation/` | The figures shown above (LB progression and architecture diagrams). |
 | `overleaf-report/figure-sources/` | Scripts that build the figures shown above from the prediction CSVs. |
 | `LB_HISTORY.md` | Every submission in order: the change, the public LB, and the one-line lesson. |
 | `results/` | Per-version submission CSVs. Training checkpoints are gitignored. |
