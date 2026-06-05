@@ -1,18 +1,37 @@
 \documentclass[11pt]{article}
 
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
 \usepackage[margin=1in]{geometry}
 \usepackage{graphicx}
 \usepackage{booktabs}
 \usepackage{amsmath}
 \usepackage{amssymb}
+\usepackage{newtxtext}
+\usepackage{newtxmath}
+\usepackage{microtype}
 \usepackage{caption}
+\usepackage{titlesec}
 \usepackage{natbib}
 \usepackage{xcolor}
 \usepackage[hidelinks]{hyperref}
 
 \graphicspath{{figures/}}
-\captionsetup{font=small}
-\setlength{\parskip}{0.4em}
+\captionsetup{font=small,labelfont=bf,labelsep=period}
+\setlength{\parindent}{1.4em}
+
+% tighter, more journal-like section headings
+\titleformat{\section}{\normalfont\large\bfseries}{\thesection}{0.6em}{}
+\titleformat{\subsection}{\normalfont\normalsize\bfseries}{\thesubsection}{0.6em}{}
+\titlespacing*{\section}{0pt}{1.5ex plus .3ex minus .2ex}{0.9ex}
+\titlespacing*{\subsection}{0pt}{1.2ex plus .2ex}{0.6ex}
+
+% keep the bibliography compact so it does not strand a near-empty final page
+\setlength{\bibsep}{0.2ex plus 0.2ex}
+
+% tighten whitespace around floats for a more compact, journal-like vertical rhythm
+\setlength{\textfloatsep}{13pt plus 2pt minus 2pt}
+\setlength{\intextsep}{11pt plus 2pt minus 2pt}
 
 \title{\textbf{Multimodal Cancer-Cell Classification under Patient Shift:\\
 A Distillation-Based Recipe for Small-$N$ Microscopy}}
@@ -34,13 +53,17 @@ capacity or regularisation. Starting from a dual-branch EfficientNet-B0 with a s
 recipe (adaptive batch normalisation, test-set stain normalisation, a per-patient multiple-instance
 loss, and heavy paired augmentation), I grow the training signal by treating the unlabelled test
 images as extra supervision: first with hard pseudo-labels \citep{lee2013}, then with soft-target
-knowledge distillation \citep{hinton2015}. The soft variant (the teacher's raw probabilities on all
-$59{,}040$ test cells used as targets) raises the public-leaderboard AUC from $0.7455$ to
-$0.8236$, a $+0.078$ improvement that sits roughly four standard errors above the seed-to-seed noise
-floor. I also document what did \emph{not} work, namely cross-modal self-supervised pre-training,
+knowledge distillation \citep{hinton2015}. Across the full recipe the public-leaderboard AUC rises from
+$0.7455$ to $0.8236$ (a cumulative $+0.078$); the soft-distillation step alone --- the teacher's raw
+probabilities on all $59{,}040$ test cells used as targets --- contributes $+0.042$ of that, the largest
+single jump and roughly four standard errors above the seed-to-seed noise floor. I also document what
+did \emph{not} work, namely cross-modal self-supervised pre-training,
 same-domain architecture transfer, stacking unvalidated changes, and cross-recipe ensembling,
 because each failure diagnosed a property of the data that directly shaped the final recipe.
 \end{abstract}
+
+\noindent\textbf{Keywords:} semi-supervised learning; knowledge distillation; pseudo-labelling; domain
+shift; multimodal microscopy; test-time adaptation; small-sample learning.
 
 \section{Introduction}
 
@@ -59,6 +82,33 @@ that patient shortcut and to make the most of a small labelled set.
 
 This report presents the recipe that reached a public-leaderboard AUC of $0.8236$, the experiments that
 led there, and, equally important for the methodology, the diagnosed failures along the way.
+
+\section{Related work}
+
+The recipe combines established ideas rather than introducing a new architecture, so it is best
+understood through the lines of work it draws on.
+
+\textbf{Learning from unlabelled data.} When labels are scarce but inputs are plentiful, two classic
+strategies turn predictions into supervision. Pseudo-labelling \citep{lee2013} assigns hard labels to
+confident unlabelled examples and trains on them as ground truth. Knowledge distillation
+\citep{hinton2015}, building on earlier model compression \citep{bucila2006}, instead transfers a
+teacher's full output distribution to a student, so the soft target carries the teacher's uncertainty
+rather than a thresholded decision. I apply both to the unlabelled test images and find the soft variant
+decisively better, consistent with the view that the discarded probability mass is where the extra
+signal lives.
+
+\textbf{Adapting to distribution shift.} Because the test patients differ from the training patients, the
+train and test pixel statistics genuinely diverge. Adaptive batch normalisation \citep{li2016} addresses
+this without labels by recomputing batch-norm statistics on the target data --- a cheap form of test-time
+adaptation that I pair with test-set stain normalisation.
+
+\textbf{Stable training and efficient backbones.} Stochastic weight averaging \citep{izmailov2018}
+reduces run-to-run variance by averaging weights along the training trajectory, which matters when the
+small patient count makes single runs noisy. For the backbone I use EfficientNet-B0 \citep{tan2019};
+on twelve patients its small parameter count is an asset, since extra capacity mainly buys room to
+memorise patient identity. The contribution here is not any single component but the finding that, in a
+small-$N$ patient-shifted regime, enlarging the effective labelled set with soft distillation dominates
+the capacity and regularisation choices a larger-data setting would reward.
 
 \section{Data and problem setting}
 
@@ -119,7 +169,7 @@ seed noise nearly swamps (Section~\ref{sec:lessons}).
 
 \begin{figure}[t]
   \centering
-  \includegraphics[width=0.92\textwidth]{arch_diagram.png}
+  \includegraphics[width=0.88\textwidth]{arch_diagram.png}
   \caption{Dual-branch EfficientNet-B0. One branch per modality, late-concatenation fusion, and a small
   MLP head. AdaBN and test-set stain normalisation adapt the network to the unseen test patients;
   the per-patient MIL term and heavy paired augmentation regularise against the patient shortcut.}
@@ -155,7 +205,7 @@ project and the reported result.
   \includegraphics[width=0.8\textwidth]{teacher_prob_histogram.png}
   \caption{Distribution of teacher probabilities over the $59{,}040$ test cells. Hard pseudo-labelling
   keeps only the two tails (the confident $\sim\!16\%$); soft distillation keeps every cell, weighted by
-  the teacher's confidence. The grey centre mass, discarded by hard thresholding, is where the
+  the teacher's confidence. The large central mass, discarded by hard thresholding, is where the
   extra signal lives.}
   \label{fig:hist}
 \end{figure}
@@ -166,8 +216,24 @@ Two ingredients reduce run-to-run variance. \textbf{Stochastic weight averaging}
 \citep{izmailov2018} averages the weights over the last four epochs of each run, with a batch-norm
 refresh pass on the averaged model. And because seed variance is large on this dataset
 (Section~\ref{sec:lessons}), the reported submission is the \emph{mean of three seeds} rather than a
-single run: this variance-reduced ensemble edged each of its individual seeds, so the headline number is
-not a lucky draw.
+single run: the two seeds scored individually on the public leaderboard ($0.8157$ and $0.8229$) both
+fell below the three-seed mean of $0.8236$, so the headline number reflects variance reduction rather
+than a single lucky draw.
+
+\subsection{Experimental setup}
+
+All models use ImageNet-pretrained EfficientNet-B0 branches at $128\times128$ input, trained for $12$
+epochs with AdamW (learning rate $3\times10^{-4}$, weight decay $10^{-4}$) under a one-cycle schedule,
+batch size $128$ drawn from four patients per batch by a patient-balanced sampler. Regularisation is
+dropout $0.4$ and label smoothing $0.05$, and the per-patient MIL term is weighted $0.5$ against the
+cell-level loss. SWA averages the last four of the twelve epochs with a batch-norm refresh, and the
+reported submission is the mean of three seeds. Inference uses $40$-way test-time augmentation (five
+scales $\{96,112,128,144,160\}$ crossed with the eight dihedral flips and rotations), averaged in
+probability space. For distillation, the teacher's raw probability on each of the $59{,}040$ test cells
+is the soft binary-cross-entropy target, weighted $0.5$ relative to the real labels; the hard-pseudo
+variant instead keeps only cells with teacher probability below $0.05$ or above $0.95$. Brightfield
+inputs are normalised with training-set statistics (mean $0.504$, standard deviation $0.216$) and
+fluorescence inputs with test-set statistics, as above.
 
 \section{Results}
 
@@ -181,6 +247,7 @@ window.
 
 \begin{table}[t]
   \centering
+  \renewcommand{\arraystretch}{1.15}
   \caption{Public-leaderboard AUC by stage. Every gain traces to enlarging the effective training set,
   not to a larger network.}
   \label{tab:progression}
@@ -198,7 +265,7 @@ window.
 
 \begin{figure}[t]
   \centering
-  \includegraphics[width=0.92\textwidth]{lb_progression.png}
+  \includegraphics[width=0.86\textwidth]{lb_progression.png}
   \caption{Public-leaderboard progression. The two pseudo-label stages, not the network or the
   regularisers, account for the bulk of the $+0.078$ gain over the supervised baseline.}
   \label{fig:lb}
@@ -206,9 +273,10 @@ window.
 
 \begin{figure}[t]
   \centering
-  \includegraphics[width=\textwidth]{learning_curves.png}
-  \caption{Per-seed training curves for the final model (three seeds $\times$ losses / train AUC /
-  epoch time). The shaded band marks the SWA epochs over which weights are averaged.}
+  \includegraphics[width=0.95\textwidth]{learning_curves.png}
+  \caption{Training curves for the final model: total training loss (left) and train AUC (right), with
+  the three seeds shown individually (faint) and their mean (bold). The shaded band marks the SWA epochs
+  over which weights are averaged; train AUC converges to $\approx\!0.993$ across all three seeds.}
   \label{fig:curves}
 \end{figure}
 
@@ -218,8 +286,8 @@ The negative results were as informative as the wins; each one revealed somethin
 
 \subsection{Cross-modal self-supervised pre-training}
 
-I tried a cross-modal contrastive objective : pre-train the two
-branches to match a cell's BF and FL views (InfoNCE), then fine-tune for classification. It produced the
+I tried cross-modal contrastive pre-training: an InfoNCE objective that pulls a cell's paired BF and FL
+views together and pushes non-matching pairs apart, then fine-tuning for classification. It produced the
 \emph{best cross-validation score} of the whole project (AUC $\approx0.866$) and then \emph{collapsed} on
 the leaderboard to $\approx0.57$, essentially chance. The diagnosis is the patient shortcut: with one
 patient per cell, a cell's two views always share a patient while non-matching pairs usually do not, so
@@ -228,13 +296,13 @@ converged almost immediately, a tell-tale sign that it had found the shortcut. T
 why the final recipe is built to suppress patient identity (AdaBN, test-set normalisation, the MIL term,
 and excluding pseudo cells from the per-patient loss).
 
-\subsection{Transferring a same-domain architecture}
+\subsection{Alternative fusion and augmentation choices}
 
-A closely related multimodal-microscopy paper  advocates intermediate co-attention
-fusion of the two modalities. Inspired by that setting, I tested two variants here: modality-specific
+An alternative to late fusion is intermediate co-attention fusion of the two modalities, a design
+favoured in some multimodal-microscopy work. I tested two variants in that spirit: modality-specific
 fluorescence augmentation and an early (input-level) fusion alternative to my late-fusion design. Both
-\emph{regressed} on this dataset ($-0.036$ and $-0.031$ respectively). Techniques motivated by a different
-acquisition setup did not transfer to a $12$-patient, patient-disjoint regime, a reminder that reported
+\emph{regressed} on this dataset ($-0.036$ and $-0.031$ respectively). Design choices motivated by other
+acquisition setups did not transfer to a $12$-patient, patient-disjoint regime, a reminder that reported
 gains are conditional on their data.
 
 \subsection{Stacking unvalidated changes}
@@ -271,16 +339,33 @@ final submission.
         multi-change jump.
 \end{enumerate}
 
+\section{Limitations}
+
+Two caveats bound the headline number. First, the method is \emph{transductive}: although the test
+\emph{labels} are never used, the test \emph{inputs} are consumed in three places --- AdaBN, test-set
+stain normalisation, and distillation on the teacher's predictions over the full test set --- so
+$0.8236$ measures performance on inputs the model was explicitly adapted to, and inductive
+generalisation to a fresh patient cohort is untested. Second, every AUC reported here is on the
+\emph{public} leaderboard split, which was also used for model selection across many submissions; the
+public numbers are therefore an optimistic estimate of held-out performance, and the private split, not
+reported here, is the unbiased measure.
+
 \section{Conclusion}
 
 On a $12$-patient, patient-disjoint microscopy task, the most effective strategy was not a bigger or more
 exotic network but a small, shift-aware EfficientNet-B0 whose \emph{effective} training set was enlarged
 with the test images via soft-target distillation. This lifted the public-leaderboard AUC from $0.7455$
-to $0.8236$ ($+0.078$, $\sim\!4\sigma$ above the seed noise). The approaches that failed, namely cross-modal
+to $0.8236$, a cumulative $+0.078$; the soft-distillation step alone contributed the largest single gain
+($+0.042$, roughly four standard errors above the seed noise). The approaches that failed, namely cross-modal
 self-supervision, same-domain transfer, stacked edits, and cross-recipe ensembling, shaped the final
 recipe more than any single success.
 
-\bibliographystyle{plainnat}
+\paragraph{Data and code availability.} The dataset is the \emph{Multimodal Cancer-Cell Classification
+Challenge 2026} Kaggle competition and is not redistributed here. The training notebooks and the code
+that generates every figure in this report are available at
+\url{https://github.com/rafallex/multimodal-microscopy-distillation}.
+
+\bibliographystyle{abbrvnat}
 \bibliography{references}
 
 \end{document}
