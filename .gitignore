@@ -1,0 +1,361 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[codz]
+*$py.class
+
+# C extensions
+*.so
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# PyInstaller
+#   Usually these files are written by a python script from a template
+#   before PyInstaller builds the exe, so as to inject date/other infos into it.
+*.manifest
+*.spec
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py.cover
+*.lcov
+.hypothesis/
+.pytest_cache/
+cover/
+
+# Translations
+*.mo
+*.pot
+
+# Django stuff:
+*.log
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+
+# Flask stuff:
+instance/
+.webassets-cache
+
+# Scrapy stuff:
+.scrapy
+
+# Sphinx documentation
+docs/_build/
+
+# PyBuilder
+.pybuilder/
+target/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# IPython
+profile_default/
+ipython_config.py
+
+# pyenv
+#   For a library or package, you might want to ignore these files since the code is
+#   intended to run in multiple environments; otherwise, check them in:
+# .python-version
+
+# pipenv
+#   According to pypa/pipenv#598, it is recommended to include Pipfile.lock in version control.
+#   However, in case of collaboration, if having platform-specific dependencies or dependencies
+#   having no cross-platform support, pipenv may install dependencies that don't work, or not
+#   install all needed dependencies.
+# Pipfile.lock
+
+# UV
+#   Similar to Pipfile.lock, it is generally recommended to include uv.lock in version control.
+#   This is especially recommended for binary packages to ensure reproducibility, and is more
+#   commonly ignored for libraries.
+# uv.lock
+
+# poetry
+#   Similar to Pipfile.lock, it is generally recommended to include poetry.lock in version control.
+#   This is especially recommended for binary packages to ensure reproducibility, and is more
+#   commonly ignored for libraries.
+#   https://python-poetry.org/docs/basic-usage/#commit-your-poetrylock-file-to-version-control
+# poetry.lock
+# poetry.toml
+
+# pdm
+#   Similar to Pipfile.lock, it is generally recommended to include pdm.lock in version control.
+#   pdm recommends including project-wide configuration in pdm.toml, but excluding .pdm-python.
+#   https://pdm-project.org/en/latest/usage/project/#working-with-version-control
+# pdm.lock
+# pdm.toml
+.pdm-python
+.pdm-build/
+
+# pixi
+#   Similar to Pipfile.lock, it is generally recommended to include pixi.lock in version control.
+# pixi.lock
+#   Pixi creates a virtual environment in the .pixi directory, just like venv module creates one
+#   in the .venv directory. It is recommended not to include this directory in version control.
+.pixi/*
+!.pixi/config.toml
+
+# PEP 582; used by e.g. github.com/David-OConnor/pyflow and github.com/pdm-project/pdm
+__pypackages__/
+
+# Celery stuff
+celerybeat-schedule*
+celerybeat.pid
+
+# Redis
+*.rdb
+*.aof
+*.pid
+
+# RabbitMQ
+mnesia/
+rabbitmq/
+rabbitmq-data/
+
+# ActiveMQ
+activemq-data/
+
+# SageMath parsed files
+*.sage.py
+
+# Environments
+.env
+.envrc
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Spyder project settings
+.spyderproject
+.spyproject
+
+# Rope project settings
+.ropeproject
+
+# mkdocs documentation
+/site
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Pyre type checker
+.pyre/
+
+# pytype static type analyzer
+.pytype/
+
+# Cython debug symbols
+cython_debug/
+
+# PyCharm
+#   JetBrains specific template is maintained in a separate JetBrains.gitignore that can
+#   be found at https://github.com/github/gitignore/blob/main/Global/JetBrains.gitignore
+#   and can be added to the global gitignore or merged into this file.  For a more nuclear
+#   option (not recommended) you can uncomment the following to ignore the entire idea folder.
+# .idea/
+
+# Abstra
+#   Abstra is an AI-powered process automation framework.
+#   Ignore directories containing user credentials, local state, and settings.
+#   Learn more at https://abstra.io/docs
+.abstra/
+
+# Visual Studio Code
+#   Visual Studio Code specific template is maintained in a separate VisualStudioCode.gitignore 
+#   that can be found at https://github.com/github/gitignore/blob/main/Global/VisualStudioCode.gitignore
+#   and can be added to the global gitignore or merged into this file. However, if you prefer, 
+#   you could uncomment the following to ignore the entire vscode folder
+# .vscode/
+# Temporary file for partial code execution
+tempCodeRunnerFile.py
+
+# Ruff stuff:
+.ruff_cache/
+
+# PyPI configuration file
+.pypirc
+
+# Marimo
+marimo/_static/
+marimo/_lsp/
+__marimo__/
+
+# Streamlit
+.streamlit/secrets.toml
+
+# Deep Learning weights and data
+*.pt
+*.pth
+*.h5
+/data/*
+!/data/.gitkeep
+
+# A3-specific: dataset (do not commit)
+multimodal-cancer-classification-challenge-2026/
+multimodal-cancer-classification-challenge-2026.zip
+*.zip
+
+# Draft paper kept local; the published methodology report (report.tex/.bib + figures/) is tracked
+overleaf-report/*.tex
+overleaf-report/*.bib
+overleaf-report/*.pdf
+overleaf-report/notes/
+overleaf-report/README.md
+!overleaf-report/report.tex
+!overleaf-report/references.bib
+
+# A3 presentation build artifacts — local QA render dirs (do not commit)
+presentation/_qa_render/
+presentation/_qa2/
+presentation/_pdfqa/
+presentation/slides_png/
+presentation/_*.png
+presentation/_*.md
+# (the A3_code.zip submission bundle is already covered by the *.zip rule above)
+
+# Use results/* (not results/) so that specific subdirectories below can be
+# re-included via ! exceptions. With `results/` the directory itself is excluded
+# and gitignore won't recurse into it, making re-includes impossible.
+results/*
+results (*)/
+runs/
+*.pt
+*.csv
+!sampleSubmission.csv
+
+# Misc
+zizlJQk2
+
+# Exception: v15 baseline artifacts are committed evidence
+!v15_baseline/
+!v15_baseline/**
+!v16_results/
+!v16_results/**
+
+# === Curated Kaggle run artifacts for reproducibility ===
+# Re-include small artifacts (CSVs, history JSONs, learning curves) from the
+# inflection-point versions only (v19, v41, v44, v46). This lets the
+# figure-builder scripts (overleaf-report/figure-sources/build_*) run from a
+# fresh clone and makes the report's per-version numbers independently
+# verifiable.
+# Still gitignored: .pt model weights (~38 MB each), full Kaggle .ipynb dumps,
+# Kaggle metadata folders (__results___files, __huggingface_repos__.json).
+!results/v19/
+!results/v19/submission*.csv
+!results/v19/learning_curves.png
+!results/v19/runs/
+!results/v19/runs/history*.json
+!results/v41/
+!results/v41/submission*.csv
+!results/v41/learning_curves.png
+!results/v41/runs/
+!results/v41/runs/history*.json
+!results/v44/
+!results/v44/submission*.csv
+!results/v44/learning_curves.png
+!results/v44/runs/
+!results/v44/runs/history*.json
+!results/v46/
+!results/v46/submission*.csv
+!results/v46/learning_curves.png
+!results/v46/runs/
+!results/v46/runs/history*.json
+
+# Inside the re-included results/vN/ dirs, still exclude the heavy / junk artifacts
+# the global *.pt and runs/ rules don't reach (full Kaggle .ipynb dumps with
+# embedded outputs, Kaggle metadata files/dirs, Kaggle logs).
+results/v*/improved*.ipynb
+results/v*/__huggingface_repos__.json
+results/v*/__results___files/
+results/v*/*.log
+results/v*/download*.txt
+
+# Presentation: keep the .pptx + builder scripts, ignore derived artifacts
+presentation/A3_cancer_challenge.pdf
+presentation/slides_png/
+
+# Reference paper PDFs (root-level only — see REFERENCES.md for canonical citations).
+# Figure PDFs under overleaf-report/ remain version-controlled.
+/*.pdf
+
+# Node
+node_modules/
+
+# local feature cache (large, regenerable)
+_l4_cache/
+
+# === Public repo scoped to the v46 deliverable: later work kept local-only ===
+# Later source notebooks (v48–v61) — iterations beyond the reported v46
+# result. Kept on disk, untracked.
+notebooks/improvedv4[89]_*.ipynb
+notebooks/improvedv5[0-9]_*.ipynb
+notebooks/improvedv6[01]_*.ipynb
+# Later experiment scaffolding + smoketests under figure-sources.
+# (The two documented figure builders — build_lb_progression.py and
+#  build_noise_floor_analysis.py — start with build_l/build_n and stay tracked.)
+overleaf-report/figure-sources/build_v*.py
+overleaf-report/figure-sources/build_ensemble*.py
+overleaf-report/figure-sources/build_cross_arch_ensemble.py
+overleaf-report/figure-sources/build_backbone_notebooks.py
+overleaf-report/figure-sources/build_extra_notebooks.py
+overleaf-report/figure-sources/build_harvest_notebooks.py
+overleaf-report/figure-sources/build_l4*.py
+overleaf-report/figure-sources/*smoketest*.py
+# Old build_deck.js speaker script (superseded; kept local)
+presentation/SPEAKER_SCRIPT.md
+
+# Local housekeeping — superseded experiments, the draft paper, and the local submission bundle
+/old/
+/after course completion/
+/submission/
+
+# LaTeX build artifacts (report compiles locally / on Overleaf)
+overleaf-report/*.aux
+overleaf-report/*.bbl
+overleaf-report/*.blg
+overleaf-report/*.out
+overleaf-report/*.log
+overleaf-report/*.synctex.gz
+
+# Versioned learning-curve figures (later work, kept local)
+presentation/learning_curves_v*.png
+
+# Slide deck kept local (presented + submitted via Studium)
+presentation/A3_cancer_challenge.pptx
+presentation/A3_cancer_challenge.html
