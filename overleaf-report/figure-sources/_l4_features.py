@@ -1,4 +1,4 @@
-"""L4 per-cell feature extractor (BF+FL grayscale, 128x128).
+"""per-cell feature extractor (BF+FL grayscale, 128x128).
 Importable module shared by the smoke/signal tests and the Kaggle notebook builder.
 Pure numpy/scipy/skimage -- all pre-installed on Kaggle.
 """

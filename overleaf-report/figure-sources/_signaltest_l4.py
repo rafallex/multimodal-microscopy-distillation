@@ -1,4 +1,4 @@
-"""Honest leave-patients-out signal test for the L4 feature-GBM.
+"""Honest leave-patients-out signal test for the feature-GBM.
 Samples cells from all 12 patients, extracts features in parallel, then does
 leave-(1 pos + 1 neg)-patient-out CV. If grouped AUC >> 0.5 and stable, the
 features transfer across patients and are worth ensembling with the CNN fleet.
