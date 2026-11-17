@@ -16,7 +16,7 @@ Canonical citations for the methods and ideas this project builds on. The corres
 
 - **Lee, D.-H. (2013).** *Pseudo-Label: The Simple and Efficient Semi-Supervised Learning Method for Deep Neural Networks.* In *ICML Workshop on Challenges in Representation Learning*.
   Used in: v44 (hard-pseudo at threshold 0.05 / 0.95).
-  Official PDF: [pseudo_label_final.pdf](http://deeplearning.net/wp-content/uploads/2013/03/pseudo_label_final.pdf) (also linked from `LB_HISTORY.md` § v44 row).
+  Official PDF (archived copy; deeplearning.net is offline): [pseudo_label_final.pdf](https://web.archive.org/web/20160305114528/http://deeplearning.net/wp-content/uploads/2013/03/pseudo_label_final.pdf) (also linked from `LB_HISTORY.md` § v44 row).
 
 ### Test-time and ensemble methods
 
